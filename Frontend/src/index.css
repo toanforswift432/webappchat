@@ -1,0 +1,39 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #b7d69a; /* light primary */
+    border-radius: 20px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #5f7f3a; /* dark primary */
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: #7fad49; /* main primary */
+  }
+  .dark .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: #4f6a30; /* hover dark */
+  }
+}
+
+body {
+  @apply font-sans bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
