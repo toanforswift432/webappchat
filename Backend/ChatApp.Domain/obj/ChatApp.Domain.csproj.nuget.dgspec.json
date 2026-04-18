@@ -1,31 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Domain\\ChatApp.Domain.csproj": {}
+    "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Domain/ChatApp.Domain.csproj": {}
   },
   "projects": {
-    "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Domain\\ChatApp.Domain.csproj": {
+    "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Domain/ChatApp.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Domain\\ChatApp.Domain.csproj",
+        "projectUniqueName": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Domain/ChatApp.Domain.csproj",
         "projectName": "ChatApp.Domain",
-        "projectPath": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Domain\\ChatApp.Domain.csproj",
-        "packagesPath": "C:\\Users\\THINKPAD\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Domain\\obj\\",
+        "projectPath": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Domain/ChatApp.Domain.csproj",
+        "packagesPath": "/Users/nguyenkhactoan/.nuget/packages/",
+        "outputPath": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Domain/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\THINKPAD\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/nguyenkhactoan/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "/opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -44,7 +39,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -65,7 +60,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/sdk/9.0.115/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -22,6 +22,34 @@ namespace ChatApp.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ChatApp.Domain.Entities.BlockedUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockedUserId");
+
+                    b.HasIndex("UserId", "BlockedUserId")
+                        .IsUnique();
+
+                    b.ToTable("BlockedUsers");
+                });
+
             modelBuilder.Entity("ChatApp.Domain.Entities.Call", b =>
                 {
                     b.Property<Guid>("Id")
@@ -146,6 +174,9 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsMuted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LastReadAt")
                         .HasColumnType("datetime2");
 
@@ -262,7 +293,7 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Property<Guid?>("ReplyToMessageId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SenderId")
+                    b.Property<Guid?>("SenderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Type")
@@ -327,6 +358,13 @@ namespace ChatApp.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("CallSoundType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("chime");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -342,6 +380,38 @@ namespace ChatApp.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastSeenAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("MessageSoundType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("ding");
+
+                    b.Property<bool>("NotificationGroups")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("NotificationMentions")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("NotificationMessages")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("NotificationPreview")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("NotificationSound")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -368,6 +438,25 @@ namespace ChatApp.Infrastructure.Migrations
                     b.HasIndex("RefreshToken");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ChatApp.Domain.Entities.BlockedUser", b =>
+                {
+                    b.HasOne("ChatApp.Domain.Entities.User", "BlockedUserEntity")
+                        .WithMany()
+                        .HasForeignKey("BlockedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BlockedUserEntity");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Entities.Call", b =>
@@ -481,8 +570,7 @@ namespace ChatApp.Infrastructure.Migrations
                     b.HasOne("ChatApp.Domain.Entities.User", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Conversation");
 

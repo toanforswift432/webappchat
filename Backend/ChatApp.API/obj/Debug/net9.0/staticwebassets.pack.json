@@ -1,0 +1,61 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-QluwT_Oe.js",
+      "PackagePath": "staticwebassets/assets/index-QluwT_Oe.js"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-cB-AIkyb.css",
+      "PackagePath": "staticwebassets/assets/index-cB-AIkyb.css"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/spos.svg",
+      "PackagePath": "staticwebassets/spos.svg"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-QluwT_Oe.js",
+      "PackagePath": "staticwebassets/webappchat/assets/index-QluwT_Oe.js"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-cB-AIkyb.css",
+      "PackagePath": "staticwebassets/webappchat/assets/index-cB-AIkyb.css"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/index.html",
+      "PackagePath": "staticwebassets/webappchat/index.html"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/spos.svg",
+      "PackagePath": "staticwebassets/webappchat/spos.svg"
+    },
+    {
+      "Id": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/web.config",
+      "PackagePath": "staticwebassets/webappchat/web.config"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.ChatApp.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.ChatApp.API.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.build.ChatApp.API.props",
+      "PackagePath": "build\\ChatApp.API.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.ChatApp.API.props",
+      "PackagePath": "buildMultiTargeting\\ChatApp.API.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.ChatApp.API.props",
+      "PackagePath": "buildTransitive\\ChatApp.API.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -10,7 +10,8 @@ public record ConversationDto(
     List<ConversationMemberDto> Members,
     MessageDto? LastMessage,
     int UnreadCount,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool IsMuted
 );
 
 public record ConversationMemberDto(

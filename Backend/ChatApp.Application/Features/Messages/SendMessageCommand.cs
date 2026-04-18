@@ -53,9 +53,9 @@ public class SendMessageCommandHandler(
         return Result<MessageDto>.Success(dto);
     }
 
-    private static MessageDto MapToDto(Message m, Domain.Entities.User sender) => new(
+    private static MessageDto MapToDto(Message m, Domain.Entities.User? sender) => new(
         m.Id, m.ConversationId, m.SenderId,
-        sender.DisplayName, sender.AvatarUrl,
+        sender?.DisplayName ?? "Unknown", sender?.AvatarUrl,
         m.Type, m.Content, m.FileUrl, m.FileName, m.FileSize,
         m.ReplyToMessageId, m.IsRecalled, m.IsPinned,
         [], m.CreatedAt);

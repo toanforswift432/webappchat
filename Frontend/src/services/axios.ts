@@ -1,8 +1,9 @@
 import axios from 'axios';
 import type { Store } from '@reduxjs/toolkit';
+import { API_URL } from '../config';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5054/api',
+  baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -59,7 +60,7 @@ api.interceptors.response.use(
       const refreshToken = state.auth.refreshToken;
       if (!refreshToken) throw new Error('No refresh token');
 
-      const { data } = await axios.post('http://localhost:5054/api/auth/refresh', { refreshToken });
+      const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
       const { accessToken, refreshToken: newRefreshToken } = data;
 
       const { setTokens } = await import('../store/slices/authSlice');

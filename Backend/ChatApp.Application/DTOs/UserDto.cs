@@ -8,7 +8,18 @@ public record UserDto(
     string DisplayName,
     string? AvatarUrl,
     OnlineStatus Status,
-    DateTime? LastSeenAt
+    DateTime? LastSeenAt,
+    NotificationSettingsDto NotificationSettings
+);
+
+public record NotificationSettingsDto(
+    bool Sound,
+    bool Messages,
+    bool Groups,
+    bool Mentions,
+    bool Preview,
+    string? MessageSoundType = "ding",
+    string? CallSoundType = "chime"
 );
 
 public record AuthResponseDto(

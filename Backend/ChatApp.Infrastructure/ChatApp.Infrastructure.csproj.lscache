@@ -45,8 +45,8 @@ TemporaryDependencyNodeTargetIdentifier=net9.0
 /debug:portable
 /filealign:512
 /optimize-
-/out:obj\Debug\net9.0\ChatApp.Infrastructure.dll
-/refout:obj\Debug\net9.0\refint\ChatApp.Infrastructure.dll
+/out:obj/Debug/net9.0/ChatApp.Infrastructure.dll
+/refout:obj/Debug/net9.0/refint/ChatApp.Infrastructure.dll
 /target:library
 /warnaserror-
 /utf8output
@@ -64,6 +64,14 @@ Migrations/
  20260417034700_InitialCreate.Designer.cs
  20260417142540_AddCallEntities.cs
  20260417142540_AddCallEntities.Designer.cs
+ 20260417180737_AddNotificationSettings.cs
+ 20260417180737_AddNotificationSettings.Designer.cs
+ 20260417182926_AddSoundTypeFields.cs
+ 20260417182926_AddSoundTypeFields.Designer.cs
+ 20260417185527_AddBlockedUsersAndMuteConversation.cs
+ 20260417185527_AddBlockedUsersAndMuteConversation.Designer.cs
+ 20260418070724_MakeMessageSenderIdNullable.cs
+ 20260418070724_MakeMessageSenderIdNullable.Designer.cs
  AppDbContextModelSnapshot.cs
 obj/Debug/net9.0/
  .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
@@ -72,6 +80,7 @@ obj/Debug/net9.0/
 Persistence/
  AppDbContext.cs
  Configurations/
+  BlockedUserConfiguration.cs
   CallConfiguration.cs
   ConversationConfiguration.cs
   FriendConfiguration.cs
@@ -79,6 +88,7 @@ Persistence/
   UserConfiguration.cs
  DesignTimeDbContextFactory.cs
  Repositories/
+  BlockedUserRepository.cs
   CallRepository.cs
   ConversationRepository.cs
   FriendRepository.cs
@@ -91,7 +101,7 @@ Storage/
  MinioStorageService.cs
 
 [metadataReferences]
-../../../../../../Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.14/ref/net9.0/
+../../../../../../../../opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/packs/Microsoft.NETCore.App.Ref/9.0.14/ref/net9.0/
  Microsoft.CSharp.dll
  Microsoft.VisualBasic.Core.dll
  Microsoft.VisualBasic.dll
@@ -305,13 +315,13 @@ Storage/
  system.text.json/9.0.15/lib/net9.0/System.Text.Json.dll
 
 [analyzerReferences]
-../../../../../../Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/9.0.14/analyzers/dotnet/cs/
+../../../../../../../../opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/packs/Microsoft.NETCore.App.Ref/9.0.14/analyzers/dotnet/cs/
  Microsoft.Interop.ComInterfaceGenerator.dll
  Microsoft.Interop.JavaScript.JSImportGenerator.dll
  Microsoft.Interop.LibraryImportGenerator.dll
  Microsoft.Interop.SourceGeneration.dll
  System.Text.RegularExpressions.Generator.dll
-../../../../../../Program Files/dotnet/sdk/9.0.312/Sdks/Microsoft.NET.Sdk/analyzers/
+../../../../../../../../opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/sdk/9.0.115/Sdks/Microsoft.NET.Sdk/analyzers/
  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
  Microsoft.CodeAnalysis.NetAnalyzers.dll
 <NUGET>/
@@ -321,5 +331,5 @@ Storage/
  system.text.json/9.0.15/analyzers/dotnet/roslyn4.4/cs/System.Text.Json.SourceGeneration.dll
 
 [analyzerConfigFiles]
-../../../../../../Program Files/dotnet/sdk/9.0.312/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_9_default.globalconfig
+../../../../../../../../opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/sdk/9.0.115/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_9_default.globalconfig
 obj/Debug/net9.0/ChatApp.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig

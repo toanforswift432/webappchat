@@ -12,7 +12,8 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         b.Property(m => m.Content).HasMaxLength(4000);
         b.Property(m => m.FileUrl).HasMaxLength(1000);
         b.Property(m => m.FileName).HasMaxLength(255);
-        b.HasOne(m => m.Sender).WithMany(u => u.SentMessages).HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
+        b.Property(m => m.SenderId).IsRequired(false);
+        b.HasOne(m => m.Sender).WithMany(u => u.SentMessages).HasForeignKey(m => m.SenderId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
         b.HasOne(m => m.ReplyToMessage).WithMany().HasForeignKey(m => m.ReplyToMessageId).OnDelete(DeleteBehavior.NoAction);
         b.HasMany(m => m.Reactions).WithOne(r => r.Message).HasForeignKey(r => r.MessageId).OnDelete(DeleteBehavior.Cascade);
         b.HasIndex(m => m.ConversationId);

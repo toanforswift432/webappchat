@@ -36,4 +36,7 @@ public class CallRepository(AppDbContext context) : ICallRepository
 
     public void Update(Call call)
         => context.Calls.Update(call);
+
+    public void UpdateParticipant(CallParticipant participant)
+        => context.CallParticipants.Update(participant);
 }

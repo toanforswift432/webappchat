@@ -40,6 +40,9 @@ public class GetOrCreateDirectCommandHandler(
         var memberDtos = memberUsers.Select(u => new ConversationMemberDto(
             u.Id, u.DisplayName, u.AvatarUrl, MemberRole.Member, u.Status)).ToList();
 
-        return new ConversationDto(conv.Id, conv.Name, conv.AvatarUrl, conv.Type, memberDtos, null, 0, conv.CreatedAt);
+        var currentMember = conv.Members.FirstOrDefault(m => m.UserId == currentUserId);
+        var isMuted = currentMember?.IsMuted ?? false;
+
+        return new ConversationDto(conv.Id, conv.Name, conv.AvatarUrl, conv.Type, memberDtos, null, 0, conv.CreatedAt, isMuted);
     }
 }

@@ -98,11 +98,77 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseMiddleware<ExceptionMiddleware>();
+
+// Serve static files from uploads folder
+var uploadsPath = builder.Configuration["Storage:LocalPath"];
+if (string.IsNullOrEmpty(uploadsPath))
+{
+    uploadsPath = Path.Combine(AppContext.BaseDirectory, "uploads");
+}
+Directory.CreateDirectory(uploadsPath);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
+
+// Serve frontend static files with a custom middleware to avoid UseStaticFiles RequestPath issues
+var frontendRoot = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "webappchat");
+var mimeTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+{
+    { ".js",   "application/javascript" },
+    { ".css",  "text/css" },
+    { ".html", "text/html; charset=utf-8" },
+    { ".svg",  "image/svg+xml" },
+    { ".png",  "image/png" },
+    { ".jpg",  "image/jpeg" },
+    { ".ico",  "image/x-icon" },
+    { ".json", "application/json" },
+    { ".woff", "font/woff" },
+    { ".woff2","font/woff2" },
+};
+app.Use(async (ctx, next) =>
+{
+    var reqPath = ctx.Request.Path.Value ?? "";
+    if (reqPath.StartsWith("/webappchat/", StringComparison.OrdinalIgnoreCase))
+    {
+        var relative = reqPath["/webappchat/".Length..].Replace('/', Path.DirectorySeparatorChar);
+        var filePath = Path.Combine(frontendRoot, relative);
+        if (File.Exists(filePath) && mimeTypes.TryGetValue(Path.GetExtension(filePath), out var mime))
+        {
+            ctx.Response.ContentType = mime;
+            ctx.Response.Headers["Cache-Control"] = "public, max-age=31536000, immutable";
+            await ctx.Response.SendFileAsync(filePath);
+            return;
+        }
+    }
+    await next();
+});
+
 app.UseCors("FrontendDev");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
+
+// SPA fallback: serve wwwroot/webappchat/index.html for any /webappchat/* path
+app.MapFallback("/webappchat/{**path}", async (HttpContext ctx, IWebHostEnvironment env) =>
+{
+    var indexPath = Path.Combine(
+        env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"),
+        "webappchat", "index.html");
+    if (File.Exists(indexPath))
+    {
+        ctx.Response.ContentType = "text/html; charset=utf-8";
+        await ctx.Response.SendFileAsync(indexPath);
+    }
+    else
+    {
+        ctx.Response.StatusCode = 404;
+    }
+});
+
+app.MapGet("/", () => Results.Redirect("/webappchat/"));
 
 app.Run();

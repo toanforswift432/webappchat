@@ -1,86 +1,111 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { friendService } from '../../services/friend.service';
-import { mapUser } from '../../types/mappers';
-import type { User, FriendRequest } from '../../types';
-import type { FriendRequestDto } from '../../types/api';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { friendService } from "../../services/friend.service";
+import { mapUser } from "../../types/mappers";
+import type { User, FriendRequest } from "../../types";
+import type { FriendRequestDto } from "../../types/api";
 
 interface FriendState {
   friends: User[];
   requests: FriendRequest[];
   requestDetails: FriendRequestDto[];
-  status: 'idle' | 'loading' | 'failed';
+  status: "idle" | "loading" | "failed";
 }
 
 const initial: FriendState = {
   friends: [],
   requests: [],
   requestDetails: [],
-  status: 'idle',
+  status: "idle",
 };
 
-export const fetchFriends = createAsyncThunk('friends/fetchFriends', async (_, { rejectWithValue }) => {
+export const fetchFriends = createAsyncThunk("friends/fetchFriends", async (_, { rejectWithValue }) => {
   try {
     const dtos = await friendService.getFriends();
     return dtos.map(mapUser);
   } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed');
+    return rejectWithValue(e.response?.data?.error ?? "Failed");
   }
 });
 
-export const fetchFriendRequests = createAsyncThunk('friends/fetchRequests', async (_, { rejectWithValue }) => {
+export const fetchFriendRequests = createAsyncThunk("friends/fetchRequests", async (_, { rejectWithValue }) => {
   try {
     return await friendService.getRequests();
   } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed');
+    return rejectWithValue(e.response?.data?.error ?? "Failed");
   }
 });
 
-export const sendFriendRequest = createAsyncThunk('friends/sendRequest', async (toUserId: string, { rejectWithValue }) => {
-  try {
-    await friendService.sendRequest(toUserId);
-  } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed');
-  }
-});
+export const sendFriendRequest = createAsyncThunk(
+  "friends/sendRequest",
+  async (toUserId: string, { rejectWithValue }) => {
+    try {
+      await friendService.sendRequest(toUserId);
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed");
+    }
+  },
+);
 
-export const acceptFriendRequest = createAsyncThunk('friends/acceptRequest', async (requestId: string, { dispatch, rejectWithValue }) => {
-  try {
-    await friendService.acceptRequest(requestId);
-    dispatch(fetchFriends());
-    dispatch(fetchFriendRequests());
-  } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed');
-  }
-});
+export const acceptFriendRequest = createAsyncThunk(
+  "friends/acceptRequest",
+  async (requestId: string, { dispatch, rejectWithValue }) => {
+    try {
+      await friendService.acceptRequest(requestId);
+      dispatch(fetchFriends());
+      dispatch(fetchFriendRequests());
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed");
+    }
+  },
+);
 
-export const rejectFriendRequest = createAsyncThunk('friends/rejectRequest', async (requestId: string, { dispatch, rejectWithValue }) => {
-  try {
-    await friendService.rejectRequest(requestId);
-    dispatch(fetchFriendRequests());
-  } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed');
-  }
-});
+export const rejectFriendRequest = createAsyncThunk(
+  "friends/rejectRequest",
+  async (requestId: string, { dispatch, rejectWithValue }) => {
+    try {
+      await friendService.rejectRequest(requestId);
+      dispatch(fetchFriendRequests());
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed");
+    }
+  },
+);
+
+export const unfriendUser = createAsyncThunk(
+  "friends/unfriend",
+  async (friendId: string, { dispatch, rejectWithValue }) => {
+    try {
+      await friendService.unfriend(friendId);
+      dispatch(fetchFriends());
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed");
+    }
+  },
+);
 
 const friendSlice = createSlice({
-  name: 'friends',
+  name: "friends",
   initialState: initial,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchFriends.pending, (state) => { state.status = 'loading'; })
+      .addCase(fetchFriends.pending, (state) => {
+        state.status = "loading";
+      })
       .addCase(fetchFriends.fulfilled, (state, action) => {
-        state.status = 'idle';
+        state.status = "idle";
         state.friends = action.payload;
       })
-      .addCase(fetchFriends.rejected, (state) => { state.status = 'failed'; })
+      .addCase(fetchFriends.rejected, (state) => {
+        state.status = "failed";
+      })
       .addCase(fetchFriendRequests.fulfilled, (state, action) => {
         state.requestDetails = action.payload;
         state.requests = action.payload.map((dto) => ({
           id: dto.id,
           fromUserId: dto.fromUser.id,
-          toUserId: '',
-          status: 'pending' as const,
+          toUserId: "",
+          status: "pending" as const,
           timestamp: dto.createdAt,
         }));
       });

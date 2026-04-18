@@ -1,28 +1,24 @@
-import { User, Message, Conversation, MessageType as UIMessageType } from '../types';
-import {
-  UserDto,
-  MessageDto,
-  ConversationDto,
-  OnlineStatus,
-  MessageType,
-  ConversationType,
-} from './api';
-
-const BASE_URL = 'http://localhost:5054';
+import { User, Message, Conversation, MessageType as UIMessageType } from "../types";
+import { UserDto, MessageDto, ConversationDto, OnlineStatus, MessageType, ConversationType } from "./api";
+import { BASE_URL } from "../config";
 
 export function avatarUrl(dto: { displayName: string; avatarUrl: string | null }): string {
   if (dto.avatarUrl) {
-    return dto.avatarUrl.startsWith('http') ? dto.avatarUrl : `${BASE_URL}${dto.avatarUrl}`;
+    return dto.avatarUrl.startsWith("http") ? dto.avatarUrl : `${BASE_URL}${dto.avatarUrl}`;
   }
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(dto.displayName)}&background=6366f1&color=fff`;
 }
 
 function statusLabel(status: OnlineStatus): string | undefined {
   switch (status) {
-    case OnlineStatus.Away: return 'Away';
-    case OnlineStatus.InMeeting: return 'In a meeting';
-    case OnlineStatus.WorkFromHome: return 'Working from home';
-    default: return undefined;
+    case OnlineStatus.Away:
+      return "Away";
+    case OnlineStatus.InMeeting:
+      return "In a meeting";
+    case OnlineStatus.WorkFromHome:
+      return "Working from home";
+    default:
+      return undefined;
   }
 }
 
@@ -38,11 +34,18 @@ export function mapUser(dto: UserDto): User {
 
 function mapMessageType(type: MessageType): UIMessageType {
   switch (type) {
-    case MessageType.Image: return 'image';
-    case MessageType.File: return 'file';
-    case MessageType.Sticker: return 'sticker';
-    case MessageType.Poll: return 'poll';
-    default: return 'text';
+    case MessageType.Image:
+      return "image";
+    case MessageType.File:
+      return "file";
+    case MessageType.Sticker:
+      return "sticker";
+    case MessageType.Poll:
+      return "poll";
+    case MessageType.System:
+      return "system";
+    default:
+      return "text";
   }
 }
 
@@ -53,24 +56,20 @@ function formatFileSize(bytes: number): string {
 }
 
 export function mapMessage(dto: MessageDto): Message {
-  const reactions: Record<string, string[]> = {};
-  for (const r of dto.reactions) {
-    reactions[r.emoji] = r.userIds;
-  }
-  const content = dto.content ?? dto.fileUrl ?? '';
+  const content = dto.content ?? dto.fileUrl ?? "";
   return {
     id: dto.id,
     conversationId: dto.conversationId,
-    senderId: dto.senderId,
+    senderId: dto.senderId ?? "",
     type: mapMessageType(dto.type),
     content,
     fileName: dto.fileName ?? undefined,
     fileSize: dto.fileSize ? formatFileSize(dto.fileSize) : undefined,
     timestamp: dto.createdAt,
-    status: 'sent',
+    status: "sent",
     isPinned: dto.isPinned,
     isRecalled: dto.isRecalled,
-    reactions: Object.keys(reactions).length > 0 ? reactions : undefined,
+    reactions: dto.reactions.length > 0 ? dto.reactions : undefined,
   };
 }
 
@@ -84,7 +83,7 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
         avatar: avatarUrl(otherMember),
         isOnline: otherMember.status === OnlineStatus.Online,
       }
-    : { id: '', name: 'Unknown', avatar: '', isOnline: false };
+    : { id: "", name: "Unknown", avatar: "", isOnline: false };
 
   const members: User[] = dto.members.map((m) => ({
     id: m.userId,
@@ -97,7 +96,14 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
 
   return {
     id: dto.id,
-    user: isGroup ? { id: dto.id, name: dto.name ?? 'Group', avatar: avatarUrl({ displayName: dto.name ?? 'G', avatarUrl: dto.avatarUrl }), isOnline: false } : otherUser,
+    user: isGroup
+      ? {
+          id: dto.id,
+          name: dto.name ?? "Group",
+          avatar: avatarUrl({ displayName: dto.name ?? "G", avatarUrl: dto.avatarUrl }),
+          isOnline: false,
+        }
+      : otherUser,
     lastMessage: dto.lastMessage ? mapMessage(dto.lastMessage) : undefined,
     unreadCount: dto.unreadCount,
     isGroup,
@@ -105,5 +111,6 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
     groupAvatar: isGroup ? (dto.avatarUrl ?? undefined) : undefined,
     members: isGroup ? members : undefined,
     adminId: adminMember?.userId,
+    isMuted: dto.isMuted,
   };
 }

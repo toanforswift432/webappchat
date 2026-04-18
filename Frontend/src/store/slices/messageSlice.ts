@@ -1,33 +1,35 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { conversationService } from '../../services/conversation.service';
-import { mapMessage, mapConversation } from '../../types/mappers';
-import { upsertConversation } from './conversationSlice';
-import type { Message } from '../../types';
-import type { MessageDto } from '../../types/api';
-import { MessageType } from '../../types/api';
-import type { RootState } from '../index';
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { conversationService } from "../../services/conversation.service";
+import { mapMessage, mapConversation } from "../../types/mappers";
+import { upsertConversation } from "./conversationSlice";
+import type { Message } from "../../types";
+import type { MessageDto } from "../../types/api";
+import { MessageType } from "../../types/api";
+import type { RootState } from "../index";
 
 interface MessageState {
   byConvId: Record<string, Message[]>;
   loadingConvIds: string[];
+  hiddenIds: string[]; // message IDs deleted "for me only"
 }
 
 const initial: MessageState = {
   byConvId: {},
   loadingConvIds: [],
+  hiddenIds: [],
 };
 
-export const fetchMessages = createAsyncThunk('messages/fetch', async (conversationId: string, { rejectWithValue }) => {
+export const fetchMessages = createAsyncThunk("messages/fetch", async (conversationId: string, { rejectWithValue }) => {
   try {
     const dtos = await conversationService.getMessages(conversationId);
     return { conversationId, messages: dtos.map(mapMessage) };
   } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed to load messages');
+    return rejectWithValue(e.response?.data?.error ?? "Failed to load messages");
   }
 });
 
 export const sendMessage = createAsyncThunk(
-  'messages/send',
+  "messages/send",
   async (
     payload: {
       conversationId: string;
@@ -35,20 +37,20 @@ export const sendMessage = createAsyncThunk(
       content: string | null;
       options?: { fileUrl?: string; fileName?: string; fileSize?: number; replyToMessageId?: string };
     },
-    { getState, dispatch, rejectWithValue }
+    { getState, dispatch, rejectWithValue },
   ) => {
     try {
       const dto = await conversationService.sendMessage(
         payload.conversationId,
         payload.type,
         payload.content,
-        payload.options
+        payload.options,
       );
       const msg = mapMessage(dto);
 
       // Refresh conversation list to update lastMessage
       const state = getState() as RootState;
-      const currentUserId = state.auth.user?.id ?? '';
+      const currentUserId = state.auth.user?.id ?? "";
       const convDtos = await conversationService.getAll();
       for (const convDto of convDtos) {
         dispatch(upsertConversation(mapConversation(convDto, currentUserId)));
@@ -56,22 +58,25 @@ export const sendMessage = createAsyncThunk(
 
       return { conversationId: payload.conversationId, message: msg };
     } catch (e: any) {
-      return rejectWithValue(e.response?.data?.error ?? 'Failed to send message');
+      return rejectWithValue(e.response?.data?.error ?? "Failed to send message");
     }
-  }
+  },
 );
 
-export const recallMessage = createAsyncThunk('messages/recall', async ({ conversationId, messageId }: { conversationId: string; messageId: string }, { rejectWithValue }) => {
-  try {
-    await conversationService.recallMessage(conversationId, messageId);
-    return { conversationId, messageId };
-  } catch (e: any) {
-    return rejectWithValue(e.response?.data?.error ?? 'Failed to recall message');
-  }
-});
+export const recallMessage = createAsyncThunk(
+  "messages/recall",
+  async ({ conversationId, messageId }: { conversationId: string; messageId: string }, { rejectWithValue }) => {
+    try {
+      await conversationService.recallMessage(conversationId, messageId);
+      return { conversationId, messageId };
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed to recall message");
+    }
+  },
+);
 
 const messageSlice = createSlice({
-  name: 'messages',
+  name: "messages",
   initialState: initial,
   reducers: {
     addRealTimeMessage(state, action: PayloadAction<{ dto: MessageDto; currentUserId: string }>) {
@@ -91,6 +96,67 @@ const messageSlice = createSlice({
     },
     clearMessages(state, action: PayloadAction<string>) {
       delete state.byConvId[action.payload];
+    },
+    hideMessage(state, action: PayloadAction<string>) {
+      if (!state.hiddenIds.includes(action.payload)) {
+        state.hiddenIds.push(action.payload);
+      }
+    },
+    markRecalled(state, action: PayloadAction<{ messageId: string; conversationId: string }>) {
+      const list = state.byConvId[action.payload.conversationId];
+      if (list) {
+        const msg = list.find((m) => m.id === action.payload.messageId);
+        if (msg) msg.isRecalled = true;
+      }
+    },
+    toggleMessageReaction(
+      state,
+      action: PayloadAction<{
+        conversationId: string;
+        messageId: string;
+        userId: string;
+        emoji: string;
+        added: boolean;
+      }>,
+    ) {
+      const list = state.byConvId[action.payload.conversationId];
+      if (!list) return;
+
+      const msg = list.find((m) => m.id === action.payload.messageId);
+      if (!msg) return;
+
+      if (!msg.reactions) {
+        msg.reactions = [];
+      }
+
+      const reactionIndex = msg.reactions.findIndex((r) => r.emoji === action.payload.emoji);
+
+      if (action.payload.added) {
+        // Add reaction
+        if (reactionIndex >= 0) {
+          // Emoji exists, add user if not already there
+          if (!msg.reactions[reactionIndex].userIds.includes(action.payload.userId)) {
+            msg.reactions[reactionIndex].userIds.push(action.payload.userId);
+          }
+        } else {
+          // New emoji
+          msg.reactions.push({
+            emoji: action.payload.emoji,
+            userIds: [action.payload.userId],
+          });
+        }
+      } else {
+        // Remove reaction
+        if (reactionIndex >= 0) {
+          msg.reactions[reactionIndex].userIds = msg.reactions[reactionIndex].userIds.filter(
+            (uid) => uid !== action.payload.userId,
+          );
+          // Remove emoji if no more users
+          if (msg.reactions[reactionIndex].userIds.length === 0) {
+            msg.reactions.splice(reactionIndex, 1);
+          }
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -122,5 +188,5 @@ const messageSlice = createSlice({
   },
 });
 
-export const { addRealTimeMessage, replaceTempMessage, clearMessages } = messageSlice.actions;
+export const { addRealTimeMessage, replaceTempMessage, clearMessages, toggleMessageReaction, hideMessage, markRecalled } = messageSlice.actions;
 export default messageSlice.reducer;

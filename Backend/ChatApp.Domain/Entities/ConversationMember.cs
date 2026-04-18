@@ -9,6 +9,7 @@ public class ConversationMember : BaseEntity
     public Guid UserId { get; private set; }
     public MemberRole Role { get; private set; } = MemberRole.Member;
     public DateTime? LastReadAt { get; private set; }
+    public bool IsMuted { get; private set; }
 
     public Conversation Conversation { get; private set; } = default!;
     public User User { get; private set; } = default!;
@@ -20,4 +21,6 @@ public class ConversationMember : BaseEntity
 
     public void MarkRead() => LastReadAt = DateTime.UtcNow;
     public void SetRole(MemberRole role) => Role = role;
+    public void Mute() => IsMuted = true;
+    public void Unmute() => IsMuted = false;
 }

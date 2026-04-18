@@ -5,7 +5,7 @@ namespace ChatApp.Application.DTOs;
 public record MessageDto(
     Guid Id,
     Guid ConversationId,
-    Guid SenderId,
+    Guid? SenderId,
     string SenderName,
     string? SenderAvatar,
     MessageType Type,

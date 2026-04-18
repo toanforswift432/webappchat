@@ -35,7 +35,9 @@ public class GetConversationsQueryHandler(IConversationRepository conversations)
                 ? c.Messages.Count
                 : c.Messages.Count(m => m.CreatedAt > unread.LastReadAt);
 
-            return new ConversationDto(c.Id, c.Name, c.AvatarUrl, c.Type, members, lastMsgDto, unreadCount, c.CreatedAt);
+            var isMuted = unread?.IsMuted ?? false;
+
+            return new ConversationDto(c.Id, c.Name, c.AvatarUrl, c.Type, members, lastMsgDto, unreadCount, c.CreatedAt, isMuted);
         }).ToList();
 
         return Result<List<ConversationDto>>.Success(dtos);

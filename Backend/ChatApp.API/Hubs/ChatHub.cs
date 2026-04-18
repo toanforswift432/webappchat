@@ -16,6 +16,7 @@ public class ChatHub(
     IConversationRepository conversations,
     IUserRepository users,
     ICallRepository calls,
+    IMessageRepository messages,
     IUnitOfWork uow) : Hub
 {
     public override async Task OnConnectedAsync()
@@ -33,6 +34,9 @@ public class ChatHub(
                 users.Update(user);
                 await uow.SaveChangesAsync();
             }
+
+            // Join personal group for targeted notifications (friend requests, etc.)
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"user-{userId}");
 
             // Join all conversation groups
             var convs = await conversations.GetByUserIdAsync(userId);
@@ -189,24 +193,76 @@ public class ChatHub(
     {
         var userId = GetUserId();
 
-        if (!Guid.TryParse(callId, out var callGuid))
-            return;
-
-        var call = await calls.GetByIdAsync(callGuid);
-        if (call is not null)
+        // Always broadcast CallEnded even if something fails
+        try
         {
-            call.End();
+            if (!Guid.TryParse(callId, out var callGuid))
+            {
+                await Clients.Group(conversationId.ToString()).SendAsync("CallEnded", callId, userId);
+                return;
+            }
 
-            // Mark participants as left
-            var participant = call.Participants.FirstOrDefault(p => p.UserId == userId);
-            participant?.Leave();
+            var call = await calls.GetByIdAsync(callGuid);
+            if (call is not null)
+            {
+                call.End();
 
-            calls.Update(call);
-            await uow.SaveChangesAsync();
+                var participant = call.Participants.FirstOrDefault(p => p.UserId == userId);
+                if (participant is not null)
+                {
+                    participant.Leave();
+                    calls.UpdateParticipant(participant);
+                }
+
+                calls.Update(call);
+                await uow.SaveChangesAsync();
+
+                // Build and persist system message for call history
+                var duration = call.EndedAt.HasValue && call.StartedAt.HasValue
+                    ? (call.EndedAt.Value - call.StartedAt.Value)
+                    : TimeSpan.Zero;
+
+                var durationText = duration.TotalSeconds > 0
+                    ? $"{(int)duration.TotalMinutes}:{duration.Seconds:D2}"
+                    : "0:00";
+
+                var callTypeName = call.Type == Domain.Enums.CallType.Video ? "📹 Video call" : "📞 Voice call";
+                var systemContent = $"{callTypeName} · {durationText}";
+
+                var systemMessage = Domain.Entities.Message.CreateSystem(conversationId, systemContent);
+                await messages.AddAsync(systemMessage);
+                await uow.SaveChangesAsync();
+
+                var systemDto = new Application.DTOs.MessageDto(
+                    systemMessage.Id,
+                    conversationId,
+                    null,
+                    "System",
+                    null,
+                    Domain.Enums.MessageType.System,
+                    systemContent,
+                    null,
+                    null,
+                    null,
+                    null,
+                    false,
+                    false,
+                    new List<Application.DTOs.ReactionDto>(),
+                    systemMessage.CreatedAt
+                );
+
+                await Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", systemDto);
+            }
         }
-
-        await Clients.Group(conversationId.ToString())
-            .SendAsync("CallEnded", callId, userId);
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[EndCall] Error saving call record: {ex.Message}");
+        }
+        finally
+        {
+            await Clients.Group(conversationId.ToString())
+                .SendAsync("CallEnded", callId, userId);
+        }
     }
 
     public async Task SendIceCandidate(Guid conversationId, string candidate)
@@ -233,6 +289,7 @@ public class ChatHub(
                     else if (mediaType.ToLower() == "audio")
                         participant.ToggleAudio(enabled);
 
+                    calls.UpdateParticipant(participant);
                     await uow.SaveChangesAsync();
                 }
             }

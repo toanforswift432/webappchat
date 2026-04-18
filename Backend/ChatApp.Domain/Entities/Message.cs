@@ -6,7 +6,7 @@ namespace ChatApp.Domain.Entities;
 public class Message : BaseEntity
 {
     public Guid ConversationId { get; private set; }
-    public Guid SenderId { get; private set; }
+    public Guid? SenderId { get; private set; }
     public MessageType Type { get; private set; }
     public string? Content { get; private set; }
     public string? FileUrl { get; private set; }
@@ -17,7 +17,7 @@ public class Message : BaseEntity
     public bool IsPinned { get; private set; }
 
     public Conversation Conversation { get; private set; } = default!;
-    public User Sender { get; private set; } = default!;
+    public User? Sender { get; private set; }
     public Message? ReplyToMessage { get; private set; }
     public ICollection<MessageReaction> Reactions { get; private set; } = [];
 
@@ -42,6 +42,15 @@ public class Message : BaseEntity
             FileUrl = fileUrl,
             FileName = fileName,
             FileSize = fileSize
+        };
+
+    public static Message CreateSystem(Guid conversationId, string systemMessage)
+        => new()
+        {
+            ConversationId = conversationId,
+            SenderId = null,
+            Type = MessageType.System,
+            Content = systemMessage
         };
 
     public void Recall()

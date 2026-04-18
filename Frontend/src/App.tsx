@@ -1,44 +1,42 @@
-import React, { useEffect } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { ChatArea } from './components/ChatArea';
-import { EmptyState } from './components/EmptyState';
-import { ForwardModal } from './components/ForwardModal';
-import { BottomNav } from './components/BottomNav';
-import { NotificationPanel } from './components/NotificationPanel';
-import { GlobalSearchPanel } from './components/GlobalSearchPanel';
-import { VideoCallModal } from './components/VideoCallModal';
-import { IncomingCallModal } from './components/IncomingCallModal';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { ContactsPage } from './pages/ContactsPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { useTranslation } from './i18n/LanguageContext';
-import { useAppDispatch, useAppSelector } from './store/hooks';
-import { logout } from './store/slices/authSlice';
+import React, { useEffect } from "react";
+import { Sidebar } from "./components/Sidebar";
+import { ChatArea } from "./components/ChatArea";
+import { EmptyState } from "./components/EmptyState";
+import { ForwardModal } from "./components/ForwardModal";
+import { BottomNav } from "./components/BottomNav";
+import { NotificationPanel } from "./components/NotificationPanel";
+import { GlobalSearchPanel } from "./components/GlobalSearchPanel";
+import { VideoCallModal } from "./components/VideoCallModal";
+import { IncomingCallModal } from "./components/IncomingCallModal";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { ContactsPage } from "./pages/ContactsPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { useTranslation } from "./i18n/LanguageContext";
+import { conversationService } from "./services/conversation.service";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { logout } from "./store/slices/authSlice";
 import {
   fetchConversations,
   setActiveConversation,
   getOrCreateDirect,
   createGroup,
-} from './store/slices/conversationSlice';
-import {
-  fetchMessages,
-  sendMessage,
-  recallMessage,
-} from './store/slices/messageSlice';
+} from "./store/slices/conversationSlice";
+import { fetchMessages, sendMessage, recallMessage, toggleMessageReaction } from "./store/slices/messageSlice";
 import {
   setActiveTab,
   toggleDarkMode,
   setNotificationsOpen,
   setSearchOpen,
   setMessageToForward,
-} from './store/slices/uiSlice';
-import { useSignalR } from './hooks/useSignalR';
-import type { Message } from './types';
-import { MessageType } from './types/api';
-import { Account } from './types';
+} from "./store/slices/uiSlice";
+import { useSignalR, getSignalRConnection } from "./hooks/useSignalR";
+import { fetchFriendRequests } from "./store/slices/friendSlice";
+import type { Message } from "./types";
+import { MessageType } from "./types/api";
+import { Account } from "./types";
 
-type AuthView = 'login' | 'register';
+type AuthView = "login" | "register";
 
 export function App() {
   const { t } = useTranslation();
@@ -47,33 +45,38 @@ export function App() {
   const { isAuthenticated, user, status: authStatus } = useAppSelector((s) => s.auth);
   const { items: conversations, activeId: activeConvId } = useAppSelector((s) => s.conversations);
   const { byConvId, loadingConvIds } = useAppSelector((s) => s.messages);
-  const { activeTab, isDarkMode, isNotificationsOpen, isSearchOpen, messageToForward, typingConvIds } = useAppSelector((s) => s.ui);
+  const { activeTab, isDarkMode, isNotificationsOpen, isSearchOpen, messageToForward, typingConvIds } = useAppSelector(
+    (s) => s.ui,
+  );
+  const pendingRequestCount = useAppSelector((s) => s.friends.requestDetails.length);
 
-  const [authView, setAuthView] = React.useState<AuthView>('login');
+  const [authView, setAuthView] = React.useState<AuthView>("login");
 
   useSignalR();
 
   useEffect(() => {
-    if (isDarkMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
+    if (isDarkMode) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
   }, [isDarkMode]);
 
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchConversations());
+      dispatch(fetchFriendRequests());
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
     if (activeConvId) {
       dispatch(fetchMessages(activeConvId));
+      getSignalRConnection()?.invoke("MarkRead", activeConvId);
     }
   }, [activeConvId]);
 
   const handleLogout = async () => {
     dispatch(logout());
     dispatch(setActiveConversation(null));
-    dispatch(setActiveTab('chat'));
+    dispatch(setActiveTab("chat"));
   };
 
   const handleOpenChat = async (userId: string) => {
@@ -84,20 +87,20 @@ export function App() {
     } else {
       await dispatch(getOrCreateDirect(userId));
     }
-    dispatch(setActiveTab('chat'));
+    dispatch(setActiveTab("chat"));
   };
 
   const handleOpenConversation = (convId: string) => {
     dispatch(setSearchOpen(false));
     dispatch(setActiveConversation(convId));
-    dispatch(setActiveTab('chat'));
+    dispatch(setActiveTab("chat"));
   };
 
   const handleSendMessage = async (
     content: string,
-    type: 'text' | 'image' | 'file' | 'sticker' | 'poll',
+    type: "text" | "image" | "file" | "sticker" | "poll",
     _fileData?: { name: string; size: string },
-    replyTo?: Message
+    replyTo?: Message,
   ) => {
     if (!activeConvId) return;
 
@@ -109,16 +112,18 @@ export function App() {
       poll: MessageType.Poll,
     };
 
-    dispatch(sendMessage({
-      conversationId: activeConvId,
-      type: typeMap[type] ?? MessageType.Text,
-      content: type === 'text' ? content : null,
-      options: {
-        fileUrl: type !== 'text' ? content : undefined,
-        fileName: _fileData?.name,
-        replyToMessageId: replyTo?.id,
-      },
-    }));
+    dispatch(
+      sendMessage({
+        conversationId: activeConvId,
+        type: typeMap[type] ?? MessageType.Text,
+        content: type === "text" ? content : null,
+        options: {
+          fileUrl: type !== "text" ? content : undefined,
+          fileName: _fileData?.name,
+          replyToMessageId: replyTo?.id,
+        },
+      }),
+    );
   };
 
   const handleCreateGroup = async (name: string, memberIds: string[]) => {
@@ -137,8 +142,21 @@ export function App() {
     // TODO: backend endpoint for pin
   };
 
-  const handleReact = async (_msgId: string, _emoji: string) => {
-    // TODO: backend endpoint for reactions
+  const handleReact = async (msgId: string, emoji: string) => {
+    if (!activeConvId || !user) return;
+    try {
+      const result = await conversationService.toggleReaction(activeConvId, msgId, emoji);
+      // Update local state immediately for sender (SignalR will update others)
+      dispatch(toggleMessageReaction({
+        conversationId: activeConvId,
+        messageId: msgId,
+        userId: user.id,
+        emoji,
+        added: result.added,
+      }));
+    } catch (error) {
+      console.error("Failed to toggle reaction:", error);
+    }
   };
 
   const handleForward = async (_msgId: string, _targetConvId: string) => {
@@ -156,28 +174,28 @@ export function App() {
   };
 
   if (!isAuthenticated) {
-    if (authView === 'login') {
-      return <LoginPage onLoginSuccess={() => {}} onSwitchToRegister={() => setAuthView('register')} />;
+    if (authView === "login") {
+      return <LoginPage onLoginSuccess={() => {}} onSwitchToRegister={() => setAuthView("register")} />;
     }
-    return <RegisterPage onRegisterSuccess={() => {}} onSwitchToLogin={() => setAuthView('login')} />;
+    return <RegisterPage onRegisterSuccess={() => {}} onSwitchToLogin={() => setAuthView("login")} />;
   }
 
   const activeConversation = conversations.find((c) => c.id === activeConvId);
   const messages = activeConvId ? (byConvId[activeConvId] ?? []) : [];
   const isTyping = activeConvId ? typingConvIds.includes(activeConvId) : false;
   const totalUnreadCount = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
-  const isMobileChatActive = activeTab === 'chat' && activeConvId !== null;
+  const unreadConvsCount = conversations.filter((c) => (c.unreadCount || 0) > 0).length;
+  const isMobileChatActive = activeTab === "chat" && activeConvId !== null;
   const showBottomNav = !isMobileChatActive;
 
   const currentAccount: Account = user
-    ? { id: user.id, email: user.email, name: user.displayName, avatar: '', createdAt: '' }
-    : { id: '', email: '', name: '', avatar: '', createdAt: '' };
+    ? { id: user.id, email: user.email, password: "", name: user.displayName, avatar: "", createdAt: "" }
+    : { id: "", email: "", password: "", name: "", avatar: "", createdAt: "" };
 
   return (
     <div className="flex h-screen w-full bg-white dark:bg-gray-900 overflow-hidden font-sans transition-colors duration-200">
-      <div className={`flex-1 flex flex-col relative ${showBottomNav ? 'pb-14' : ''}`}>
-
-        {activeTab === 'chat' && (
+      <div className={`flex-1 flex flex-col relative ${showBottomNav ? "pb-14" : ""}`}>
+        {activeTab === "chat" && (
           <div className="flex flex-1 h-full overflow-hidden relative">
             <Sidebar
               conversations={conversations}
@@ -187,7 +205,11 @@ export function App() {
               isMobileHidden={activeConvId !== null}
               onOpenSearch={() => dispatch(setSearchOpen(true))}
               onOpenNotifications={() => dispatch(setNotificationsOpen(!isNotificationsOpen))}
-              unreadNotificationCount={0}
+              unreadNotificationCount={unreadConvsCount}
+              activeTab={activeTab}
+              onTabChange={(tab) => dispatch(setActiveTab(tab))}
+              unreadCount={totalUnreadCount}
+              pendingRequestCount={pendingRequestCount}
             />
 
             <NotificationPanel
@@ -199,12 +221,12 @@ export function App() {
               onNotificationClick={async () => {}}
             />
 
-            <div className={`flex-1 flex-col relative ${activeConvId === null ? 'hidden md:flex' : 'flex'}`}>
+            <div className={`flex-1 flex-col relative overflow-hidden ${activeConvId === null ? "hidden md:flex" : "flex"}`}>
               {activeConversation ? (
                 <ChatArea
                   conversation={activeConversation}
                   messages={messages}
-                  currentUserId={user?.id ?? ''}
+                  currentUserId={user?.id ?? ""}
                   isTyping={isTyping}
                   onSendMessage={handleSendMessage}
                   onBack={() => dispatch(setActiveConversation(null))}
@@ -228,11 +250,9 @@ export function App() {
           </div>
         )}
 
-        {activeTab === 'contacts' && (
-          <ContactsPage onOpenChat={handleOpenChat} />
-        )}
+        {activeTab === "contacts" && <ContactsPage onOpenChat={handleOpenChat} />}
 
-        {activeTab === 'profile' && (
+        {activeTab === "profile" && (
           <ProfilePage
             account={currentAccount}
             isDarkMode={isDarkMode}
@@ -242,12 +262,12 @@ export function App() {
         )}
       </div>
 
-      <div className={`${!showBottomNav ? 'hidden md:block' : 'block'}`}>
+      <div className={`${!showBottomNav ? "hidden md:block" : "block"}`}>
         <BottomNav
           activeTab={activeTab}
           onTabChange={(tab) => dispatch(setActiveTab(tab))}
           unreadCount={totalUnreadCount}
-          pendingRequestCount={0}
+          pendingRequestCount={pendingRequestCount}
         />
       </div>
 

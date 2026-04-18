@@ -25,6 +25,16 @@ export enum MemberRole {
   Admin = 1,
 }
 
+export interface NotificationSettingsDto {
+  sound: boolean;
+  messages: boolean;
+  groups: boolean;
+  mentions: boolean;
+  preview: boolean;
+  messageSoundType?: string;
+  callSoundType?: string;
+}
+
 export interface UserDto {
   id: string;
   email: string;
@@ -32,6 +42,7 @@ export interface UserDto {
   avatarUrl: string | null;
   status: OnlineStatus;
   lastSeenAt: string | null;
+  notificationSettings: NotificationSettingsDto;
 }
 
 export interface AuthResponseDto {
@@ -48,7 +59,7 @@ export interface ReactionDto {
 export interface MessageDto {
   id: string;
   conversationId: string;
-  senderId: string;
+  senderId: string | null;
   senderName: string;
   senderAvatar: string | null;
   type: MessageType;
@@ -80,6 +91,7 @@ export interface ConversationDto {
   lastMessage: MessageDto | null;
   unreadCount: number;
   createdAt: string;
+  isMuted: boolean;
 }
 
 export interface FriendRequestDto {

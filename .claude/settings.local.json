@@ -6,7 +6,14 @@
       "Bash(dotnet sln *)",
       "Bash(dotnet add *)",
       "Bash(dotnet build *)",
-      "Bash(dotnet tool *)"
+      "Bash(dotnet tool *)",
+      "Bash(npx tsc *)",
+      "Bash(sed -i \"s/reactions: { '👋': \\\\['user-me'\\\\] }/reactions: [{ emoji: '👋', userIds: ['user-me'] }]/\" /Users/nguyenkhactoan/Documents/company/Swift/webappchat/Frontend/src/api.ts)",
+      "Bash(sed -i \"s/reactions: { '🎉': \\\\['user-2', 'user-3', CURRENT_USER_ID\\\\] }/reactions: [{ emoji: '🎉', userIds: ['user-2', 'user-3', CURRENT_USER_ID] }]/\" /Users/nguyenkhactoan/Documents/company/Swift/webappchat/Frontend/src/api.ts)",
+      "Bash(sed -i \"s/reactions: {},/reactions: [],/\" /Users/nguyenkhactoan/Documents/company/Swift/webappchat/Frontend/src/api.ts)",
+      "Bash(xargs cat *)",
+      "Bash(dotnet ef *)",
+      "Bash(npm run *)"
     ]
   }
 }

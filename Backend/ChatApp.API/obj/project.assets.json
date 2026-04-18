@@ -6513,42 +6513,36 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\THINKPAD\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "/Users/nguyenkhactoan/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.API\\ChatApp.API.csproj",
+      "projectUniqueName": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/ChatApp.API.csproj",
       "projectName": "ChatApp.API",
-      "projectPath": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.API\\ChatApp.API.csproj",
-      "packagesPath": "C:\\Users\\THINKPAD\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.API\\obj\\",
+      "projectPath": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/ChatApp.API.csproj",
+      "packagesPath": "/Users/nguyenkhactoan/.nuget/packages/",
+      "outputPath": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\THINKPAD\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "/Users/nguyenkhactoan/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "/opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Application\\ChatApp.Application.csproj": {
-              "projectPath": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Application\\ChatApp.Application.csproj"
+            "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Application/ChatApp.Application.csproj": {
+              "projectPath": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Application/ChatApp.Application.csproj"
             },
-            "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Infrastructure\\ChatApp.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\THINKPAD\\Documents\\ChatWebApp\\Backend\\ChatApp.Infrastructure\\ChatApp.Infrastructure.csproj"
+            "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Infrastructure/ChatApp.Infrastructure.csproj": {
+              "projectPath": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.Infrastructure/ChatApp.Infrastructure.csproj"
             }
           }
         }
@@ -6563,7 +6557,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -6615,7 +6609,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@9/9.0.115/libexec/sdk/9.0.115/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

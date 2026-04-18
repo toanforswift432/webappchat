@@ -1,6 +1,7 @@
 using ChatApp.Application.Common;
 using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Entities;
 using MediatR;
 
 namespace ChatApp.Application.Features.Messages;
@@ -21,12 +22,13 @@ public class GetMessagesQueryHandler(
             return Result<List<MessageDto>>.Failure("Not a member of this conversation.");
 
         var msgs = await messages.GetByConversationAsync(req.ConversationId, req.Page, req.PageSize, ct);
-        var senderIds = msgs.Select(m => m.SenderId).Distinct();
+        var senderIds = msgs.Select(m => m.SenderId).Where(id => id.HasValue).Select(id => id!.Value).Distinct();
         var senders = (await users.GetByIdsAsync(senderIds, ct)).ToDictionary(u => u.Id);
 
         var dtos = msgs.Select(m =>
         {
-            senders.TryGetValue(m.SenderId, out var sender);
+            User? sender = null;
+            if (m.SenderId.HasValue) senders.TryGetValue(m.SenderId.Value, out sender);
             var reactions = m.Reactions
                 .GroupBy(r => r.Emoji)
                 .Select(g => new ReactionDto(g.Key, g.Select(r => r.UserId).ToList()))

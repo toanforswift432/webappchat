@@ -1,1 +1,2845 @@
-{"Version":1,"Hash":"ylEMNLc+YsGl0ltKthjo9wGYMopUgEAqQnipmf0zz/U=","Source":"ChatApp.API","BasePath":"_content/ChatApp.API","Mode":"Default","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
+{
+  "Version": 1,
+  "Hash": "on6SKXE8WTps94zeMQEfOXH3mO9fKQrPo5w74zlQLXs=",
+  "Source": "ChatApp.API",
+  "BasePath": "_content/ChatApp.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "ChatApp.API/wwwroot",
+      "Source": "ChatApp.API",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/b180qopneq-6iaogqddgi.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "assets/index-QluwT_Oe#[.{fingerprint=6iaogqddgi}]?.js.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-QluwT_Oe.js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "6ms5rvvudf",
+      "Integrity": "4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-QluwT_Oe.js"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/h6ihk612ga-fyolp6rbnd.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "spos#[.{fingerprint=fyolp6rbnd}]?.svg.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/spos.svg",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "g6hmy0kqqd",
+      "Integrity": "eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/spos.svg"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/kxeb1n62aa-b7vwxotuwn.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "assets/index-cB-AIkyb#[.{fingerprint=b7vwxotuwn}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-cB-AIkyb.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "kytxa1ngu2",
+      "Integrity": "FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-cB-AIkyb.css"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/m8hdpiy4wd-6iaogqddgi.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/assets/index-QluwT_Oe#[.{fingerprint=6iaogqddgi}]?.js.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-QluwT_Oe.js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "6ms5rvvudf",
+      "Integrity": "4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-QluwT_Oe.js"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/se2b3exsab-y0d11a1dgh.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/index#[.{fingerprint=y0d11a1dgh}]?.html.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/index.html",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "qw3cn5obuc",
+      "Integrity": "NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/index.html"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/vkaabdljjx-fyolp6rbnd.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/spos#[.{fingerprint=fyolp6rbnd}]?.svg.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/spos.svg",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "g6hmy0kqqd",
+      "Integrity": "eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/spos.svg"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/wf77t39a1r-y0d11a1dgh.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "index#[.{fingerprint=y0d11a1dgh}]?.html.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/index.html",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "qw3cn5obuc",
+      "Integrity": "NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/index.html"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/xt10w1fzma-b7vwxotuwn.gz",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/assets/index-cB-AIkyb#[.{fingerprint=b7vwxotuwn}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-cB-AIkyb.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "kytxa1ngu2",
+      "Integrity": "FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-cB-AIkyb.css"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-cB-AIkyb.css",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "assets/index-cB-AIkyb#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "b7vwxotuwn",
+      "Integrity": "99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/assets/index-cB-AIkyb.css"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-QluwT_Oe.js",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "assets/index-QluwT_Oe#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "6iaogqddgi",
+      "Integrity": "LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/assets/index-QluwT_Oe.js"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/index.html",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "y0d11a1dgh",
+      "Integrity": "MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/index.html"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/spos.svg",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "spos#[.{fingerprint}]?.svg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "fyolp6rbnd",
+      "Integrity": "l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/spos.svg"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-cB-AIkyb.css",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/assets/index-cB-AIkyb#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "b7vwxotuwn",
+      "Integrity": "99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/webappchat/assets/index-cB-AIkyb.css"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-QluwT_Oe.js",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/assets/index-QluwT_Oe#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "6iaogqddgi",
+      "Integrity": "LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/webappchat/assets/index-QluwT_Oe.js"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/index.html",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/index#[.{fingerprint}]?.html",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "y0d11a1dgh",
+      "Integrity": "MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/webappchat/index.html"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/spos.svg",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/spos#[.{fingerprint}]?.svg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "fyolp6rbnd",
+      "Integrity": "l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/webappchat/spos.svg"
+    },
+    {
+      "Identity": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/web.config",
+      "SourceId": "ChatApp.API",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/",
+      "BasePath": "_content/ChatApp.API",
+      "RelativePath": "webappchat/web#[.{fingerprint}]?.config",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "dg9wg6i4kh",
+      "Integrity": "IwC/xIvz2dWeUNHmmkVhW8dUO3BO6Ea3MDWGNCB10c0=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/webappchat/web.config"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "assets/index-cB-AIkyb.b7vwxotuwn.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/kxeb1n62aa-b7vwxotuwn.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000147514383"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b7vwxotuwn"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/index-cB-AIkyb.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-cB-AIkyb.b7vwxotuwn.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-cB-AIkyb.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "37772"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b7vwxotuwn"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/index-cB-AIkyb.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-cB-AIkyb.b7vwxotuwn.css.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/kxeb1n62aa-b7vwxotuwn.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b7vwxotuwn"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/index-cB-AIkyb.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-cB-AIkyb.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/kxeb1n62aa-b7vwxotuwn.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000147514383"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-cB-AIkyb.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-cB-AIkyb.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "37772"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-cB-AIkyb.css.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/kxeb1n62aa-b7vwxotuwn.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-QluwT_Oe.6iaogqddgi.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/b180qopneq-6iaogqddgi.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000005848364"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6iaogqddgi"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/index-QluwT_Oe.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-QluwT_Oe.6iaogqddgi.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-QluwT_Oe.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "589026"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6iaogqddgi"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/index-QluwT_Oe.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-QluwT_Oe.6iaogqddgi.js.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/b180qopneq-6iaogqddgi.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6iaogqddgi"
+        },
+        {
+          "Name": "label",
+          "Value": "assets/index-QluwT_Oe.js.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-QluwT_Oe.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/b180qopneq-6iaogqddgi.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000005848364"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-QluwT_Oe.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/assets/index-QluwT_Oe.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "589026"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "assets/index-QluwT_Oe.js.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/b180qopneq-6iaogqddgi.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE="
+        }
+      ]
+    },
+    {
+      "Route": "index.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/wf77t39a1r-y0d11a1dgh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003154574132"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "index.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "495"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "index.html.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/wf77t39a1r-y0d11a1dgh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4="
+        }
+      ]
+    },
+    {
+      "Route": "index.y0d11a1dgh.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/wf77t39a1r-y0d11a1dgh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003154574132"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y0d11a1dgh"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "index.y0d11a1dgh.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "495"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y0d11a1dgh"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "index.y0d11a1dgh.html.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/wf77t39a1r-y0d11a1dgh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y0d11a1dgh"
+        },
+        {
+          "Name": "label",
+          "Value": "index.html.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4="
+        }
+      ]
+    },
+    {
+      "Route": "spos.fyolp6rbnd.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/h6ihk612ga-fyolp6rbnd.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000503524673"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fyolp6rbnd"
+        },
+        {
+          "Name": "label",
+          "Value": "spos.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "spos.fyolp6rbnd.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/spos.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "5175"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fyolp6rbnd"
+        },
+        {
+          "Name": "label",
+          "Value": "spos.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "spos.fyolp6rbnd.svg.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/h6ihk612ga-fyolp6rbnd.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fyolp6rbnd"
+        },
+        {
+          "Name": "label",
+          "Value": "spos.svg.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ="
+        }
+      ]
+    },
+    {
+      "Route": "spos.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/h6ihk612ga-fyolp6rbnd.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000503524673"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "spos.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/spos.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "5175"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "spos.svg.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/h6ihk612ga-fyolp6rbnd.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:30:52 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-cB-AIkyb.b7vwxotuwn.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/xt10w1fzma-b7vwxotuwn.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000147514383"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b7vwxotuwn"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/assets/index-cB-AIkyb.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-cB-AIkyb.b7vwxotuwn.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-cB-AIkyb.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "37772"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b7vwxotuwn"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/assets/index-cB-AIkyb.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-cB-AIkyb.b7vwxotuwn.css.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/xt10w1fzma-b7vwxotuwn.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b7vwxotuwn"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/assets/index-cB-AIkyb.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-cB-AIkyb.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/xt10w1fzma-b7vwxotuwn.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000147514383"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-cB-AIkyb.css",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-cB-AIkyb.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "37772"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-99ZwOW2Gd/BgifoHb+aHmqZAlrjxCevW8Vvr95EX8Dw="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-cB-AIkyb.css.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/xt10w1fzma-b7vwxotuwn.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "6778"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-FIxYMe9E2PS0iFU0Gans4uCUyPXyda61ekkRLtfeDks="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-QluwT_Oe.6iaogqddgi.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/m8hdpiy4wd-6iaogqddgi.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000005848364"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6iaogqddgi"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/assets/index-QluwT_Oe.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-QluwT_Oe.6iaogqddgi.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-QluwT_Oe.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "589026"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6iaogqddgi"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/assets/index-QluwT_Oe.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-QluwT_Oe.6iaogqddgi.js.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/m8hdpiy4wd-6iaogqddgi.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6iaogqddgi"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/assets/index-QluwT_Oe.js.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-QluwT_Oe.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/m8hdpiy4wd-6iaogqddgi.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000005848364"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-QluwT_Oe.js",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/assets/index-QluwT_Oe.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "589026"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-LhMV3BbJLucQe07GFTXlpna/W2P5/Kl6BNlWb2bacDM="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/assets/index-QluwT_Oe.js.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/m8hdpiy4wd-6iaogqddgi.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "170987"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-4pjGKZJGRoTWoesgQfKMq6Dbh49f4HeFEkrXRTNwQRE="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/index.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/se2b3exsab-y0d11a1dgh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003154574132"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/index.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "495"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/index.html.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/se2b3exsab-y0d11a1dgh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/index.y0d11a1dgh.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/se2b3exsab-y0d11a1dgh.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.003154574132"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y0d11a1dgh"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/index.y0d11a1dgh.html",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/index.html",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "495"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y0d11a1dgh"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/index.html"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-MlFRaCJTjjJ++1xfxuMM7rrWS68guMxrk7rXSWn0nz4="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/index.y0d11a1dgh.html.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/se2b3exsab-y0d11a1dgh.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "316"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/html"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "y0d11a1dgh"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/index.html.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-NnZgU43xv1yES27gxlDbKinmmjVtLVGU63AO7mIU9x4="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/spos.fyolp6rbnd.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/vkaabdljjx-fyolp6rbnd.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000503524673"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fyolp6rbnd"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/spos.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/spos.fyolp6rbnd.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/spos.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "5175"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fyolp6rbnd"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/spos.svg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/spos.fyolp6rbnd.svg.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/vkaabdljjx-fyolp6rbnd.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "fyolp6rbnd"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/spos.svg.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/spos.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/vkaabdljjx-fyolp6rbnd.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000503524673"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/spos.svg",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/spos.svg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "5175"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-l3IeIGQQxeZdyfC5GzHO8/EafR7umTDgNVCMheM+/jo="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/spos.svg.gz",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/vkaabdljjx-fyolp6rbnd.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1985"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/svg+xml"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:34:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-eCLFGDvnhYcliwmHJnQiTcTf3ycYmTTU2+8ODagYZCQ="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/web.config",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/web.config",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1387"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/octet-stream"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"IwC/xIvz2dWeUNHmmkVhW8dUO3BO6Ea3MDWGNCB10c0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:37:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-IwC/xIvz2dWeUNHmmkVhW8dUO3BO6Ea3MDWGNCB10c0="
+        }
+      ]
+    },
+    {
+      "Route": "webappchat/web.dg9wg6i4kh.config",
+      "AssetFile": "/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/wwwroot/webappchat/web.config",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1387"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/octet-stream"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"IwC/xIvz2dWeUNHmmkVhW8dUO3BO6Ea3MDWGNCB10c0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 18 Apr 2026 14:37:28 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "dg9wg6i4kh"
+        },
+        {
+          "Name": "label",
+          "Value": "webappchat/web.config"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-IwC/xIvz2dWeUNHmmkVhW8dUO3BO6Ea3MDWGNCB10c0="
+        }
+      ]
+    }
+  ]
+}

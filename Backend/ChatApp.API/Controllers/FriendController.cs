@@ -1,20 +1,29 @@
 using ChatApp.Application.Features.Friends;
 using ChatApp.Application.Interfaces;
 using ChatApp.Application.DTOs;
+using ChatApp.API.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.API.Controllers;
 
 [Route("api/friends")]
-public class FriendController(IMediator mediator, IFriendRepository friendRepo, IUserRepository userRepo) : BaseController
+public class FriendController(
+    IMediator mediator,
+    IFriendRepository friendRepo,
+    IUserRepository userRepo,
+    IHubContext<ChatHub> hub) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetFriends(CancellationToken ct)
     {
         var friendships = await friendRepo.GetFriendshipsAsync(CurrentUserId, ct);
-        var dtos = friendships.Select(f => new UserDto(
-            f.Friend.Id, f.Friend.Email, f.Friend.DisplayName, f.Friend.AvatarUrl, f.Friend.Status, f.Friend.LastSeenAt));
+        var dtos = friendships.Select(f =>
+        {
+            var notifSettings = new NotificationSettingsDto(f.Friend.NotificationSound, f.Friend.NotificationMessages, f.Friend.NotificationGroups, f.Friend.NotificationMentions, f.Friend.NotificationPreview);
+            return new UserDto(f.Friend.Id, f.Friend.Email, f.Friend.DisplayName, f.Friend.AvatarUrl, f.Friend.Status, f.Friend.LastSeenAt, notifSettings);
+        });
         return Ok(dtos);
     }
 
@@ -29,14 +38,42 @@ public class FriendController(IMediator mediator, IFriendRepository friendRepo, 
     public async Task<IActionResult> SendRequest([FromBody] SendFriendRequestRequest req, CancellationToken ct)
     {
         var result = await mediator.Send(new SendFriendRequestCommand(CurrentUserId, req.ToUserId), ct);
-        return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.Error });
+
+        // Notify recipient via SignalR
+        var sender = await userRepo.GetByIdAsync(CurrentUserId);
+        if (sender is not null)
+        {
+            await hub.Clients
+                .Group($"user-{req.ToUserId}")
+                .SendAsync("FriendRequestReceived", CurrentUserId, sender.DisplayName, sender.AvatarUrl, ct);
+        }
+
+        return Ok();
     }
 
     [HttpPost("request/{requestId}/accept")]
     public async Task<IActionResult> AcceptRequest(Guid requestId, CancellationToken ct)
     {
         var result = await mediator.Send(new AcceptFriendRequestCommand(requestId, CurrentUserId), ct);
-        return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.Error });
+
+        // Notify the original requester that their request was accepted
+        var request = await friendRepo.GetRequestByIdAsync(requestId, ct);
+        if (request is not null)
+        {
+            var accepter = await userRepo.GetByIdAsync(CurrentUserId);
+            if (accepter is not null)
+            {
+                await hub.Clients
+                    .Group($"user-{request.FromUserId}")
+                    .SendAsync("FriendRequestAccepted", CurrentUserId, accepter.DisplayName, ct);
+            }
+        }
+
+        return Ok();
     }
 
     [HttpPost("request/{requestId}/reject")]
@@ -47,7 +84,20 @@ public class FriendController(IMediator mediator, IFriendRepository friendRepo, 
         if (request.ToUserId != CurrentUserId) return Forbid();
         request.Reject();
         friendRepo.UpdateRequest(request);
-        // Save via UoW – injected inline for simplicity
+        return Ok();
+    }
+
+    [HttpDelete("{friendId}")]
+    public async Task<IActionResult> Unfriend(Guid friendId, CancellationToken ct)
+    {
+        var result = await mediator.Send(new UnfriendCommand(CurrentUserId, friendId), ct);
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.Error });
+
+        // Notify both users via SignalR
+        await hub.Clients.Group($"user-{CurrentUserId}").SendAsync("FriendRemoved", friendId, ct);
+        await hub.Clients.Group($"user-{friendId}").SendAsync("FriendRemoved", CurrentUserId, ct);
+
         return Ok();
     }
 }

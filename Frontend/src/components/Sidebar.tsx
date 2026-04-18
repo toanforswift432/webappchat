@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Menu, PlusCircle, Moon, Sun, Bell } from 'lucide-react';
+import { Search, Menu, PlusCircle, Moon, Sun, Bell, MessageCircle, Users, User } from 'lucide-react';
 import { Conversation } from '../types';
+import { AppTab } from '../types';
 import { ConversationItem } from './ConversationItem';
 import { CreateGroupModal } from './CreateGroupModal';
 import { StatusSelector, STATUS_COLORS } from './StatusSelector';
@@ -17,6 +18,10 @@ interface SidebarProps {
   onOpenSearch: () => void;
   onOpenNotifications: () => void;
   unreadNotificationCount: number;
+  activeTab?: AppTab;
+  onTabChange?: (tab: AppTab) => void;
+  unreadCount?: number;
+  pendingRequestCount?: number;
 }
 export const Sidebar: React.FC<SidebarProps> = ({
   conversations,
@@ -26,7 +31,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileHidden,
   onOpenSearch,
   onOpenNotifications,
-  unreadNotificationCount
+  unreadNotificationCount,
+  activeTab,
+  onTabChange,
+  unreadCount = 0,
+  pendingRequestCount = 0,
 }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -102,9 +111,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               title={t('sidebar.notifications')}>
               
               <Bell className="w-5 h-5" />
-              {unreadNotificationCount > 0 &&
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
-              }
+              {unreadNotificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white dark:border-gray-900">
+                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                </span>
+              )}
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -151,6 +162,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           }
         </div>
+
+        {/* Desktop-only bottom nav tabs */}
+        {onTabChange && (
+          <div className="hidden md:flex border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+            {([
+              { id: 'chat' as AppTab, icon: MessageCircle, label: t('nav.chat'), badge: unreadCount },
+              { id: 'contacts' as AppTab, icon: Users, label: t('nav.contacts'), badge: pendingRequestCount },
+              { id: 'profile' as AppTab, icon: User, label: t('nav.profile'), badge: 0 },
+            ]).map(({ id, icon: Icon, label, badge }) => (
+              <button
+                key={id}
+                onClick={() => onTabChange(id)}
+                className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-colors relative ${activeTab === id ? 'text-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+              >
+                <div className="relative">
+                  <Icon className={`w-5 h-5 ${activeTab === id ? 'fill-primary/20' : ''}`} />
+                  {badge > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[16px] text-center border border-white dark:border-gray-900 leading-none">
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium">{label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <CreateGroupModal

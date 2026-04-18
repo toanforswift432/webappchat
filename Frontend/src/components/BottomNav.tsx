@@ -37,7 +37,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   }];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-14 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around z-40 pb-[env(safe-area-inset-bottom)] transition-colors duration-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-none">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around z-40 pb-[env(safe-area-inset-bottom)] transition-colors duration-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-none">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;

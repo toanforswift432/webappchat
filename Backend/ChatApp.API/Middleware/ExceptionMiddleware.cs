@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace ChatApp.API.Middleware;
 
-public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IWebHostEnvironment env)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -16,7 +16,10 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
             logger.LogError(ex, "Unhandled exception");
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";
-            var response = JsonSerializer.Serialize(new { error = "An unexpected error occurred." });
+            var message = env.IsDevelopment()
+                ? $"{ex.GetType().Name}: {ex.Message}\n{ex.InnerException?.Message}"
+                : "An unexpected error occurred.";
+            var response = JsonSerializer.Serialize(new { error = message });
             await context.Response.WriteAsync(response);
         }
     }

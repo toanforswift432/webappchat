@@ -6,6 +6,7 @@ namespace ChatApp.Infrastructure.Storage;
 public class LocalStorageService(IConfiguration config) : IStorageService
 {
     private readonly string _uploadPath = config["Storage:LocalPath"] ?? Path.Combine(AppContext.BaseDirectory, "uploads");
+    private readonly string _baseUrl = config["Storage:BaseUrl"] ?? "http://localhost:5054";
 
     public async Task<string> UploadAsync(Stream fileStream, string fileName, string contentType, CancellationToken ct = default)
     {
@@ -24,5 +25,5 @@ public class LocalStorageService(IConfiguration config) : IStorageService
         return Task.CompletedTask;
     }
 
-    public string GetPublicUrl(string objectName) => $"/uploads/{objectName}";
+    public string GetPublicUrl(string objectName) => $"{_baseUrl}/uploads/{objectName}";
 }

@@ -33,4 +33,13 @@ public class MessageRepository(AppDbContext db) : IMessageRepository
         => await db.Messages.AddAsync(message, ct);
 
     public void Update(Message message) => db.Messages.Update(message);
+
+    public Task<MessageReaction?> GetReactionAsync(Guid messageId, Guid userId, string emoji, CancellationToken ct = default)
+        => db.MessageReactions.FirstOrDefaultAsync(r => r.MessageId == messageId && r.UserId == userId && r.Emoji == emoji, ct);
+
+    public async Task AddReactionAsync(MessageReaction reaction, CancellationToken ct = default)
+        => await db.MessageReactions.AddAsync(reaction, ct);
+
+    public void RemoveReaction(MessageReaction reaction)
+        => db.MessageReactions.Remove(reaction);
 }

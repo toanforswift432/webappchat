@@ -10,4 +10,5 @@ public interface ICallRepository
     Task AddAsync(Call call, CancellationToken ct = default);
     Task AddParticipantAsync(CallParticipant participant, CancellationToken ct = default);
     void Update(Call call);
+    void UpdateParticipant(CallParticipant participant);
 }

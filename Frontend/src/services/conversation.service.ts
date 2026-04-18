@@ -1,15 +1,15 @@
-import api from './axios';
-import type { ConversationDto, MessageDto } from '../types/api';
-import { MessageType } from '../types/api';
+import api from "./axios";
+import type { ConversationDto, MessageDto } from "../types/api";
+import { MessageType } from "../types/api";
 
 export const conversationService = {
-  getAll: () => api.get<ConversationDto[]>('/conversations').then((r) => r.data),
+  getAll: () => api.get<ConversationDto[]>("/conversations").then((r) => r.data),
 
   getOrCreateDirect: (otherUserId: string) =>
-    api.post<ConversationDto>('/conversations/direct', { otherUserId }).then((r) => r.data),
+    api.post<ConversationDto>("/conversations/direct", { otherUserId }).then((r) => r.data),
 
   createGroup: (name: string, memberIds: string[]) =>
-    api.post<ConversationDto>('/conversations/group', { name, memberIds }).then((r) => r.data),
+    api.post<ConversationDto>("/conversations/group", { name, memberIds }).then((r) => r.data),
 
   getMessages: (conversationId: string, page = 1, pageSize = 50) =>
     api
@@ -20,7 +20,7 @@ export const conversationService = {
     conversationId: string,
     type: MessageType,
     content: string | null,
-    options?: { fileUrl?: string; fileName?: string; fileSize?: number; replyToMessageId?: string }
+    options?: { fileUrl?: string; fileName?: string; fileSize?: number; replyToMessageId?: string },
   ) =>
     api
       .post<MessageDto>(`/conversations/${conversationId}/messages`, {
@@ -35,14 +35,22 @@ export const conversationService = {
 
   uploadAndSend: (conversationId: string, file: File, type: MessageType = MessageType.File) => {
     const form = new FormData();
-    form.append('file', file);
+    form.append("file", file);
     return api
       .post<MessageDto>(`/conversations/${conversationId}/messages/upload?type=${type}`, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { "Content-Type": "multipart/form-data" },
       })
       .then((r) => r.data);
   },
 
   recallMessage: (conversationId: string, messageId: string) =>
     api.delete(`/conversations/${conversationId}/messages/${messageId}`),
+
+  toggleReaction: (conversationId: string, messageId: string, emoji: string) =>
+    api
+      .post<{ added: boolean }>(`/conversations/${conversationId}/messages/${messageId}/react`, { emoji })
+      .then((r) => r.data),
+
+  muteConversation: (conversationId: string, mute: boolean) =>
+    api.put(`/conversations/${conversationId}/mute`, { mute }).then((r) => r.data),
 };

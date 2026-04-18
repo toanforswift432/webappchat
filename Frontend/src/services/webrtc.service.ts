@@ -3,6 +3,15 @@ export class WebRTCService {
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
 
+  // ICE candidates received before peer connection / remote description is ready
+  private pendingIceCandidates: RTCIceCandidateInit[] = [];
+
+  // Prevents double setRemoteDescription when both useCall instances handle call-answered
+  private remoteAnswerSet = false;
+
+  private onRemoteStreamCallback: ((stream: MediaStream) => void) | null = null;
+  private onLocalStreamCallback: ((stream: MediaStream) => void) | null = null;
+
   private config: RTCConfiguration = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
@@ -12,6 +21,22 @@ export class WebRTCService {
       { urls: 'stun:stun4.l.google.com:19302' },
     ],
   };
+
+  updateStreamCallbacks(
+    onRemoteStream: (stream: MediaStream) => void,
+    onLocalStream?: (stream: MediaStream) => void
+  ): void {
+    this.onRemoteStreamCallback = onRemoteStream;
+    if (onLocalStream) this.onLocalStreamCallback = onLocalStream;
+
+    // Deliver any streams that arrived before the modal mounted
+    if (this.localStream && this.onLocalStreamCallback) {
+      this.onLocalStreamCallback(this.localStream);
+    }
+    if (this.remoteStream && this.onRemoteStreamCallback) {
+      this.onRemoteStreamCallback(this.remoteStream);
+    }
+  }
 
   async initializeLocalStream(video: boolean = true): Promise<MediaStream> {
     try {
@@ -23,6 +48,8 @@ export class WebRTCService {
           autoGainControl: true,
         },
       });
+      this.onLocalStreamCallback?.(this.localStream);
+      window.dispatchEvent(new CustomEvent('webrtc-local-stream', { detail: this.localStream }));
       return this.localStream;
     } catch (error) {
       console.error('Error accessing media devices:', error);
@@ -31,20 +58,28 @@ export class WebRTCService {
   }
 
   createPeerConnection(
-    onRemoteStream: (stream: MediaStream) => void,
     onIceCandidate: (candidate: RTCIceCandidate) => void
   ): RTCPeerConnection {
     this.peerConnection = new RTCPeerConnection(this.config);
 
     this.peerConnection.ontrack = (event) => {
       console.log('Remote track received:', event.track.kind);
-      this.remoteStream = event.streams[0];
-      onRemoteStream(this.remoteStream);
+      if (event.streams && event.streams[0]) {
+        this.remoteStream = event.streams[0];
+      } else {
+        // Always create a new MediaStream object so srcObject assignment is always detected as a change
+        const existingTracks = this.remoteStream ? this.remoteStream.getTracks() : [];
+        this.remoteStream = new MediaStream([...existingTracks, event.track]);
+      }
+      this.onRemoteStreamCallback?.(this.remoteStream);
+      // Dispatch DOM event so VideoCallModal can apply srcObject immediately
+      // regardless of React render cycle timing
+      window.dispatchEvent(new CustomEvent('webrtc-remote-stream', { detail: this.remoteStream }));
     };
 
     this.peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('ICE candidate generated');
+        console.log('ICE candidate generated:', event.candidate.type);
         onIceCandidate(event.candidate);
       }
     };
@@ -59,6 +94,7 @@ export class WebRTCService {
 
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => {
+        console.log('Adding local track:', track.kind);
         this.peerConnection!.addTrack(track, this.localStream!);
       });
     }
@@ -87,15 +123,44 @@ export class WebRTCService {
 
   async setRemoteDescription(sdp: RTCSessionDescriptionInit): Promise<void> {
     if (!this.peerConnection) throw new Error('Peer connection not initialized');
+    // JS is single-threaded: check+set flag is atomic before the first await,
+    // so this reliably blocks the duplicate call-answered handler.
+    if (sdp.type === 'answer') {
+      if (this.remoteAnswerSet) {
+        console.log('Remote answer already applied, skipping duplicate setRemoteDescription');
+        return;
+      }
+      this.remoteAnswerSet = true;
+    }
     await this.peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+    await this.flushPendingCandidates();
   }
 
   async addIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-    if (!this.peerConnection) throw new Error('Peer connection not initialized');
+    // Buffer the candidate if peer connection or remote description not ready
+    if (!this.peerConnection || !this.peerConnection.remoteDescription) {
+      console.log('Buffering ICE candidate (peer not ready yet)');
+      this.pendingIceCandidates.push(candidate);
+      return;
+    }
     try {
       await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     } catch (error) {
       console.error('Error adding ICE candidate:', error);
+    }
+  }
+
+  private async flushPendingCandidates(): Promise<void> {
+    if (this.pendingIceCandidates.length === 0) return;
+    console.log(`Flushing ${this.pendingIceCandidates.length} buffered ICE candidates`);
+    const candidates = [...this.pendingIceCandidates];
+    this.pendingIceCandidates = [];
+    for (const candidate of candidates) {
+      try {
+        await this.peerConnection!.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (error) {
+        console.error('Error adding buffered ICE candidate:', error);
+      }
     }
   }
 
@@ -123,6 +188,10 @@ export class WebRTCService {
     return this.remoteStream;
   }
 
+  getPeerConnection(): RTCPeerConnection | null {
+    return this.peerConnection;
+  }
+
   cleanup(): void {
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => track.stop());
@@ -133,5 +202,26 @@ export class WebRTCService {
       this.peerConnection = null;
     }
     this.remoteStream = null;
+    this.pendingIceCandidates = [];
+    this.remoteAnswerSet = false;
+    this.onLocalStreamCallback = null;
+    this.onRemoteStreamCallback = null;
+  }
+}
+
+// Singleton instance shared across all useCall hooks
+let sharedWebRTCService: WebRTCService | null = null;
+
+export function getWebRTCService(): WebRTCService {
+  if (!sharedWebRTCService) {
+    sharedWebRTCService = new WebRTCService();
+  }
+  return sharedWebRTCService;
+}
+
+export function resetWebRTCService(): void {
+  if (sharedWebRTCService) {
+    sharedWebRTCService.cleanup();
+    sharedWebRTCService = null;
   }
 }

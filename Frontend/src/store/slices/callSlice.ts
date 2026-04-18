@@ -54,6 +54,9 @@ const callSlice = createSlice({
     updateCallStatus(state, action: PayloadAction<CallStatus>) {
       if (state.activeCall) {
         state.activeCall.status = action.payload;
+        if (action.payload === 'active' && !state.activeCall.startTime) {
+          state.activeCall.startTime = Date.now();
+        }
       }
     },
     addParticipant(state, action: PayloadAction<string>) {

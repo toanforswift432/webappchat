@@ -19,9 +19,10 @@ public class GetFriendRequestsQueryHandler(IFriendRepository friends, IUserRepos
         var dtos = requests.Select(r =>
         {
             senders.TryGetValue(r.FromUserId, out var sender);
+            var defaultNotifSettings = new NotificationSettingsDto(true, true, true, true, true, "ding", "chime");
             var userDto = sender is null
-                ? new UserDto(r.FromUserId, "", "Unknown", null, Domain.Enums.OnlineStatus.Offline, null)
-                : new UserDto(sender.Id, sender.Email, sender.DisplayName, sender.AvatarUrl, sender.Status, sender.LastSeenAt);
+                ? new UserDto(r.FromUserId, "", "Unknown", null, Domain.Enums.OnlineStatus.Offline, null, defaultNotifSettings)
+                : new UserDto(sender.Id, sender.Email, sender.DisplayName, sender.AvatarUrl, sender.Status, sender.LastSeenAt, new NotificationSettingsDto(sender.NotificationSound, sender.NotificationMessages, sender.NotificationGroups, sender.NotificationMentions, sender.NotificationPreview, sender.MessageSoundType, sender.CallSoundType));
             return new FriendRequestDto(r.Id, userDto, r.CreatedAt);
         }).ToList();
 

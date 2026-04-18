@@ -205,7 +205,7 @@ let messagesStore: Message[] = [
   timestamp: new Date(Date.now() - 3600000).toISOString(),
   status: 'seen',
   isPinned: true,
-  reactions: { '👋': ['user-me'] }
+  reactions: [{ emoji: '👋', userIds: ['user-me'] }]
 },
 {
   id: 'm2',
@@ -280,7 +280,7 @@ let messagesStore: Message[] = [
   timestamp: new Date(Date.now() - 200000).toISOString(),
   status: 'seen',
   isPinned: true,
-  reactions: { '🎉': ['user-2', 'user-3', CURRENT_USER_ID] }
+  reactions: [{ emoji: '🎉', userIds: ['user-2', 'user-3', CURRENT_USER_ID] }]
 }];
 
 
@@ -413,17 +413,20 @@ userId: string)
     setTimeout(() => {
       const msg = messagesStore.find((m) => m.id === messageId);
       if (msg) {
-        if (!msg.reactions) msg.reactions = {};
-        if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
-
-        const userIndex = msg.reactions[emoji].indexOf(userId);
-        if (userIndex > -1) {
-          msg.reactions[emoji].splice(userIndex, 1);
-          if (msg.reactions[emoji].length === 0) {
-            delete msg.reactions[emoji];
+        if (!msg.reactions) msg.reactions = [];
+        const existing = msg.reactions.find((r) => r.emoji === emoji);
+        if (existing) {
+          const idx = existing.userIds.indexOf(userId);
+          if (idx > -1) {
+            existing.userIds.splice(idx, 1);
+            if (existing.userIds.length === 0) {
+              msg.reactions = msg.reactions.filter((r) => r.emoji !== emoji);
+            }
+          } else {
+            existing.userIds.push(userId);
           }
         } else {
-          msg.reactions[emoji].push(userId);
+          msg.reactions.push({ emoji, userIds: [userId] });
         }
       }
       resolve();
@@ -458,7 +461,7 @@ targetConversationId: string)
         status: 'sent',
         isPinned: false,
         isForwarded: true,
-        reactions: {},
+        reactions: [],
         replyTo: undefined
       };
 

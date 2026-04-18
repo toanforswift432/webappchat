@@ -23,7 +23,8 @@ public class LoginCommandHandler(IUserRepository users, IJwtService jwt, IUnitOf
         users.Update(user);
         await uow.SaveChangesAsync(ct);
 
-        var dto = new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt);
+        var notifSettings = new NotificationSettingsDto(user.NotificationSound, user.NotificationMessages, user.NotificationGroups, user.NotificationMentions, user.NotificationPreview, user.MessageSoundType, user.CallSoundType);
+        var dto = new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt, notifSettings);
         return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken, dto));
     }
 }

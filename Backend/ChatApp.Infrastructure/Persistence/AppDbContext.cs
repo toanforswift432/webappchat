@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Friendship> Friendships => Set<Friendship>();
     public DbSet<Call> Calls => Set<Call>();
     public DbSet<CallParticipant> CallParticipants => Set<CallParticipant>();
+    public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,5 +1,5 @@
-export type MessageStatus = 'sent' | 'delivered' | 'seen';
-export type MessageType = 'text' | 'image' | 'file' | 'sticker' | 'poll';
+export type MessageStatus = "sent" | "delivered" | "seen";
+export type MessageType = "text" | "image" | "file" | "sticker" | "poll" | "system";
 
 export interface Account {
   id: string;
@@ -13,7 +13,7 @@ export interface Account {
   createdAt: string;
 }
 
-export type FriendRequestStatus = 'pending' | 'accepted' | 'rejected';
+export type FriendRequestStatus = "pending" | "accepted" | "rejected";
 
 export interface FriendRequest {
   id: string;
@@ -29,11 +29,11 @@ export interface Contact {
   isFavorite?: boolean;
 }
 
-export type AppTab = 'chat' | 'contacts' | 'profile';
+export type AppTab = "chat" | "contacts" | "profile";
 
 export interface AppNotification {
   id: string;
-  type: 'message' | 'friend_request' | 'mention' | 'system';
+  type: "message" | "friend_request" | "mention" | "system";
   title: string;
   body: string;
   timestamp: string;
@@ -69,10 +69,10 @@ export interface Message {
     senderName: string;
     type: MessageType;
   };
-  reactions?: Record<string, string[]>; // emoji -> array of userIds
+  reactions?: { emoji: string; userIds: string[] }[]; // array of reaction objects
   pollData?: {
     question: string;
-    options: {id: string;text: string;votes: string[];}[];
+    options: { id: string; text: string; votes: string[] }[];
   };
 }
 
@@ -86,4 +86,5 @@ export interface Conversation {
   groupAvatar?: string;
   members?: User[];
   adminId?: string;
+  isMuted?: boolean;
 }

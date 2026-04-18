@@ -16,5 +16,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         b.Property(u => u.RefreshToken).HasMaxLength(500);
         b.HasIndex(u => u.Email).IsUnique();
         b.HasIndex(u => u.RefreshToken);
+
+        // Notification settings with default values
+        b.Property(u => u.NotificationSound).HasDefaultValue(true);
+        b.Property(u => u.NotificationMessages).HasDefaultValue(true);
+        b.Property(u => u.NotificationGroups).HasDefaultValue(true);
+        b.Property(u => u.NotificationMentions).HasDefaultValue(true);
+        b.Property(u => u.NotificationPreview).HasDefaultValue(true);
+        b.Property(u => u.MessageSoundType).HasMaxLength(50).HasDefaultValue("ding");
+        b.Property(u => u.CallSoundType).HasMaxLength(50).HasDefaultValue("chime");
     }
 }

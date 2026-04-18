@@ -74,11 +74,31 @@ public class ConversationController(IMediator mediator, IStorageService storage,
         var result = await mediator.Send(new RecallMessageCommand(messageId, CurrentUserId), ct);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
-        await hub.Clients.Group(conversationId.ToString()).SendAsync("MessageRecalled", messageId, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("MessageRecalled", messageId, conversationId, ct);
         return Ok();
+    }
+
+    [HttpPost("{conversationId}/messages/{messageId}/react")]
+    public async Task<IActionResult> ToggleReaction(Guid conversationId, Guid messageId, [FromBody] ToggleReactionRequest req, CancellationToken ct)
+    {
+        var result = await mediator.Send(new ToggleReactionCommand(messageId, CurrentUserId, req.Emoji), ct);
+        if (!result.IsSuccess) return BadRequest(new { error = result.Error });
+
+        // Broadcast reaction change to all members in the conversation
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReactionToggled", new { conversationId, messageId, userId = CurrentUserId, emoji = req.Emoji, added = result.Value }, ct);
+        return Ok(new { added = result.Value });
+    }
+
+    [HttpPut("{conversationId}/mute")]
+    public async Task<IActionResult> MuteConversation(Guid conversationId, [FromBody] MuteConversationRequest req, CancellationToken ct)
+    {
+        var result = await mediator.Send(new MuteConversationCommand(conversationId, CurrentUserId, req.Mute), ct);
+        return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
     }
 }
 
 public record GetOrCreateDirectRequest(Guid OtherUserId);
 public record CreateGroupRequest(string Name, List<Guid> MemberIds);
 public record SendMessageRequest(MessageType Type, string? Content, string? FileUrl, string? FileName, long? FileSize, Guid? ReplyToMessageId);
+public record ToggleReactionRequest(string Emoji);
+public record MuteConversationRequest(bool Mute);
