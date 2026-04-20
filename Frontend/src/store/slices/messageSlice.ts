@@ -1,32 +1,59 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { conversationService } from "../../services/conversation.service";
-import { mapMessage, mapConversation } from "../../types/mappers";
-import { upsertConversation } from "./conversationSlice";
+import { mapMessage } from "../../types/mappers";
+import { updateLastMessage } from "./conversationSlice";
 import type { Message } from "../../types";
 import type { MessageDto } from "../../types/api";
 import { MessageType } from "../../types/api";
 import type { RootState } from "../index";
 
+const PAGE_SIZE = 10;
+
 interface MessageState {
   byConvId: Record<string, Message[]>;
   loadingConvIds: string[];
-  hiddenIds: string[]; // message IDs deleted "for me only"
+  loadingMoreConvIds: string[];
+  hasMoreByConvId: Record<string, boolean>;
+  pageByConvId: Record<string, number>;
+  hiddenIds: string[];
 }
 
 const initial: MessageState = {
   byConvId: {},
   loadingConvIds: [],
+  loadingMoreConvIds: [],
+  hasMoreByConvId: {},
+  pageByConvId: {},
   hiddenIds: [],
 };
 
 export const fetchMessages = createAsyncThunk("messages/fetch", async (conversationId: string, { rejectWithValue }) => {
   try {
-    const dtos = await conversationService.getMessages(conversationId);
-    return { conversationId, messages: dtos.map(mapMessage) };
+    const dtos = await conversationService.getMessages(conversationId, 1, PAGE_SIZE);
+    return { conversationId, messages: dtos.map(mapMessage), hasMore: dtos.length === PAGE_SIZE };
   } catch (e: any) {
     return rejectWithValue(e.response?.data?.error ?? "Failed to load messages");
   }
 });
+
+export const fetchMoreMessages = createAsyncThunk(
+  "messages/fetchMore",
+  async (conversationId: string, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState;
+      const nextPage = (state.messages.pageByConvId[conversationId] ?? 1) + 1;
+      const dtos = await conversationService.getMessages(conversationId, nextPage, PAGE_SIZE);
+      return {
+        conversationId,
+        messages: dtos.map(mapMessage),
+        page: nextPage,
+        hasMore: dtos.length === PAGE_SIZE,
+      };
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed to load more messages");
+    }
+  },
+);
 
 export const sendMessage = createAsyncThunk(
   "messages/send",
@@ -37,7 +64,7 @@ export const sendMessage = createAsyncThunk(
       content: string | null;
       options?: { fileUrl?: string; fileName?: string; fileSize?: number; replyToMessageId?: string };
     },
-    { getState, dispatch, rejectWithValue },
+    { dispatch, rejectWithValue },
   ) => {
     try {
       const dto = await conversationService.sendMessage(
@@ -48,13 +75,8 @@ export const sendMessage = createAsyncThunk(
       );
       const msg = mapMessage(dto);
 
-      // Refresh conversation list to update lastMessage
-      const state = getState() as RootState;
-      const currentUserId = state.auth.user?.id ?? "";
-      const convDtos = await conversationService.getAll();
-      for (const convDto of convDtos) {
-        dispatch(upsertConversation(mapConversation(convDto, currentUserId)));
-      }
+      // Update lastMessage in-place — no extra API call needed
+      dispatch(updateLastMessage({ conversationId: payload.conversationId, message: msg }));
 
       return { conversationId: payload.conversationId, message: msg };
     } catch (e: any) {
@@ -165,11 +187,28 @@ const messageSlice = createSlice({
         state.loadingConvIds.push(action.meta.arg);
       })
       .addCase(fetchMessages.fulfilled, (state, action) => {
-        state.loadingConvIds = state.loadingConvIds.filter((id) => id !== action.payload.conversationId);
-        state.byConvId[action.payload.conversationId] = action.payload.messages;
+        const { conversationId, messages, hasMore } = action.payload;
+        state.loadingConvIds = state.loadingConvIds.filter((id) => id !== conversationId);
+        state.byConvId[conversationId] = messages;
+        state.hasMoreByConvId[conversationId] = hasMore;
+        state.pageByConvId[conversationId] = 1;
       })
       .addCase(fetchMessages.rejected, (state, action) => {
         state.loadingConvIds = state.loadingConvIds.filter((id) => id !== action.meta.arg);
+      })
+      .addCase(fetchMoreMessages.pending, (state, action) => {
+        state.loadingMoreConvIds.push(action.meta.arg);
+      })
+      .addCase(fetchMoreMessages.fulfilled, (state, action) => {
+        const { conversationId, messages, page, hasMore } = action.payload;
+        state.loadingMoreConvIds = state.loadingMoreConvIds.filter((id) => id !== conversationId);
+        // Prepend older messages at the beginning
+        state.byConvId[conversationId] = [...messages, ...(state.byConvId[conversationId] ?? [])];
+        state.hasMoreByConvId[conversationId] = hasMore;
+        state.pageByConvId[conversationId] = page;
+      })
+      .addCase(fetchMoreMessages.rejected, (state, action) => {
+        state.loadingMoreConvIds = state.loadingMoreConvIds.filter((id) => id !== action.meta.arg);
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
         const list = state.byConvId[action.payload.conversationId];
@@ -188,5 +227,12 @@ const messageSlice = createSlice({
   },
 });
 
-export const { addRealTimeMessage, replaceTempMessage, clearMessages, toggleMessageReaction, hideMessage, markRecalled } = messageSlice.actions;
+export const {
+  addRealTimeMessage,
+  replaceTempMessage,
+  clearMessages,
+  toggleMessageReaction,
+  hideMessage,
+  markRecalled,
+} = messageSlice.actions;
 export default messageSlice.reducer;

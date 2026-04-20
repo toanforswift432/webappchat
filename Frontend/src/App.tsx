@@ -193,8 +193,8 @@ export function App() {
     : { id: "", email: "", password: "", name: "", avatar: "", createdAt: "" };
 
   return (
-    <div className="flex h-screen w-full bg-white dark:bg-gray-900 overflow-hidden font-sans transition-colors duration-200">
-      <div className={`flex-1 flex flex-col relative ${showBottomNav ? "pb-14" : ""}`}>
+    <div className="flex h-dvh w-full bg-white dark:bg-gray-900 overflow-hidden font-sans transition-colors duration-200 pt-safe">
+      <div className={`flex-1 flex flex-col relative ${showBottomNav ? "pb-nav-safe" : ""}`}>
         {activeTab === "chat" && (
           <div className="flex flex-1 h-full overflow-hidden relative">
             <Sidebar

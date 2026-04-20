@@ -107,8 +107,8 @@ export function useCall(options?: UseCallOptions) {
         const stream = await service.initializeLocalStream(type === 'video');
         options?.onLocalStream?.(stream);
 
-        // Create peer connection with ICE candidate handler
-        service.createPeerConnection((candidate) => {
+        // Create peer connection with ICE candidate handler (fetches TURN credentials)
+        await service.createPeerConnection((candidate) => {
           hubConnection.invoke('SendIceCandidate', conversationId, JSON.stringify(candidate));
         });
 
@@ -153,8 +153,8 @@ export function useCall(options?: UseCallOptions) {
       // Get local stream
       await service.initializeLocalStream(incomingCall.type === 'video');
 
-      // Create peer connection
-      service.createPeerConnection((candidate) => {
+      // Create peer connection (fetches TURN credentials)
+      await service.createPeerConnection((candidate) => {
         hubConnection.invoke('SendIceCandidate', incomingCall.conversationId, JSON.stringify(candidate));
       });
 

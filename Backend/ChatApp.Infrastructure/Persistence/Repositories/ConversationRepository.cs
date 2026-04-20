@@ -40,5 +40,11 @@ public class ConversationRepository(AppDbContext db) : IConversationRepository
     public Task<ConversationMember?> GetMemberAsync(Guid conversationId, Guid userId, CancellationToken ct = default)
         => db.ConversationMembers.FirstOrDefaultAsync(m => m.ConversationId == conversationId && m.UserId == userId, ct);
 
+    public Task<List<Guid>> GetMemberIdsAsync(Guid conversationId, CancellationToken ct = default)
+        => db.ConversationMembers
+            .Where(m => m.ConversationId == conversationId)
+            .Select(m => m.UserId)
+            .ToListAsync(ct);
+
     public void Update(Conversation conversation) => db.Conversations.Update(conversation);
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useState, useRef } from "react";
 import {
   Phone,
   Video,
@@ -32,7 +32,7 @@ import { getSignalRConnection } from "../hooks/useSignalR";
 import { conversationService } from "../services/conversation.service";
 import { userService } from "../services/user.service";
 import { MessageType } from "../types/api";
-import { addRealTimeMessage, hideMessage as hideMessageAction } from "../store/slices/messageSlice";
+import { addRealTimeMessage, hideMessage as hideMessageAction, fetchMoreMessages } from "../store/slices/messageSlice";
 interface ChatAreaProps {
   conversation: Conversation;
   messages: Message[];
@@ -88,6 +88,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     if (u && "id" in u) users[u.id] = u as User;
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const prevScrollHeightRef = useRef(0);
+  const isPrependingRef = useRef(false);
+  const lastBottomMsgIdRef = useRef<string | null>(null);
+
+  const hasMore = useAppSelector((s) => s.messages.hasMoreByConvId[conversation.id] ?? false);
+  const isLoadingMore = useAppSelector((s) => s.messages.loadingMoreConvIds.includes(conversation.id));
+
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -117,11 +126,65 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     initiateCall(conversation.id, "video");
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
+
+  // Reset lastBottomMsgIdRef when switching conversations so initial scroll fires correctly
+  useEffect(() => {
+    lastBottomMsgIdRef.current = null;
+  }, [conversation.id]);
+
+  // Restore scroll position after prepending older messages (runs synchronously after DOM update)
+  useLayoutEffect(() => {
+    if (!isPrependingRef.current) return;
+    const container = scrollContainerRef.current;
+    if (container && prevScrollHeightRef.current > 0) {
+      container.scrollTop = container.scrollHeight - prevScrollHeightRef.current;
+    }
+    isPrependingRef.current = false;
+    prevScrollHeightRef.current = 0;
+  }, [visibleMessages.length]);
+
+  // Scroll to bottom when a new message arrives at the bottom (not when old ones are prepended)
+  useEffect(() => {
+    const lastMsg = visibleMessages[visibleMessages.length - 1];
+    const lastId = lastMsg?.id ?? null;
+    if (lastId !== lastBottomMsgIdRef.current && !isPrependingRef.current) {
+      // "instant" on initial load so the sentinel stays out of view from the start
+      const isFirstLoad = lastBottomMsgIdRef.current === null;
+      scrollToBottom(isFirstLoad ? "instant" : "smooth");
+      lastBottomMsgIdRef.current = lastId;
+    }
+  }, [visibleMessages]);
+
+  useEffect(() => {
+    if (isTyping) scrollToBottom("smooth");
+  }, [isTyping]);
+
+  // IntersectionObserver on sentinel at the top of the list.
+  // Fires only when the user manually scrolls up far enough — NOT during initial
+  // scroll-to-bottom animation (because "instant" scroll means sentinel is never
+  // visible at page load).
+  useEffect(() => {
+    const sentinel = topSentinelRef.current;
+    const container = scrollContainerRef.current;
+    if (!sentinel || !container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isLoadingMore) {
+          prevScrollHeightRef.current = container.scrollHeight;
+          isPrependingRef.current = true;
+          dispatch(fetchMoreMessages(conversation.id));
+        }
+      },
+      { root: container, threshold: 0 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, conversation.id, dispatch]);
   // Close options menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -168,9 +231,6 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     }
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -291,11 +351,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           {conversation.isGroup && (
             <button
               onClick={() => setIsManageModalOpen(true)}
-              className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
+              className="p-1.5 sm:p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
               title="Manage Group"
             >
               <Users className="w-5 h-5" />
@@ -303,28 +363,28 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           )}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
             title={t("common.search")}
           >
             <Search className="w-5 h-5" />
           </button>
           <button
             onClick={() => setIsSharedFilesOpen(true)}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors hidden sm:block"
+            className="p-1.5 sm:p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors hidden sm:block"
             title={t("sharedFiles.title")}
           >
             <Paperclip className="w-5 h-5" />
           </button>
           <button
             onClick={handleStartAudioCall}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors hidden sm:block"
+            className="p-1.5 sm:p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
             title="Start audio call"
           >
             <Phone className="w-5 h-5" />
           </button>
           <button
             onClick={handleStartVideoCall}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors hidden sm:block"
+            className="p-1.5 sm:p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
             title="Start video call"
           >
             <Video className="w-5 h-5" />
@@ -338,6 +398,13 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             </button>
             {showOptionsMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
+                <button
+                  onClick={() => { setIsSharedFilesOpen(true); setShowOptionsMenu(false); }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors sm:hidden"
+                >
+                  <Paperclip className="w-4 h-4" />
+                  <span>{t("sharedFiles.title")}</span>
+                </button>
                 <button
                   onClick={handleToggleMute}
                   className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
@@ -437,8 +504,26 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[#f3f4f6] dark:bg-gray-800 transition-colors duration-200">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[#f3f4f6] dark:bg-gray-800 transition-colors duration-200"
+      >
         <div className="max-w-4xl mx-auto flex flex-col">
+          {/* Sentinel — IntersectionObserver watches this to trigger load-more */}
+          <div ref={topSentinelRef} className="h-px w-full" />
+
+          {/* Load more indicator */}
+          {isLoadingMore && (
+            <div className="flex justify-center py-3">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span>Loading older messages…</span>
+              </div>
+            </div>
+          )}
+          {!hasMore && visibleMessages.length > 0 && (
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500 py-2">Beginning of conversation</p>
+          )}
           {visibleMessages.map((msg) => (
             <MessageBubble
               key={msg.id}

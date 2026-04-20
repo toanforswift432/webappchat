@@ -25,5 +25,7 @@ public class LocalStorageService(IConfiguration config) : IStorageService
         return Task.CompletedTask;
     }
 
-    public string GetPublicUrl(string objectName) => $"{_baseUrl}/uploads/{objectName}";
+    // Return a server-relative path so the URL works on any domain (dev or production).
+    // The _baseUrl field is kept for backward compatibility but not used for URL generation.
+    public string GetPublicUrl(string objectName) => $"/uploads/{objectName}";
 }

@@ -2,10 +2,25 @@ import { User, Message, Conversation, MessageType as UIMessageType } from "../ty
 import { UserDto, MessageDto, ConversationDto, OnlineStatus, MessageType, ConversationType } from "./api";
 import { BASE_URL } from "../config";
 
-export function avatarUrl(dto: { displayName: string; avatarUrl: string | null }): string {
-  if (dto.avatarUrl) {
-    return dto.avatarUrl.startsWith("http") ? dto.avatarUrl : `${BASE_URL}${dto.avatarUrl}`;
+// Resolve any file/avatar URL to an absolute URL that works on any environment.
+// Handles three cases:
+//   1. Relative path  "/uploads/..."  → prepend BASE_URL
+//   2. Legacy absolute "http://localhost:5054/uploads/..." → rewrite to BASE_URL + path
+//   3. External URL   "https://..."   → use as-is
+function resolveUrl(url: string): string {
+  if (url.startsWith("/")) return `${BASE_URL}${url}`;
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(url)) {
+    try {
+      return `${BASE_URL}${new URL(url).pathname}`;
+    } catch {
+      return url;
+    }
   }
+  return url;
+}
+
+export function avatarUrl(dto: { displayName: string; avatarUrl: string | null }): string {
+  if (dto.avatarUrl) return resolveUrl(dto.avatarUrl);
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(dto.displayName)}&background=6366f1&color=fff`;
 }
 
@@ -56,7 +71,8 @@ function formatFileSize(bytes: number): string {
 }
 
 export function mapMessage(dto: MessageDto): Message {
-  const content = dto.content ?? dto.fileUrl ?? "";
+  const resolvedFileUrl = dto.fileUrl ? resolveUrl(dto.fileUrl) : null;
+  const content = dto.content ?? resolvedFileUrl ?? "";
   return {
     id: dto.id,
     conversationId: dto.conversationId,

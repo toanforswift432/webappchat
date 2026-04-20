@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { conversationService } from '../../services/conversation.service';
 import { mapConversation } from '../../types/mappers';
-import type { Conversation } from '../../types';
+import type { Conversation, Message } from '../../types';
 import type { RootState } from '../index';
 
 interface ConversationState {
@@ -73,6 +73,17 @@ const conversationSlice = createSlice({
       const conv = state.items.find((c) => c.id === action.payload);
       if (conv && conv.id !== state.activeId) conv.unreadCount += 1;
     },
+    updateLastMessage(state, action: PayloadAction<{ conversationId: string; message: Message }>) {
+      const idx = state.items.findIndex((c) => c.id === action.payload.conversationId);
+      if (idx >= 0) {
+        state.items[idx] = { ...state.items[idx], lastMessage: action.payload.message };
+        // Move to top so the list stays sorted by most recent
+        if (idx > 0) {
+          const [conv] = state.items.splice(idx, 1);
+          state.items.unshift(conv);
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -95,5 +106,5 @@ const conversationSlice = createSlice({
   },
 });
 
-export const { setActiveConversation, upsertConversation, removeConversation, bumpUnread } = conversationSlice.actions;
+export const { setActiveConversation, upsertConversation, removeConversation, bumpUnread, updateLastMessage } = conversationSlice.actions;
 export default conversationSlice.reducer;

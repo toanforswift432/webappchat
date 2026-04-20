@@ -8,11 +8,18 @@ namespace ChatApp.Application.Features.Conversations;
 
 public record GetConversationsQuery(Guid UserId) : IRequest<Result<List<ConversationDto>>>;
 
-public class GetConversationsQueryHandler(IConversationRepository conversations)
+public class GetConversationsQueryHandler(IConversationRepository conversations, IRedisService redis)
     : IRequestHandler<GetConversationsQuery, Result<List<ConversationDto>>>
 {
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
+
     public async Task<Result<List<ConversationDto>>> Handle(GetConversationsQuery req, CancellationToken ct)
     {
+        var cacheKey = $"conv:list:{req.UserId}";
+        var cached = await redis.GetJsonAsync<List<ConversationDto>>(cacheKey);
+        if (cached is not null)
+            return Result<List<ConversationDto>>.Success(cached);
+
         var convs = await conversations.GetByUserIdAsync(req.UserId, ct);
 
         var dtos = convs.Select(c =>
@@ -40,6 +47,7 @@ public class GetConversationsQueryHandler(IConversationRepository conversations)
             return new ConversationDto(c.Id, c.Name, c.AvatarUrl, c.Type, members, lastMsgDto, unreadCount, c.CreatedAt, isMuted);
         }).ToList();
 
+        await redis.SetJsonAsync(cacheKey, dtos, CacheTtl);
         return Result<List<ConversationDto>>.Success(dtos);
     }
 }

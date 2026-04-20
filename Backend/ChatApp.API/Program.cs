@@ -10,6 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// HttpClient factory (used by TurnController to call Metered API)
+builder.Services.AddHttpClient();
+
 // Controllers + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -73,8 +76,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// SignalR
-builder.Services.AddSignalR();
+// SignalR with optional Redis backplane for horizontal scaling
+var redisConn = builder.Configuration.GetConnectionString("Redis");
+var signalR = builder.Services.AddSignalR();
+if (!string.IsNullOrEmpty(redisConn))
+    signalR.AddStackExchangeRedis(redisConn, opts =>
+        opts.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("ChatApp"));
 
 // CORS — allow frontend dev server
 builder.Services.AddCors(opts =>

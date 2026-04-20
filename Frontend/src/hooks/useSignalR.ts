@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addRealTimeMessage, toggleMessageReaction, markRecalled } from "../store/slices/messageSlice";
-import { bumpUnread, fetchConversations } from "../store/slices/conversationSlice";
+import { bumpUnread, updateLastMessage } from "../store/slices/conversationSlice";
+import { mapMessage } from "../types/mappers";
 import { fetchFriends, fetchFriendRequests } from "../store/slices/friendSlice";
 import { setTyping } from "../store/slices/uiSlice";
 import { setIncomingCall, setActiveCall, updateCallStatus, clearCall, CallType } from "../store/slices/callSlice";
@@ -79,12 +80,11 @@ export function useSignalR() {
           connection.invoke("MarkRead", dto.conversationId).catch(() => {});
         }
       }
-      dispatch(fetchConversations());
+      dispatch(updateLastMessage({ conversationId: dto.conversationId, message: mapMessage(dto) }));
     });
 
     connection.on("MessageRecalled", (messageId: string, conversationId: string) => {
       dispatch(markRecalled({ messageId, conversationId }));
-      dispatch(fetchConversations());
     });
 
     connection.on(
@@ -103,12 +103,10 @@ export function useSignalR() {
     );
 
     connection.on("UserOnline", () => {
-      dispatch(fetchConversations());
       dispatch(fetchFriends());
     });
 
     connection.on("UserOffline", () => {
-      dispatch(fetchConversations());
       dispatch(fetchFriends());
     });
 
@@ -120,7 +118,7 @@ export function useSignalR() {
     });
 
     connection.on("MessagesRead", () => {
-      dispatch(fetchConversations());
+      // Unread count is managed locally via bumpUnread / setActiveConversation
     });
 
     // ── Friend events ──────────────────────────────────────────────

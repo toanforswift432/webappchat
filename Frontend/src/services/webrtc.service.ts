@@ -1,3 +1,9 @@
+import axiosInstance from './axios';
+
+interface TurnCredentialsResponse {
+  iceServers: RTCIceServer[];
+}
+
 export class WebRTCService {
   private peerConnection: RTCPeerConnection | null = null;
   private localStream: MediaStream | null = null;
@@ -12,15 +18,20 @@ export class WebRTCService {
   private onRemoteStreamCallback: ((stream: MediaStream) => void) | null = null;
   private onLocalStreamCallback: ((stream: MediaStream) => void) | null = null;
 
-  private config: RTCConfiguration = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:stun3.l.google.com:19302' },
-      { urls: 'stun:stun4.l.google.com:19302' },
-    ],
-  };
+  private baseIceServers: RTCIceServer[] = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ];
+
+  private async buildConfig(): Promise<RTCConfiguration> {
+    try {
+      const res = await axiosInstance.get<TurnCredentialsResponse>('/turn/credentials');
+      const turnServers = res.data.iceServers ?? [];
+      return { iceServers: [...this.baseIceServers, ...turnServers] };
+    } catch {
+      return { iceServers: this.baseIceServers };
+    }
+  }
 
   updateStreamCallbacks(
     onRemoteStream: (stream: MediaStream) => void,
@@ -57,10 +68,11 @@ export class WebRTCService {
     }
   }
 
-  createPeerConnection(
+  async createPeerConnection(
     onIceCandidate: (candidate: RTCIceCandidate) => void
-  ): RTCPeerConnection {
-    this.peerConnection = new RTCPeerConnection(this.config);
+  ): Promise<RTCPeerConnection> {
+    const config = await this.buildConfig();
+    this.peerConnection = new RTCPeerConnection(config);
 
     this.peerConnection.ontrack = (event) => {
       console.log('Remote track received:', event.track.kind);

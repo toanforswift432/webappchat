@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ChatApp.Application.Interfaces;
 using StackExchange.Redis;
 
@@ -22,7 +23,24 @@ public class RedisService(IConnectionMultiplexer redis) : IRedisService
 
     public Task DeleteAsync(string key) => _db.KeyDeleteAsync(key);
 
+    public Task DeleteManyAsync(params string[] keys)
+    {
+        if (keys.Length == 0) return Task.CompletedTask;
+        var redisKeys = keys.Select(k => (RedisKey)k).ToArray();
+        return _db.KeyDeleteAsync(redisKeys);
+    }
+
     public Task<bool> ExistsAsync(string key) => _db.KeyExistsAsync(key);
+
+    public Task SetJsonAsync<T>(string key, T value, TimeSpan? expiry = null)
+        => SetAsync(key, JsonSerializer.Serialize(value), expiry);
+
+    public async Task<T?> GetJsonAsync<T>(string key)
+    {
+        var json = await GetAsync(key);
+        if (json is null) return default;
+        return JsonSerializer.Deserialize<T>(json);
+    }
 
     public Task SetUserOnlineAsync(Guid userId)
         => _db.StringSetAsync($"online:{userId}", "1", TimeSpan.FromMinutes(5));

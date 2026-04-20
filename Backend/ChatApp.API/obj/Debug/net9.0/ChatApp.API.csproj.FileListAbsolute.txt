@@ -387,3 +387,7 @@ C:/Users/THINKPAD/Documents/ChatWebApp/Backend/ChatApp.API/bin/Debug/net9.0/runt
 /Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/m8hdpiy4wd-6iaogqddgi.gz
 /Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/se2b3exsab-y0d11a1dgh.gz
 /Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/obj/Debug/net9.0/compressed/vkaabdljjx-fyolp6rbnd.gz
+/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/bin/Debug/net9.0/MessagePack.dll
+/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/bin/Debug/net9.0/MessagePack.Annotations.dll
+/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/bin/Debug/net9.0/Microsoft.AspNetCore.SignalR.StackExchangeRedis.dll
+/Users/nguyenkhactoan/Documents/company/Swift/webappchat/Backend/ChatApp.API/bin/Debug/net9.0/Microsoft.NET.StringTools.dll

@@ -76,7 +76,14 @@ public class ChatHub(
         var result = await mediator.Send(command);
 
         if (result.IsSuccess)
+        {
             await Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", result.Value);
+
+            // Invalidate conversation list cache for all members so they see the updated last message
+            var memberIds = await conversations.GetMemberIdsAsync(conversationId);
+            var cacheKeys = memberIds.Select(id => $"conv:list:{id}").ToArray();
+            await redis.DeleteManyAsync(cacheKeys);
+        }
     }
 
     public async Task JoinConversation(Guid conversationId)

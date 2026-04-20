@@ -1,4 +1,5 @@
 import React, { useState, lazy } from "react";
+import { LazyImage } from "./LazyImage";
 import { Message, User } from "../types";
 import { format } from "date-fns";
 import {
@@ -141,11 +142,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       case "image":
         return (
           <div className="relative group/img cursor-pointer">
-            <img
+            <LazyImage
               src={message.content}
               alt="Attached"
               className="max-w-full sm:max-w-xs h-auto object-cover rounded-md"
-              loading="lazy"
             />
           </div>
         );
@@ -173,11 +173,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       case "sticker":
         return (
           <div className="mt-1 mb-1">
-            <img
+            <LazyImage
               src={message.content}
               alt="Sticker"
               className="w-32 h-32 object-contain drop-shadow-md"
-              loading="lazy"
             />
           </div>
         );

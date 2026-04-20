@@ -60,6 +60,7 @@ Controllers/
  BaseController.cs
  ConversationController.cs
  FriendController.cs
+ TurnController.cs
  UserController.cs
 Hubs/ChatHub.cs
 Middleware/ExceptionMiddleware.cs
@@ -375,8 +376,11 @@ Program.cs
  fluentvalidation/11.12.0/lib/net8.0/FluentValidation.dll
  mediatr.contracts/2.0.1/lib/netstandard2.0/MediatR.Contracts.dll
  mediatr/12.5.0/lib/net6.0/MediatR.dll
+ messagepack.annotations/2.5.187/lib/netstandard2.0/MessagePack.Annotations.dll
+ messagepack/2.5.187/lib/net6.0/MessagePack.dll
  microsoft.aspnetcore.authentication.jwtbearer/9.0.15/lib/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
  microsoft.aspnetcore.openapi/9.0.14/lib/net9.0/Microsoft.AspNetCore.OpenApi.dll
+ microsoft.aspnetcore.signalr.stackexchangeredis/9.0.15/lib/net9.0/Microsoft.AspNetCore.SignalR.StackExchangeRedis.dll
  microsoft.bcl.asyncinterfaces/7.0.0/lib/netstandard2.1/Microsoft.Bcl.AsyncInterfaces.dll
  microsoft.data.sqlclient/5.1.6/ref/net6.0/Microsoft.Data.SqlClient.dll
  microsoft.entityframeworkcore.abstractions/9.0.15/lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll

@@ -37,3 +37,21 @@ body {
   padding: 0;
   overflow: hidden;
 }
+
+@layer utilities {
+  /* Dynamic viewport height — accounts for mobile browser chrome collapsing */
+  .h-dvh {
+    height: 100dvh;
+  }
+  /* Safe area padding helpers for iOS notch / Dynamic Island */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pb-nav-safe {
+    /* BottomNav (h-14 = 3.5rem) + iOS home indicator */
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+}
