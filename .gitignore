@@ -36,3 +36,11 @@ Frontend/node_modules/
 Frontend/dist/
 Frontend/dist-ssr/
 Frontend/*.local
+
+
+**/obj/
+**/bin/
+**/*.lscache
+.vs/
+.vscode/
+*.user
