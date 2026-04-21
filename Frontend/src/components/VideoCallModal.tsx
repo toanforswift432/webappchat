@@ -124,66 +124,63 @@ export const VideoCallModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 z-50 flex flex-col">
-      <div className="relative flex-1 bg-gray-800">
+    <div className="fixed inset-0 bg-black z-50">
+      {/* Remote video — fills full screen */}
+      <video
+        ref={remoteVideoRef}
+        autoPlay
+        playsInline
+        className={`absolute inset-0 w-full h-full object-cover ${hasRemoteStream ? '' : 'hidden'}`}
+      />
 
-        {/* Remote video — always in DOM so ref is never null */}
-        <video
-          ref={remoteVideoRef}
-          autoPlay
-          playsInline
-          className={`w-full h-full object-cover ${hasRemoteStream ? '' : 'hidden'}`}
-        />
+      {/* Avatar overlay shown while waiting for remote stream */}
+      {!hasRemoteStream && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900">
+          <div className="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center mb-4 text-white text-4xl font-bold">
+            {otherParticipant?.name?.slice(0, 2).toUpperCase() || 'AN'}
+          </div>
+          <h2 className="text-white text-2xl font-semibold mb-2">
+            {otherParticipant?.name || 'Unknown'}
+          </h2>
+          <p className="text-gray-400">
+            {activeCall.status === 'connecting' ? 'Connecting...' : 'Ringing...'}
+          </p>
+        </div>
+      )}
 
-        {/* Avatar overlay shown while waiting for remote stream */}
-        {!hasRemoteStream && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center mb-4 text-white text-4xl font-bold">
-              {otherParticipant?.name?.slice(0, 2).toUpperCase() || 'AN'}
+      {/* Local video PiP — only for video calls */}
+      {activeCall.type === 'video' && (
+        <div className="absolute top-4 right-4 w-36 h-28 sm:w-48 sm:h-36 bg-gray-900 rounded-lg overflow-hidden shadow-lg z-10">
+          <video
+            ref={localVideoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`w-full h-full object-cover ${isVideoEnabled ? '' : 'hidden'}`}
+          />
+          {!isVideoEnabled && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+              <VideoOff className="w-8 h-8 text-gray-500" />
             </div>
-            <h2 className="text-white text-2xl font-semibold mb-2">
-              {otherParticipant?.name || 'Unknown'}
-            </h2>
-            <p className="text-gray-400">
-              {activeCall.status === 'connecting' ? 'Connecting...' : 'Ringing...'}
-            </p>
-          </div>
-        )}
-
-        {/* Local video PiP — only for video calls */}
-        {activeCall.type === 'video' && (
-          <div className="absolute top-4 right-4 w-48 h-36 bg-gray-900 rounded-lg overflow-hidden shadow-lg">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`w-full h-full object-cover ${isVideoEnabled ? '' : 'hidden'}`}
-            />
-            {!isVideoEnabled && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                <VideoOff className="w-8 h-8 text-gray-500" />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Call info top-left */}
-        <div className="absolute top-4 left-4 text-white">
-          <h3 className="text-lg font-semibold">{otherParticipant?.name || 'Unknown'}</h3>
-          {activeCall.status === 'active' && (
-            <p className="text-sm text-gray-300">{formatDuration(callDuration)}</p>
           )}
         </div>
+      )}
+
+      {/* Call info top-left */}
+      <div className="absolute top-4 left-4 text-white z-10">
+        <h3 className="text-lg font-semibold drop-shadow">{otherParticipant?.name || 'Unknown'}</h3>
+        {activeCall.status === 'active' && (
+          <p className="text-sm text-gray-300 drop-shadow">{formatDuration(callDuration)}</p>
+        )}
       </div>
 
-      {/* Controls */}
-      <div className="bg-gray-900 py-6 px-4">
-        <div className="flex items-center justify-center gap-4">
+      {/* Controls — overlay at bottom with gradient */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent pt-12 pb-8 px-4">
+        <div className="flex items-center justify-center gap-6">
           <button
             onClick={() => toggleAudio(!isAudioEnabled)}
             className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
-              isAudioEnabled ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'
+              isAudioEnabled ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-red-500 hover:bg-red-600 text-white'
             }`}
             title={isAudioEnabled ? 'Mute' : 'Unmute'}
           >
@@ -194,7 +191,7 @@ export const VideoCallModal: React.FC = () => {
             <button
               onClick={() => toggleVideo(!isVideoEnabled)}
               className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
-                isVideoEnabled ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-red-500 hover:bg-red-600 text-white'
+                isVideoEnabled ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-red-500 hover:bg-red-600 text-white'
               }`}
               title={isVideoEnabled ? 'Turn off camera' : 'Turn on camera'}
             >
