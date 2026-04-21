@@ -7,7 +7,7 @@ import {
   Contact,
   AppNotification } from
 './types';
-
+// check
 const CURRENT_USER_ID = 'user-me';
 
 let currentAccountId: string | null = null;
