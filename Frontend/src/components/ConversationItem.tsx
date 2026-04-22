@@ -28,9 +28,14 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
   const displayAvatar = isGroup ? groupAvatar : user.avatar;
   const renderLastMessage = () => {
     if (!lastMessage) return '';
-    if (lastMessage.type === 'image') return t('chat.image');
-    if (lastMessage.type === 'file') return t('chat.file');
-    return lastMessage.content;
+    switch (lastMessage.type) {
+      case 'image':   return '🖼️ ' + (t('chat.image') || 'Image');
+      case 'file':    return '📎 ' + (lastMessage.fileName || t('chat.file') || 'File');
+      case 'sticker': return '😊 Sticker';
+      case 'poll':    return '📊 Poll';
+      case 'system':  return lastMessage.content ?? '';
+      default:        return lastMessage.content ?? '';
+    }
   };
   return (
     <div
@@ -60,10 +65,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
           </span>
         </div>
 
-        <div className="flex justify-between items-center mt-1">
+        <div className="flex justify-between items-center mt-1 min-w-0">
           <p
-            className={`text-sm truncate ${unreadCount > 0 ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
-            
+            className={`text-sm truncate min-w-0 flex-1 ${unreadCount > 0 ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
             {renderLastMessage()}
           </p>
           {unreadCount > 0 &&

@@ -11,6 +11,14 @@ export const conversationService = {
   createGroup: (name: string, memberIds: string[]) =>
     api.post<ConversationDto>("/conversations/group", { name, memberIds }).then((r) => r.data),
 
+  uploadGroupAvatar: (conversationId: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post<{ avatarUrl: string }>(`/conversations/${conversationId}/avatar`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data.avatarUrl);
+  },
+
   getMessages: (conversationId: string, page = 1, pageSize = 50) =>
     api
       .get<MessageDto[]>(`/conversations/${conversationId}/messages`, { params: { page, pageSize } })
@@ -53,4 +61,16 @@ export const conversationService = {
 
   muteConversation: (conversationId: string, mute: boolean) =>
     api.put(`/conversations/${conversationId}/mute`, { mute }).then((r) => r.data),
+
+  renameGroup: (conversationId: string, name: string) =>
+    api.patch(`/conversations/${conversationId}/name`, { name }),
+
+  leaveGroup: (conversationId: string) =>
+    api.post(`/conversations/${conversationId}/leave`),
+
+  kickMember: (conversationId: string, userId: string) =>
+    api.delete(`/conversations/${conversationId}/members/${userId}`),
+
+  addMember: (conversationId: string, userId: string) =>
+    api.post(`/conversations/${conversationId}/members`, { userId }),
 };

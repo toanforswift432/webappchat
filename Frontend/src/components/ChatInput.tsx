@@ -26,13 +26,97 @@ interface ChatInputProps {
   members?: User[];
   onTyping?: (isTyping: boolean) => void;
 }
-const MOCK_STICKERS = [
-  "https://cdn-icons-png.flaticon.com/512/4668/4668854.png",
-  "https://cdn-icons-png.flaticon.com/512/4668/4668858.png",
-  "https://cdn-icons-png.flaticon.com/512/4668/4668862.png",
-  "https://cdn-icons-png.flaticon.com/512/4668/4668866.png",
-  "https://cdn-icons-png.flaticon.com/512/4668/4668870.png",
-  "https://cdn-icons-png.flaticon.com/512/4668/4668874.png",
+const STICKER_PACKS = [
+  {
+    id: "happy",
+    label: "😊",
+    stickers: [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f601/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f603/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f604/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f607/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f609/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f618/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f970/512.webp",
+    ],
+  },
+  {
+    id: "sad",
+    label: "😢",
+    stickers: [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f614/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f615/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f616/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f622/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f62b/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f629/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f97a/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f928/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f971/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f644/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f624/512.webp",
+    ],
+  },
+  {
+    id: "love",
+    label: "❤️",
+    stickers: [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f495/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f496/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f497/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f498/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f499/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f49a/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f49b/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f49c/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f49e/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f48b/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60b/512.webp",
+    ],
+  },
+  {
+    id: "party",
+    label: "🎉",
+    stickers: [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f38a/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f973/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f942/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f37e/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f381/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f382/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f388/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f4af/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/2b50/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f31f/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44f/512.webp",
+    ],
+  },
+  {
+    id: "animals",
+    label: "🐱",
+    stickers: [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f431/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f436/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43b/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f430/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f984/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43c/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f427/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f98a/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f439/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43f_fe0f/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f414/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f98e/512.webp",
+    ],
+  },
 ];
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -51,6 +135,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const currentUserId = useAppSelector((s) => s.auth.user?.id ?? "");
   const [text, setText] = useState("");
   const [showStickers, setShowStickers] = useState(false);
+  const [activeStickerPack, setActiveStickerPack] = useState(0);
   // Mention State
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionIndex, setMentionIndex] = useState(-1);
@@ -308,9 +393,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       y: 10,
                       scale: 0.95,
                     }}
-                    className="absolute bottom-full left-0 mb-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 p-3 z-50 transition-colors"
+                    className="absolute bottom-full left-0 mb-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 z-50 overflow-hidden transition-colors"
                   >
-                    <div className="flex justify-between items-center mb-2">
+                    {/* Header */}
+                    <div className="flex justify-between items-center px-3 pt-3 pb-2">
                       <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                         {t("chat.stickers")}
                       </span>
@@ -321,14 +407,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {MOCK_STICKERS.map((url, i) => (
+                    {/* Category tabs */}
+                    <div className="flex gap-1 px-3 pb-2 border-b border-gray-100 dark:border-gray-700">
+                      {STICKER_PACKS.map((pack, idx) => (
+                        <button
+                          key={pack.id}
+                          onClick={() => setActiveStickerPack(idx)}
+                          className={`w-9 h-9 rounded-lg text-xl flex items-center justify-center transition-colors ${
+                            activeStickerPack === idx
+                              ? "bg-primary/10 ring-2 ring-primary"
+                              : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          {pack.label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Sticker grid */}
+                    <div className="grid grid-cols-4 gap-1 p-2 max-h-52 overflow-y-auto custom-scrollbar">
+                      {STICKER_PACKS[activeStickerPack].stickers.map((url, i) => (
                         <button
                           key={i}
                           onClick={() => handleStickerClick(url)}
-                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center"
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center aspect-square"
                         >
-                          <img src={url} alt="Sticker" className="w-12 h-12 object-contain" />
+                          <img src={url} alt="Sticker" className="w-12 h-12 object-contain" loading="lazy" />
                         </button>
                       ))}
                     </div>

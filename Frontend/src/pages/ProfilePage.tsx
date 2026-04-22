@@ -13,6 +13,7 @@ import {
   ChevronUp,
   Volume2,
   Play,
+  ArrowLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Account } from "../types";
@@ -21,6 +22,7 @@ import { updateProfile, updateNotificationSettings } from "../store/slices/authS
 import { useTranslation } from "../i18n/LanguageContext";
 import { userService } from "../services/user.service";
 import type { NotificationSettingsDto } from "../types/api";
+import { avatarUrl as resolveAvatarUrl } from "../types/mappers";
 import { playMessageSound, playNotificationSound, NotificationSoundType, SOUND_NAMES } from "../utils/sounds";
 
 interface ProfilePageProps {
@@ -28,9 +30,10 @@ interface ProfilePageProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
+  onBack?: () => void;
 }
 
-export const ProfilePage: React.FC<ProfilePageProps> = ({ account, isDarkMode, onToggleDarkMode, onLogout }) => {
+export const ProfilePage: React.FC<ProfilePageProps> = ({ account, isDarkMode, onToggleDarkMode, onLogout, onBack }) => {
   const { t, language, setLanguage } = useTranslation();
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
@@ -38,6 +41,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ account, isDarkMode, o
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.displayName ?? account.name);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const [expandedSection, setExpandedSection] = useState<"notifications" | "language" | "privacy" | null>(null);
 
   const [notifPrefs, setNotifPrefs] = useState<NotificationSettingsDto>(() => {
@@ -107,16 +112,36 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ account, isDarkMode, o
     setIsEditing(false);
   };
 
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingAvatar(true);
+    try {
+      const avatarUrl = await userService.uploadAvatar(file);
+      dispatch(updateProfile({ displayName: user?.displayName ?? account.name, avatarUrl }));
+    } catch {
+      // silent fail
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
+
   const displayName = user?.displayName ?? account.name;
   const email = user?.email ?? account.email;
-  const avatarUrl = user?.avatarUrl
-    ? user.avatarUrl
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6366f1&color=fff`;
+  const avatarUrl = resolveAvatarUrl({ displayName, avatarUrl: user?.avatarUrl ?? null });
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200 overflow-y-auto custom-scrollbar pb-20">
       <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t("profile.title")}</h1>
+        <div className="flex items-center gap-2">
+          {onBack && (
+            <button onClick={onBack} className="p-1.5 -ml-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t("profile.title")}</h1>
+        </div>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
@@ -134,11 +159,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ account, isDarkMode, o
             alt={displayName}
             className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md"
           />
-          {isEditing && (
-            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center cursor-pointer">
-              <Edit2 className="w-6 h-6 text-white" />
-            </div>
-          )}
+          <button
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={isUploadingAvatar}
+            className="absolute bottom-0 right-0 w-8 h-8 bg-primary hover:bg-primary-hover text-white rounded-full flex items-center justify-center shadow-md transition-colors disabled:opacity-60"
+            title="Đổi ảnh đại diện"
+          >
+            {isUploadingAvatar
+              ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              : <Edit2 className="w-4 h-4" />
+            }
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarFileChange}
+          />
         </div>
 
         {!isEditing ? (

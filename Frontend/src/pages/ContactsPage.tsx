@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, UserPlus, Check, X, UserMinus, MessageCircle, Users } from "lucide-react";
+import { Search, UserPlus, Check, X, UserMinus, MessageCircle, Users, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
@@ -17,11 +17,12 @@ import { useTranslation } from "../i18n/LanguageContext";
 
 interface ContactsPageProps {
   onOpenChat: (userId: string) => void;
+  onBack?: () => void;
 }
 
 type SubTab = "friends" | "requests" | "find";
 
-export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat }) => {
+export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat, onBack }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { friends, requestDetails, status } = useAppSelector((s) => s.friends);
@@ -62,7 +63,14 @@ export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat }) => {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 transition-colors duration-200">
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{t("contacts.title")}</h1>
+        <div className="flex items-center gap-2 mb-3">
+          {onBack && (
+            <button onClick={onBack} className="p-1.5 -ml-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t("contacts.title")}</h1>
+        </div>
         <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
           {(["friends", "requests", "find"] as SubTab[]).map((tab) => (
             <button

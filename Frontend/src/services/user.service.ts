@@ -8,6 +8,14 @@ export const userService = {
   updateMe: (displayName: string, avatarUrl?: string) =>
     api.put<UserDto>("/users/me", { displayName, avatarUrl }).then((r) => r.data),
 
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post<{ avatarUrl: string }>("/users/me/avatar", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data.avatarUrl);
+  },
+
   updateStatus: (status: OnlineStatus) => api.put("/users/me/status", { status }).then((r) => r.data),
 
   updateNotifications: (settings: NotificationSettingsDto) =>

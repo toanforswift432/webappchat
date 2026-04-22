@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChatApp.API.Controllers;
 
 [Route("api/users")]
-public class UserController(IUserRepository users, IUnitOfWork uow, IRedisService redis, IMediator mediator) : BaseController
+public class UserController(IUserRepository users, IUnitOfWork uow, IRedisService redis, IMediator mediator, IStorageService storage) : BaseController
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetMe(CancellationToken ct)
@@ -17,6 +17,22 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
         if (user is null) return NotFound();
         var notifSettings = new NotificationSettingsDto(user.NotificationSound, user.NotificationMessages, user.NotificationGroups, user.NotificationMentions, user.NotificationPreview, user.MessageSoundType, user.CallSoundType);
         return Ok(new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt, notifSettings));
+    }
+
+    [HttpPost("me/avatar")]
+    public async Task<IActionResult> UploadAvatar(IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0) return BadRequest("File is empty.");
+        using var stream = file.OpenReadStream();
+        var objectName = await storage.UploadAsync(stream, file.FileName, file.ContentType, ct);
+        var avatarUrl = storage.GetPublicUrl(objectName);
+
+        var user = await users.GetByIdAsync(CurrentUserId, ct);
+        if (user is null) return NotFound();
+        user.UpdateProfile(user.DisplayName, avatarUrl);
+        users.Update(user);
+        await uow.SaveChangesAsync(ct);
+        return Ok(new { avatarUrl });
     }
 
     [HttpPut("me")]

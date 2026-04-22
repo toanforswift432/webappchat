@@ -241,7 +241,7 @@ export function App() {
               ) : (
                 <>
                   <div className="hidden h-16 px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 md:flex items-center shadow-sm absolute top-0 w-full z-10 transition-colors duration-200">
-                    <span className="font-semibold text-primary">Z-Chat</span>
+                    <span className="font-semibold text-primary">Ami Chat</span>
                   </div>
                   <EmptyState />
                 </>
@@ -250,7 +250,12 @@ export function App() {
           </div>
         )}
 
-        {activeTab === "contacts" && <ContactsPage onOpenChat={handleOpenChat} />}
+        {activeTab === "contacts" && (
+          <ContactsPage
+            onOpenChat={handleOpenChat}
+            onBack={() => dispatch(setActiveTab("chat"))}
+          />
+        )}
 
         {activeTab === "profile" && (
           <ProfilePage
@@ -258,6 +263,7 @@ export function App() {
             isDarkMode={isDarkMode}
             onToggleDarkMode={() => dispatch(toggleDarkMode())}
             onLogout={handleLogout}
+            onBack={() => dispatch(setActiveTab("chat"))}
           />
         )}
       </div>

@@ -1,7 +1,9 @@
 using ChatApp.Application.Features.Conversations;
 using ChatApp.Application.Features.Messages;
 using ChatApp.Application.Interfaces;
+using ChatApp.Application.DTOs;
 using ChatApp.API.Hubs;
+using ChatApp.Domain.Entities;
 using ChatApp.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +12,14 @@ using Microsoft.AspNetCore.SignalR;
 namespace ChatApp.API.Controllers;
 
 [Route("api/conversations")]
-public class ConversationController(IMediator mediator, IStorageService storage, IHubContext<ChatHub> hub) : BaseController
+public class ConversationController(
+    IMediator mediator,
+    IStorageService storage,
+    IHubContext<ChatHub> hub,
+    IConversationRepository convRepo,
+    IMessageRepository msgRepo,
+    IUserRepository userRepo,
+    IUnitOfWork uow) : BaseController
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
@@ -30,7 +39,13 @@ public class ConversationController(IMediator mediator, IStorageService storage,
     public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest req, CancellationToken ct)
     {
         var result = await mediator.Send(new CreateGroupCommand(req.Name, CurrentUserId, req.MemberIds), ct);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+        if (!result.IsSuccess) return BadRequest(new { error = result.Error });
+
+        var dto = result.Value;
+        foreach (var member in dto.Members.Where(m => m.UserId != CurrentUserId))
+            await hub.Clients.Group($"user-{member.UserId}").SendAsync("GroupCreated", dto, ct);
+
+        return Ok(dto);
     }
 
     [HttpGet("{conversationId}/messages")]
@@ -84,9 +99,37 @@ public class ConversationController(IMediator mediator, IStorageService storage,
         var result = await mediator.Send(new ToggleReactionCommand(messageId, CurrentUserId, req.Emoji), ct);
         if (!result.IsSuccess) return BadRequest(new { error = result.Error });
 
-        // Broadcast reaction change to all members in the conversation
-        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReactionToggled", new { conversationId, messageId, userId = CurrentUserId, emoji = req.Emoji, added = result.Value }, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReactionToggled",
+            new { conversationId, messageId, userId = CurrentUserId, emoji = req.Emoji, added = result.Value }, ct);
         return Ok(new { added = result.Value });
+    }
+
+    [HttpPost("{conversationId}/avatar")]
+    public async Task<IActionResult> UploadGroupAvatar(Guid conversationId, IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0) return BadRequest("File is empty.");
+
+        var member = await convRepo.GetMemberAsync(conversationId, CurrentUserId, ct);
+        if (member is null) return Forbid();
+
+        using var stream = file.OpenReadStream();
+        var objectName = await storage.UploadAsync(stream, file.FileName, file.ContentType, ct);
+        var avatarUrl = storage.GetPublicUrl(objectName);
+
+        var conv = await convRepo.GetByIdAsync(conversationId, ct);
+        if (conv is null) return NotFound();
+        conv.UpdateGroup(conv.Name ?? "", avatarUrl);
+        convRepo.Update(conv);
+
+        var actor = await userRepo.GetByIdAsync(CurrentUserId, ct);
+        var sysMsg = await BroadcastSystemMessageAsync(conversationId,
+            $"{actor?.DisplayName ?? "Someone"} updated the group photo", ct);
+
+        await uow.SaveChangesAsync(ct);
+
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("GroupAvatarUpdated", conversationId, avatarUrl, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", sysMsg, ct);
+        return Ok(new { avatarUrl });
     }
 
     [HttpPut("{conversationId}/mute")]
@@ -95,6 +138,115 @@ public class ConversationController(IMediator mediator, IStorageService storage,
         var result = await mediator.Send(new MuteConversationCommand(conversationId, CurrentUserId, req.Mute), ct);
         return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
     }
+
+    [HttpPatch("{conversationId}/name")]
+    public async Task<IActionResult> RenameGroup(Guid conversationId, [FromBody] RenameGroupRequest req, CancellationToken ct)
+    {
+        var member = await convRepo.GetMemberAsync(conversationId, CurrentUserId, ct);
+        if (member is null || member.Role != MemberRole.Admin) return Forbid();
+
+        var conv = await convRepo.GetByIdAsync(conversationId, ct);
+        if (conv is null) return NotFound();
+        conv.UpdateGroup(req.Name, conv.AvatarUrl);
+        convRepo.Update(conv);
+
+        var actor = await userRepo.GetByIdAsync(CurrentUserId, ct);
+        var sysMsg = await BroadcastSystemMessageAsync(conversationId,
+            $"{actor?.DisplayName ?? "Someone"} renamed the group to \"{req.Name}\"", ct);
+
+        await uow.SaveChangesAsync(ct);
+
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("GroupRenamed", conversationId, req.Name, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", sysMsg, ct);
+        return Ok();
+    }
+
+    [HttpPost("{conversationId}/leave")]
+    public async Task<IActionResult> LeaveGroup(Guid conversationId, CancellationToken ct)
+    {
+        var member = await convRepo.GetMemberAsync(conversationId, CurrentUserId, ct);
+        if (member is null) return NotFound();
+
+        convRepo.RemoveMember(member);
+
+        var actor = await userRepo.GetByIdAsync(CurrentUserId, ct);
+        var sysMsg = await BroadcastSystemMessageAsync(conversationId,
+            $"{actor?.DisplayName ?? "Someone"} left the group", ct);
+
+        await uow.SaveChangesAsync(ct);
+
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("MemberLeft", conversationId, CurrentUserId, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", sysMsg, ct);
+        return Ok();
+    }
+
+    [HttpDelete("{conversationId}/members/{userId}")]
+    public async Task<IActionResult> KickMember(Guid conversationId, Guid userId, CancellationToken ct)
+    {
+        var requester = await convRepo.GetMemberAsync(conversationId, CurrentUserId, ct);
+        if (requester is null || requester.Role != MemberRole.Admin) return Forbid();
+
+        var target = await convRepo.GetMemberAsync(conversationId, userId, ct);
+        if (target is null) return NotFound();
+
+        convRepo.RemoveMember(target);
+
+        var actor = await userRepo.GetByIdAsync(CurrentUserId, ct);
+        var targetUser = await userRepo.GetByIdAsync(userId, ct);
+        var sysMsg = await BroadcastSystemMessageAsync(conversationId,
+            $"{actor?.DisplayName ?? "Admin"} removed {targetUser?.DisplayName ?? "a member"} from the group", ct);
+
+        await uow.SaveChangesAsync(ct);
+
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("MemberKicked", conversationId, userId, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", sysMsg, ct);
+        return Ok();
+    }
+
+    [HttpPost("{conversationId}/members")]
+    public async Task<IActionResult> AddMember(Guid conversationId, [FromBody] AddMemberRequest req, CancellationToken ct)
+    {
+        var requester = await convRepo.GetMemberAsync(conversationId, CurrentUserId, ct);
+        if (requester is null || requester.Role != MemberRole.Admin) return Forbid();
+
+        var existing = await convRepo.GetMemberAsync(conversationId, req.UserId, ct);
+        if (existing is not null) return Conflict(new { error = "User already in group" });
+
+        var newMember = ConversationMember.Create(conversationId, req.UserId);
+        await convRepo.AddMemberAsync(newMember, ct);
+
+        var actor = await userRepo.GetByIdAsync(CurrentUserId, ct);
+        var addedUser = await userRepo.GetByIdAsync(req.UserId, ct);
+        var sysMsg = await BroadcastSystemMessageAsync(conversationId,
+            $"{actor?.DisplayName ?? "Admin"} added {addedUser?.DisplayName ?? "a member"} to the group", ct);
+
+        await uow.SaveChangesAsync(ct);
+
+        var convDto = await BuildConversationDtoAsync(conversationId, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("MemberAdded", conversationId, req.UserId, ct);
+        await hub.Clients.Group($"user-{req.UserId}").SendAsync("GroupCreated", convDto, ct);
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("ReceiveMessage", sysMsg, ct);
+        return Ok();
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    private async Task<MessageDto> BroadcastSystemMessageAsync(Guid conversationId, string text, CancellationToken ct)
+    {
+        var msg = Message.CreateSystem(conversationId, text);
+        await msgRepo.AddAsync(msg, ct);
+        return new MessageDto(msg.Id, msg.ConversationId, null, "", null,
+            MessageType.System, msg.Content, null, null, null, null, false, false, [], msg.CreatedAt);
+    }
+
+    private async Task<ConversationDto> BuildConversationDtoAsync(Guid conversationId, CancellationToken ct)
+    {
+        var conv = await convRepo.GetByIdAsync(conversationId, ct);
+        var members = conv!.Members.Select(m => new ConversationMemberDto(
+            m.UserId, m.User.DisplayName, m.User.AvatarUrl, m.Role, m.User.Status)).ToList();
+        return new ConversationDto(conv.Id, conv.Name, conv.AvatarUrl,
+            conv.Type, members, null, 0, conv.CreatedAt, false);
+    }
 }
 
 public record GetOrCreateDirectRequest(Guid OtherUserId);
@@ -102,3 +254,5 @@ public record CreateGroupRequest(string Name, List<Guid> MemberIds);
 public record SendMessageRequest(MessageType Type, string? Content, string? FileUrl, string? FileName, long? FileSize, Guid? ReplyToMessageId);
 public record ToggleReactionRequest(string Emoji);
 public record MuteConversationRequest(bool Mute);
+public record RenameGroupRequest(string Name);
+public record AddMemberRequest(Guid UserId);

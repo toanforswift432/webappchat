@@ -124,7 +124,7 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
     unreadCount: dto.unreadCount,
     isGroup,
     groupName: isGroup ? (dto.name ?? undefined) : undefined,
-    groupAvatar: isGroup ? (dto.avatarUrl ?? undefined) : undefined,
+    groupAvatar: isGroup && dto.avatarUrl ? resolveUrl(dto.avatarUrl) : undefined,
     members: isGroup ? members : undefined,
     adminId: adminMember?.userId,
     isMuted: dto.isMuted,

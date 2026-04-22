@@ -186,7 +186,7 @@ export let notificationsStore: AppNotification[] = [
 {
   id: 'notif-4',
   type: 'system',
-  title: 'Welcome to Z-Chat!',
+  title: 'Welcome to Ami Chat!',
   body: 'Get started by adding some friends and joining groups.',
   timestamp: new Date(Date.now() - 172800000).toISOString(),
   isRead: true

@@ -6,7 +6,7 @@ export const translations = {
     "nav.profile": "Profile",
 
     // Login / Register
-    "auth.welcome": "Welcome to Z-Chat",
+    "auth.welcome": "Welcome to Ami Chat",
     "auth.signInSubtitle": "Sign in to connect with your team",
     "auth.email": "Email address",
     "auth.emailPlaceholder": "Enter your email",
@@ -14,10 +14,10 @@ export const translations = {
     "auth.passwordPlaceholder": "Enter your password",
     "auth.signIn": "Sign in",
     "auth.signingIn": "Signing in...",
-    "auth.newToZChat": "New to Z-Chat?",
+    "auth.newToZChat": "New to Ami Chat?",
     "auth.createAccount": "Create an account",
     "auth.createAccountTitle": "Create an account",
-    "auth.joinSubtitle": "Join your team on Z-Chat",
+    "auth.joinSubtitle": "Join your team on Ami Chat",
     "auth.fullName": "Full Name",
     "auth.fullNamePlaceholder": "John Doe",
     "auth.confirmPassword": "Confirm Password",
@@ -69,7 +69,7 @@ export const translations = {
     "chat.uploadFailed": "Upload failed. Please try again.",
 
     // Empty State
-    "empty.title": "Welcome to Z-Chat",
+    "empty.title": "Welcome to Ami Chat",
     "empty.subtitle": "Select a conversation from the sidebar to start messaging, or search for a specific contact.",
 
     // Contacts
@@ -116,7 +116,7 @@ export const translations = {
     "profile.language": "Language",
     "profile.privacySecurity": "Privacy & Security",
     "profile.logOut": "Log Out",
-    "profile.version": "Z-Chat Version 2.0.0",
+    "profile.version": "Ami Chat Version 2.0.0",
 
     // Notification Prefs
     "notifPrefs.messageNotifications": "Message notifications",
@@ -204,7 +204,7 @@ export const translations = {
     "nav.profile": "Cá nhân",
 
     // Login / Register
-    "auth.welcome": "Chào mừng đến Z-Chat",
+    "auth.welcome": "Chào mừng đến Ami Chat",
     "auth.signInSubtitle": "Đăng nhập để kết nối với đội ngũ",
     "auth.email": "Địa chỉ email",
     "auth.emailPlaceholder": "Nhập email của bạn",
@@ -212,10 +212,10 @@ export const translations = {
     "auth.passwordPlaceholder": "Nhập mật khẩu",
     "auth.signIn": "Đăng nhập",
     "auth.signingIn": "Đang đăng nhập...",
-    "auth.newToZChat": "Mới dùng Z-Chat?",
+    "auth.newToZChat": "Mới dùng Ami Chat?",
     "auth.createAccount": "Tạo tài khoản",
     "auth.createAccountTitle": "Tạo tài khoản",
-    "auth.joinSubtitle": "Tham gia đội ngũ trên Z-Chat",
+    "auth.joinSubtitle": "Tham gia đội ngũ trên Ami Chat",
     "auth.fullName": "Họ và tên",
     "auth.fullNamePlaceholder": "Nguyễn Văn A",
     "auth.confirmPassword": "Xác nhận mật khẩu",
@@ -267,7 +267,7 @@ export const translations = {
     "chat.vote": "Bình chọn",
 
     // Empty State
-    "empty.title": "Chào mừng đến Z-Chat",
+    "empty.title": "Chào mừng đến Ami Chat",
     "empty.subtitle": "Chọn một cuộc trò chuyện từ thanh bên để bắt đầu nhắn tin, hoặc tìm kiếm liên hệ.",
 
     // Contacts
@@ -314,7 +314,7 @@ export const translations = {
     "profile.language": "Ngôn ngữ",
     "profile.privacySecurity": "Quyền riêng tư & Bảo mật",
     "profile.logOut": "Đăng xuất",
-    "profile.version": "Z-Chat Phiên bản 2.0.0",
+    "profile.version": "Ami Chat Phiên bản 2.0.0",
 
     // Notification Prefs
     "notifPrefs.messageNotifications": "Thông báo tin nhắn",

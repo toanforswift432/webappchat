@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { friendService } from "../../services/friend.service";
 import { mapUser } from "../../types/mappers";
 import type { User, FriendRequest } from "../../types";
@@ -86,7 +86,12 @@ export const unfriendUser = createAsyncThunk(
 const friendSlice = createSlice({
   name: "friends",
   initialState: initial,
-  reducers: {},
+  reducers: {
+    setUserStatus(state, action: PayloadAction<{ userId: string; isOnline: boolean }>) {
+      const friend = state.friends.find((f) => f.id === action.payload.userId);
+      if (friend) friend.isOnline = action.payload.isOnline;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchFriends.pending, (state) => {
@@ -112,4 +117,5 @@ const friendSlice = createSlice({
   },
 });
 
+export const { setUserStatus } = friendSlice.actions;
 export default friendSlice.reducer;

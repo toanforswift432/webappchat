@@ -73,6 +73,28 @@ const conversationSlice = createSlice({
       const conv = state.items.find((c) => c.id === action.payload);
       if (conv && conv.id !== state.activeId) conv.unreadCount += 1;
     },
+    updateConvAvatar(state, action: PayloadAction<{ conversationId: string; avatarUrl: string }>) {
+      const conv = state.items.find((c) => c.id === action.payload.conversationId);
+      if (conv) conv.groupAvatar = action.payload.avatarUrl;
+    },
+    renameConversation(state, action: PayloadAction<{ conversationId: string; name: string }>) {
+      const conv = state.items.find((c) => c.id === action.payload.conversationId);
+      if (conv) { conv.groupName = action.payload.name; conv.user.name = action.payload.name; }
+    },
+    removeMemberFromConv(state, action: PayloadAction<{ conversationId: string; userId: string }>) {
+      const conv = state.items.find((c) => c.id === action.payload.conversationId);
+      if (conv?.members) conv.members = conv.members.filter((m) => m.id !== action.payload.userId);
+    },
+    setUserStatus(state, action: PayloadAction<{ userId: string; isOnline: boolean }>) {
+      state.items.forEach((conv) => {
+        if (conv.user?.id === action.payload.userId) {
+          conv.user.isOnline = action.payload.isOnline;
+        }
+        conv.members?.forEach((m) => {
+          if (m.id === action.payload.userId) m.isOnline = action.payload.isOnline;
+        });
+      });
+    },
     updateLastMessage(state, action: PayloadAction<{ conversationId: string; message: Message }>) {
       const idx = state.items.findIndex((c) => c.id === action.payload.conversationId);
       if (idx >= 0) {
@@ -106,5 +128,5 @@ const conversationSlice = createSlice({
   },
 });
 
-export const { setActiveConversation, upsertConversation, removeConversation, bumpUnread, updateLastMessage } = conversationSlice.actions;
+export const { setActiveConversation, upsertConversation, removeConversation, bumpUnread, updateLastMessage, setUserStatus, updateConvAvatar, renameConversation, removeMemberFromConv } = conversationSlice.actions;
 export default conversationSlice.reducer;

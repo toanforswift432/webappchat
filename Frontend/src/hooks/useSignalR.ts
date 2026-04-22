@@ -2,14 +2,14 @@ import { useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addRealTimeMessage, toggleMessageReaction, markRecalled } from "../store/slices/messageSlice";
-import { bumpUnread, updateLastMessage } from "../store/slices/conversationSlice";
-import { mapMessage } from "../types/mappers";
-import { fetchFriends, fetchFriendRequests } from "../store/slices/friendSlice";
+import { bumpUnread, updateLastMessage, setUserStatus as setConvUserStatus, upsertConversation, updateConvAvatar, renameConversation, removeMemberFromConv, removeConversation } from "../store/slices/conversationSlice";
+import { mapMessage, mapConversation } from "../types/mappers";
+import { fetchFriends, fetchFriendRequests, setUserStatus as setFriendUserStatus } from "../store/slices/friendSlice";
+import type { ConversationDto, MessageDto } from "../types/api";
 import { setTyping } from "../store/slices/uiSlice";
 import { setIncomingCall, setActiveCall, updateCallStatus, clearCall, CallType } from "../store/slices/callSlice";
 import { playMessageSound, playFriendRequestSound, NotificationSoundType } from "../utils/sounds";
-import type { MessageDto } from "../types/api";
-import { HUB_URL } from "../config";
+import { HUB_URL, BASE_URL } from "../config";
 
 // Singleton connection
 let sharedConnection: signalR.HubConnection | null = null;
@@ -102,12 +102,14 @@ export function useSignalR() {
       },
     );
 
-    connection.on("UserOnline", () => {
-      dispatch(fetchFriends());
+    connection.on("UserOnline", (userId: string) => {
+      dispatch(setFriendUserStatus({ userId, isOnline: true }));
+      dispatch(setConvUserStatus({ userId, isOnline: true }));
     });
 
-    connection.on("UserOffline", () => {
-      dispatch(fetchFriends());
+    connection.on("UserOffline", (userId: string) => {
+      dispatch(setFriendUserStatus({ userId, isOnline: false }));
+      dispatch(setConvUserStatus({ userId, isOnline: false }));
     });
 
     connection.on("UserTyping", (convId: string, _userId: string, isTyping: boolean) => {
@@ -129,9 +131,45 @@ export function useSignalR() {
     });
 
     connection.on("FriendRequestAccepted", (_accepterId: string, _accepterName: string) => {
-      // Refresh friends list and requests
       dispatch(fetchFriends());
       dispatch(fetchFriendRequests());
+    });
+
+    connection.on("GroupCreated", (dto: ConversationDto) => {
+      const conv = mapConversation(dto, currentUserId);
+      dispatch(upsertConversation(conv));
+    });
+
+    connection.on("GroupAvatarUpdated", (conversationId: string, avatarUrl: string) => {
+      const resolved = avatarUrl.startsWith("/") ? `${BASE_URL}${avatarUrl}` : avatarUrl;
+      dispatch(updateConvAvatar({ conversationId, avatarUrl: resolved }));
+    });
+
+    connection.on("GroupRenamed", (conversationId: string, name: string) => {
+      dispatch(renameConversation({ conversationId, name }));
+    });
+
+    connection.on("MemberKicked", (conversationId: string, userId: string) => {
+      if (userId === currentUserId) {
+        dispatch(removeConversation(conversationId));
+      } else {
+        dispatch(removeMemberFromConv({ conversationId, userId }));
+      }
+    });
+
+    connection.on("MemberLeft", (conversationId: string, userId: string) => {
+      if (userId === currentUserId) {
+        dispatch(removeConversation(conversationId));
+      } else {
+        dispatch(removeMemberFromConv({ conversationId, userId }));
+      }
+    });
+
+    connection.on("MemberAdded", (conversationId: string, userId: string) => {
+      // Refresh conversation to get updated member list
+      if (userId !== currentUserId) {
+        dispatch(removeMemberFromConv({ conversationId, userId: "__noop__" }));
+      }
     });
 
     // ── Call events ────────────────────────────────────────────────

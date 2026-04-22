@@ -28,6 +28,7 @@ interface MessageBubbleProps {
   onRecall?: (msgId: string) => void;
   onVote?: (msgId: string, optionId: string) => void;
   onDelete?: (msgId: string) => void;
+  onImagePreview?: (url: string) => void;
   currentUserId: string;
 }
 const EMOJI_OPTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -42,6 +43,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onRecall,
   onVote,
   onDelete,
+  onImagePreview,
   currentUserId,
 }) => {
   const { t } = useTranslation();
@@ -141,11 +143,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
       case "image":
         return (
-          <div className="relative group/img cursor-pointer">
+          <div
+            className="relative group/img cursor-pointer rounded-2xl overflow-hidden"
+            onClick={() => onImagePreview?.(message.content)}
+          >
             <LazyImage
               src={message.content}
               alt="Attached"
-              className="max-w-full sm:max-w-xs h-auto object-cover rounded-md"
+              className="w-full max-w-[220px] sm:max-w-xs h-auto object-cover"
             />
           </div>
         );
@@ -267,8 +272,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   }
 
   const isSticker = message.type === "sticker";
-  const bubbleClasses = isSticker
-    ? "relative" // No background for stickers
+  const isImage = message.type === "image";
+  const bubbleClasses = (isSticker || isImage)
+    ? "relative" // No padding/background for stickers and images
     : `relative px-4 py-2 transition-colors ${isOwn ? "bg-primary text-white rounded-2xl rounded-tr-sm" : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm shadow-sm dark:shadow-none border border-gray-100 dark:border-gray-600"}`;
   return (
     <motion.div
@@ -367,12 +373,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             {!message.isRecalled && renderReplyBlock()}
             {renderContent()}
 
-            <div
-              className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? (isSticker ? "text-gray-400 dark:text-gray-500" : "text-blue-100") : "text-gray-400 dark:text-gray-400"}`}
-            >
-              <span className="text-[10px] leading-none">{timeString}</span>
-              {renderStatus()}
-            </div>
+            {isImage ? (
+              /* Timestamp overlaid at bottom-right of image */
+              <div className="flex items-center justify-end gap-0.5 absolute bottom-1.5 right-2 bg-black/40 rounded-full px-1.5 py-0.5 pointer-events-none z-10">
+                <span className="text-[10px] leading-none text-white">{timeString}</span>
+                {isOwn && renderStatus()}
+              </div>
+            ) : (
+              <div
+                className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? (isSticker ? "text-gray-400 dark:text-gray-500" : "text-blue-100") : "text-gray-400 dark:text-gray-400"}`}
+              >
+                <span className="text-[10px] leading-none">{timeString}</span>
+                {renderStatus()}
+              </div>
+            )}
           </div>
 
           {/* Actions for Received Messages (Right side) — CSS group-hover, no JS gap issue */}
