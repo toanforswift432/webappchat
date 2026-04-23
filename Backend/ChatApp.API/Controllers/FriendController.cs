@@ -19,11 +19,7 @@ public class FriendController(
     public async Task<IActionResult> GetFriends(CancellationToken ct)
     {
         var friendships = await friendRepo.GetFriendshipsAsync(CurrentUserId, ct);
-        var dtos = friendships.Select(f =>
-        {
-            var notifSettings = new NotificationSettingsDto(f.Friend.NotificationSound, f.Friend.NotificationMessages, f.Friend.NotificationGroups, f.Friend.NotificationMentions, f.Friend.NotificationPreview);
-            return new UserDto(f.Friend.Id, f.Friend.Email, f.Friend.DisplayName, f.Friend.AvatarUrl, f.Friend.Status, f.Friend.LastSeenAt, notifSettings);
-        });
+        var dtos = friendships.Select(f => f.Friend.ToDto());
         return Ok(dtos);
     }
 

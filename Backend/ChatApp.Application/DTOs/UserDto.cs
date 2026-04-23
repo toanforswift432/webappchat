@@ -6,10 +6,22 @@ public record UserDto(
     Guid Id,
     string Email,
     string DisplayName,
+    string? PhoneNumber,
     string? AvatarUrl,
     OnlineStatus Status,
     DateTime? LastSeenAt,
+    AccountType AccountType,
+    ApprovalStatus ApprovalStatus,
+    bool IsVerified,
     NotificationSettingsDto NotificationSettings
+);
+
+public record PendingEmployeeDto(
+    Guid Id,
+    string Email,
+    string DisplayName,
+    string? PhoneNumber,
+    DateTime CreatedAt
 );
 
 public record NotificationSettingsDto(

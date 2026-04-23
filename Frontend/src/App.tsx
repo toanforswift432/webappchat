@@ -12,6 +12,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ContactsPage } from "./pages/ContactsPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { AdminPage } from "./pages/AdminPage";
 import { useTranslation } from "./i18n/LanguageContext";
 import { conversationService } from "./services/conversation.service";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
@@ -33,10 +34,15 @@ import {
 import { useSignalR, getSignalRConnection } from "./hooks/useSignalR";
 import { fetchFriendRequests } from "./store/slices/friendSlice";
 import type { Message } from "./types";
-import { MessageType } from "./types/api";
+import { MessageType, AccountType } from "./types/api";
 import { Account } from "./types";
 
 type AuthView = "login" | "register";
+
+function getInviteCodeFromUrl(): string | null {
+  const match = window.location.pathname.match(/\/webchatapp\/([^/]+)$/);
+  return match ? match[1] : null;
+}
 
 export function App() {
   const { t } = useTranslation();
@@ -50,7 +56,8 @@ export function App() {
   );
   const pendingRequestCount = useAppSelector((s) => s.friends.requestDetails.length);
 
-  const [authView, setAuthView] = React.useState<AuthView>("login");
+  const inviteCode = React.useMemo(() => getInviteCodeFromUrl(), []);
+  const [authView, setAuthView] = React.useState<AuthView>(() => (inviteCode ? "register" : "login"));
 
   useSignalR();
 
@@ -147,13 +154,15 @@ export function App() {
     try {
       const result = await conversationService.toggleReaction(activeConvId, msgId, emoji);
       // Update local state immediately for sender (SignalR will update others)
-      dispatch(toggleMessageReaction({
-        conversationId: activeConvId,
-        messageId: msgId,
-        userId: user.id,
-        emoji,
-        added: result.added,
-      }));
+      dispatch(
+        toggleMessageReaction({
+          conversationId: activeConvId,
+          messageId: msgId,
+          userId: user.id,
+          emoji,
+          added: result.added,
+        }),
+      );
     } catch (error) {
       console.error("Failed to toggle reaction:", error);
     }
@@ -177,7 +186,13 @@ export function App() {
     if (authView === "login") {
       return <LoginPage onLoginSuccess={() => {}} onSwitchToRegister={() => setAuthView("register")} />;
     }
-    return <RegisterPage onRegisterSuccess={() => {}} onSwitchToLogin={() => setAuthView("login")} />;
+    return (
+      <RegisterPage
+        onRegisterSuccess={() => setAuthView("login")}
+        onSwitchToLogin={() => setAuthView("login")}
+        inviteCode={inviteCode ?? undefined}
+      />
+    );
   }
 
   const activeConversation = conversations.find((c) => c.id === activeConvId);
@@ -210,6 +225,7 @@ export function App() {
               onTabChange={(tab) => dispatch(setActiveTab(tab))}
               unreadCount={totalUnreadCount}
               pendingRequestCount={pendingRequestCount}
+              isAdmin={user?.accountType === AccountType.Admin}
             />
 
             <NotificationPanel
@@ -221,7 +237,9 @@ export function App() {
               onNotificationClick={async () => {}}
             />
 
-            <div className={`flex-1 flex-col relative overflow-hidden ${activeConvId === null ? "hidden md:flex" : "flex"}`}>
+            <div
+              className={`flex-1 flex-col relative overflow-hidden ${activeConvId === null ? "hidden md:flex" : "flex"}`}
+            >
               {activeConversation ? (
                 <ChatArea
                   conversation={activeConversation}
@@ -251,10 +269,7 @@ export function App() {
         )}
 
         {activeTab === "contacts" && (
-          <ContactsPage
-            onOpenChat={handleOpenChat}
-            onBack={() => dispatch(setActiveTab("chat"))}
-          />
+          <ContactsPage onOpenChat={handleOpenChat} onBack={() => dispatch(setActiveTab("chat"))} />
         )}
 
         {activeTab === "profile" && (
@@ -266,6 +281,10 @@ export function App() {
             onBack={() => dispatch(setActiveTab("chat"))}
           />
         )}
+
+        {activeTab === "admin" && user?.accountType === AccountType.Admin && (
+          <AdminPage onBack={() => dispatch(setActiveTab("chat"))} />
+        )}
       </div>
 
       <div className={`${!showBottomNav ? "hidden md:block" : "block"}`}>
@@ -274,6 +293,7 @@ export function App() {
           onTabChange={(tab) => dispatch(setActiveTab(tab))}
           unreadCount={totalUnreadCount}
           pendingRequestCount={pendingRequestCount}
+          isAdmin={user?.accountType === AccountType.Admin}
         />
       </div>
 

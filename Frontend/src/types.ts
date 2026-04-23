@@ -29,7 +29,7 @@ export interface Contact {
   isFavorite?: boolean;
 }
 
-export type AppTab = "chat" | "contacts" | "profile";
+export type AppTab = "chat" | "contacts" | "profile" | "admin";
 
 export interface AppNotification {
   id: string;

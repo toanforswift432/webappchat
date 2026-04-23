@@ -33,6 +33,7 @@ public static class DependencyInjection
 
         // Services
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         // Redis (optional — comment out if not available)
         var redisConn = config.GetConnectionString("Redis");

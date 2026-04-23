@@ -11,6 +11,8 @@ interface AuthState {
   isAuthenticated: boolean;
   status: "idle" | "loading" | "failed";
   error: string | null;
+  pendingOtpEmail: string | null;
+  requiresApproval: boolean;
 }
 
 function loadPersistedAuth(): Partial<AuthState> {
@@ -34,6 +36,8 @@ const initial: AuthState = {
   isAuthenticated: false,
   status: "idle",
   error: null,
+  pendingOtpEmail: null,
+  requiresApproval: false,
   ...loadPersistedAuth(),
 };
 
@@ -48,16 +52,63 @@ export const login = createAsyncThunk(
   },
 );
 
-export const register = createAsyncThunk(
-  "auth/register",
+export const registerCustomer = createAsyncThunk(
+  "auth/registerCustomer",
   async (
-    { email, password, displayName }: { email: string; password: string; displayName: string },
+    {
+      email,
+      password,
+      displayName,
+      phoneNumber,
+    }: { email: string; password: string; displayName: string; phoneNumber: string },
     { rejectWithValue },
   ) => {
     try {
-      return await authService.register(email, password, displayName);
+      return await authService.registerCustomer(email, password, displayName, phoneNumber);
     } catch (e: any) {
       return rejectWithValue(e.response?.data?.error ?? "Registration failed");
+    }
+  },
+);
+
+export const registerEmployee = createAsyncThunk(
+  "auth/registerEmployee",
+  async (
+    {
+      inviteCode,
+      email,
+      password,
+      displayName,
+      phoneNumber,
+    }: { inviteCode: string; email: string; password: string; displayName: string; phoneNumber: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      return await authService.registerEmployee(inviteCode, email, password, displayName, phoneNumber);
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Registration failed");
+    }
+  },
+);
+
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async ({ emailOrPhone, otpCode }: { emailOrPhone: string; otpCode: string }, { rejectWithValue }) => {
+    try {
+      return await authService.verifyOtp(emailOrPhone, otpCode);
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "OTP verification failed");
+    }
+  },
+);
+
+export const resendOtpForUnverified = createAsyncThunk(
+  "auth/resendOtpForUnverified",
+  async (emailOrPhone: string, { rejectWithValue }) => {
+    try {
+      return await authService.resendOtp(emailOrPhone);
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed to resend OTP");
     }
   },
 );
@@ -92,9 +143,17 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
       state.error = null;
+      state.pendingOtpEmail = null;
+      state.requiresApproval = false;
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("authUser");
+    },
+    clearRegistrationState(state) {
+      state.pendingOtpEmail = null;
+      state.requiresApproval = false;
+      state.error = null;
+      state.status = "idle";
     },
     setTokens(state, action: PayloadAction<{ accessToken: string; refreshToken: string }>) {
       state.accessToken = action.payload.accessToken;
@@ -139,9 +198,45 @@ const authSlice = createSlice({
       .addCase(login.pending, handleAuthPending)
       .addCase(login.fulfilled, handleAuthFulfilled)
       .addCase(login.rejected, handleAuthRejected)
-      .addCase(register.pending, handleAuthPending)
-      .addCase(register.fulfilled, handleAuthFulfilled)
-      .addCase(register.rejected, handleAuthRejected)
+      .addCase(registerCustomer.pending, handleAuthPending)
+      .addCase(registerCustomer.fulfilled, (state, action) => {
+        state.status = "idle";
+        state.pendingOtpEmail = action.meta.arg.email;
+      })
+      .addCase(registerCustomer.rejected, handleAuthRejected)
+      .addCase(registerEmployee.pending, handleAuthPending)
+      .addCase(registerEmployee.fulfilled, (state, action) => {
+        state.status = "idle";
+        state.pendingOtpEmail = action.meta.arg.email;
+      })
+      .addCase(registerEmployee.rejected, handleAuthRejected)
+      .addCase(verifyOtp.pending, handleAuthPending)
+      .addCase(verifyOtp.fulfilled, (state, action) => {
+        state.status = "idle";
+        if (action.payload.requiresApproval) {
+          state.requiresApproval = true;
+          state.pendingOtpEmail = null;
+        } else if (action.payload.accessToken && action.payload.refreshToken && action.payload.user) {
+          state.isAuthenticated = true;
+          state.user = action.payload.user;
+          state.accessToken = action.payload.accessToken;
+          state.refreshToken = action.payload.refreshToken;
+          state.pendingOtpEmail = null;
+          localStorage.setItem("accessToken", action.payload.accessToken);
+          localStorage.setItem("refreshToken", action.payload.refreshToken);
+          localStorage.setItem("authUser", JSON.stringify(action.payload.user));
+        }
+      })
+      .addCase(verifyOtp.rejected, handleAuthRejected)
+      .addCase(resendOtpForUnverified.pending, handleAuthPending)
+      .addCase(resendOtpForUnverified.fulfilled, (state, action) => {
+        state.status = "idle";
+        // Set pendingOtpEmail từ maskedEmail (sẽ dùng input email từ user)
+        // Nhưng vì backend trả về maskedEmail, ta cần lưu email gốc từ input
+        // => Ta sẽ dùng maskedEmail như một hint, nhưng user phải nhập lại email để verify
+        state.pendingOtpEmail = action.payload.maskedEmail;
+      })
+      .addCase(resendOtpForUnverified.rejected, handleAuthRejected)
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload;
         localStorage.setItem("authUser", JSON.stringify(action.payload));
@@ -152,5 +247,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setTokens, clearError, updateNotificationSettings } = authSlice.actions;
+export const { logout, setTokens, clearError, updateNotificationSettings, clearRegistrationState } = authSlice.actions;
 export default authSlice.reducer;

@@ -4,6 +4,7 @@ using ChatApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422160316_AddPhase0UserFields")]
+    partial class AddPhase0UserFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -426,12 +429,6 @@ namespace ChatApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("OtpExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OtpResendCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("OtpResendLastResetAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PasswordHash")

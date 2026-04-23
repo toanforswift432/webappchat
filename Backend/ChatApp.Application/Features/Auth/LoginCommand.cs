@@ -1,8 +1,8 @@
 using ChatApp.Application.Common;
 using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Enums;
 using MediatR;
-using BCrypt.Net;
 
 namespace ChatApp.Application.Features.Auth;
 
@@ -17,14 +17,21 @@ public class LoginCommandHandler(IUserRepository users, IJwtService jwt, IUnitOf
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return Result<AuthResponseDto>.Failure("Invalid email or password.");
 
+        if (!user.IsVerified)
+            return Result<AuthResponseDto>.Failure("Please verify your email before logging in.");
+
+        if (user.ApprovalStatus == ApprovalStatus.Pending)
+            return Result<AuthResponseDto>.Failure("Your account is pending admin approval.");
+
+        if (user.ApprovalStatus == ApprovalStatus.Rejected)
+            return Result<AuthResponseDto>.Failure("Your account registration was rejected. Please contact admin.");
+
         var accessToken = jwt.GenerateAccessToken(user);
         var refreshToken = jwt.GenerateRefreshToken();
         user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(30));
         users.Update(user);
         await uow.SaveChangesAsync(ct);
 
-        var notifSettings = new NotificationSettingsDto(user.NotificationSound, user.NotificationMessages, user.NotificationGroups, user.NotificationMentions, user.NotificationPreview, user.MessageSoundType, user.CallSoundType);
-        var dto = new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt, notifSettings);
-        return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken, dto));
+        return Result<AuthResponseDto>.Success(new AuthResponseDto(accessToken, refreshToken, user.ToDto()));
     }
 }

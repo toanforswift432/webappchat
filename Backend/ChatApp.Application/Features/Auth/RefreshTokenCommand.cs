@@ -1,6 +1,7 @@
 using ChatApp.Application.Common;
 using ChatApp.Application.DTOs;
 using ChatApp.Application.Interfaces;
+using ChatApp.Domain.Enums;
 using MediatR;
 
 namespace ChatApp.Application.Features.Auth;
@@ -18,14 +19,15 @@ public class RefreshTokenCommandHandler(IUserRepository users, IJwtService jwt, 
         if (user is null || user.RefreshTokenExpiresAt < DateTime.UtcNow)
             return Result<AuthResponseDto>.Failure("Invalid or expired refresh token.");
 
+        if (user.ApprovalStatus == ApprovalStatus.Rejected)
+            return Result<AuthResponseDto>.Failure("Account has been rejected.");
+
         var newAccess = jwt.GenerateAccessToken(user);
         var newRefresh = jwt.GenerateRefreshToken();
         user.SetRefreshToken(newRefresh, DateTime.UtcNow.AddDays(30));
         users.Update(user);
         await uow.SaveChangesAsync(ct);
 
-        var notifSettings = new NotificationSettingsDto(user.NotificationSound, user.NotificationMessages, user.NotificationGroups, user.NotificationMentions, user.NotificationPreview, user.MessageSoundType, user.CallSoundType);
-        var dto = new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt, notifSettings);
-        return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccess, newRefresh, dto));
+        return Result<AuthResponseDto>.Success(new AuthResponseDto(newAccess, newRefresh, user.ToDto()));
     }
 }

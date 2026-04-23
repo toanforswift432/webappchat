@@ -1,19 +1,22 @@
 import React from 'react';
-import { MessageCircle, Users, User } from 'lucide-react';
+import { MessageCircle, Users, User, Shield } from 'lucide-react';
 import { AppTab } from '../types';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../i18n/LanguageContext';
+import { AccountType } from '../types/api';
 interface BottomNavProps {
   activeTab: AppTab;
   onTabChange: (tab: AppTab) => void;
   unreadCount: number;
   pendingRequestCount: number;
+  isAdmin?: boolean;
 }
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onTabChange,
   unreadCount,
-  pendingRequestCount
+  pendingRequestCount,
+  isAdmin = false,
 }) => {
   const { t } = useTranslation();
   const tabs = [
@@ -34,7 +37,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     icon: User,
     label: t('nav.profile'),
     badge: 0
-  }];
+  },
+  ...(isAdmin ? [{
+    id: 'admin' as AppTab,
+    icon: Shield,
+    label: 'Admin',
+    badge: 0,
+  }] : []),
+  ];
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-40 pb-safe transition-colors duration-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-none">

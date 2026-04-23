@@ -1,4 +1,5 @@
 using System.Text;
+using BCrypt.Net;
 using ChatApp.Application;
 using ChatApp.Infrastructure;
 using ChatApp.API.Hubs;
@@ -93,12 +94,24 @@ builder.Services.AddCors(opts =>
 
 var app = builder.Build();
 
-// Auto-migrate on startup in development
-if (app.Environment.IsDevelopment())
+// Auto-migrate + seed admin on startup
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
+
+    // Seed admin account if none exists
+    if (!db.Users.Any(u => u.AccountType == ChatApp.Domain.Enums.AccountType.Admin))
+    {
+        var adminEmail = builder.Configuration["AdminSeed:Email"] ?? "admin@amichat.local";
+        var adminPass  = builder.Configuration["AdminSeed:Password"] ?? "Admin@123456";
+        var adminName  = builder.Configuration["AdminSeed:DisplayName"] ?? "System Admin";
+        var hash = BCrypt.Net.BCrypt.HashPassword(adminPass);
+        var admin = ChatApp.Domain.Entities.User.CreateAdmin(adminEmail, hash, adminName);
+        db.Users.Add(admin);
+        await db.SaveChangesAsync();
+        Console.WriteLine($"[Seed] Admin account created: {adminEmail}");
+    }
 }
 
 app.UseSwagger();

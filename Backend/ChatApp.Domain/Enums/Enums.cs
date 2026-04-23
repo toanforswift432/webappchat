@@ -53,3 +53,17 @@ public enum CallStatus
     Missed,
     Rejected
 }
+
+public enum AccountType
+{
+    Customer,  // Khách hàng bên ngoài
+    Employee,  // Nhân viên nội bộ
+    Admin      // Quản trị hệ thống
+}
+
+public enum ApprovalStatus
+{
+    Pending,   // Chờ admin duyệt (chỉ áp dụng Employee)
+    Approved,  // Đã duyệt
+    Rejected   // Bị từ chối
+}

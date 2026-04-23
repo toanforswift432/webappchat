@@ -15,8 +15,7 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
     {
         var user = await users.GetByIdAsync(CurrentUserId, ct);
         if (user is null) return NotFound();
-        var notifSettings = new NotificationSettingsDto(user.NotificationSound, user.NotificationMessages, user.NotificationGroups, user.NotificationMentions, user.NotificationPreview, user.MessageSoundType, user.CallSoundType);
-        return Ok(new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt, notifSettings));
+        return Ok(user.ToDto());
     }
 
     [HttpPost("me/avatar")]
@@ -43,8 +42,7 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
         user.UpdateProfile(req.DisplayName, req.AvatarUrl);
         users.Update(user);
         await uow.SaveChangesAsync(ct);
-        var notifSettings = new NotificationSettingsDto(user.NotificationSound, user.NotificationMessages, user.NotificationGroups, user.NotificationMentions, user.NotificationPreview, user.MessageSoundType, user.CallSoundType);
-        return Ok(new UserDto(user.Id, user.Email, user.DisplayName, user.AvatarUrl, user.Status, user.LastSeenAt, notifSettings));
+        return Ok(user.ToDto());
     }
 
     [HttpPut("me/notifications")]
@@ -81,12 +79,7 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
     {
         if (string.IsNullOrWhiteSpace(q)) return BadRequest("Query is required.");
         var results = await users.SearchAsync(q, ct);
-        var dtos = results.Select(u =>
-        {
-            var notifSettings = new NotificationSettingsDto(u.NotificationSound, u.NotificationMessages, u.NotificationGroups, u.NotificationMentions, u.NotificationPreview, u.MessageSoundType, u.CallSoundType);
-            return new UserDto(u.Id, u.Email, u.DisplayName, u.AvatarUrl, u.Status, u.LastSeenAt, notifSettings);
-        });
-        return Ok(dtos);
+        return Ok(results.Select(u => u.ToDto()));
     }
 
     [HttpPost("{userId}/block")]

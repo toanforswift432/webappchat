@@ -6,6 +6,9 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   base: '/webappchat/',
+  server: {
+    historyApiFallback: true,
+  },
   build: {
     outDir: path.resolve(__dirname, '../Backend/ChatApp.API/wwwroot/webappchat'),
     emptyOutDir: true,
