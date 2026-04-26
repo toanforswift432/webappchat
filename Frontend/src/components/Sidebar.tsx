@@ -45,13 +45,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isStatusSelectorOpen, setIsStatusSelectorOpen] = useState(false);
-  const currentStatusColor = STATUS_COLORS["Available"] || "bg-green-500";
+
+  const STATUS_LABEL_MAP: Record<OnlineStatus, { label: string; color: string }> = {
+    [OnlineStatus.Online]: { label: t("status.available"), color: "bg-green-500" },
+    [OnlineStatus.Away]: { label: t("status.away"), color: "bg-yellow-500" },
+    [OnlineStatus.InMeeting]: { label: t("status.inMeeting"), color: "bg-purple-500" },
+    [OnlineStatus.WorkFromHome]: { label: t("status.wfh"), color: "bg-blue-500" },
+    [OnlineStatus.Offline]: { label: "Offline", color: "bg-gray-400" },
+  };
+  const currentStatusInfo = STATUS_LABEL_MAP[authUser?.status ?? OnlineStatus.Online] ?? STATUS_LABEL_MAP[OnlineStatus.Online];
+  const currentStatusColor = currentStatusInfo.color;
+
   const handleStatusSelect = async (status: string) => {
     const statusMap: Record<string, OnlineStatus> = {
       Available: OnlineStatus.Online,
       Away: OnlineStatus.Away,
       "In a meeting": OnlineStatus.InMeeting,
-      "Working from home": OnlineStatus.WorkFromHome,
+      WFH: OnlineStatus.WorkFromHome,
       Offline: OnlineStatus.Offline,
     };
     const s = statusMap[status] ?? OnlineStatus.Online;
@@ -74,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 transition-colors duration-200">
           <div className="flex items-center gap-3">
-            <img src="/ami-logo.svg" alt="Ami Chat" className="w-8 h-8" />
+            <img src={`${import.meta.env.BASE_URL}ami-logo.svg`} alt="Ami Chat" className="w-8 h-8" />
 
             <div
               className="flex flex-col relative cursor-pointer"
@@ -85,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </h1>
               <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                 <div className={`w-2 h-2 rounded-full ${currentStatusColor}`}></div>
-                {t("status.available")}
+                {currentStatusInfo.label}
               </span>
               <StatusSelector
                 isOpen={isStatusSelectorOpen}

@@ -29,6 +29,10 @@ public class LoginCommandHandler(IUserRepository users, IJwtService jwt, IUnitOf
         var accessToken = jwt.GenerateAccessToken(user);
         var refreshToken = jwt.GenerateRefreshToken();
         user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(30));
+        
+        // Set user status to Online when logging in
+        user.SetStatus(OnlineStatus.Online);
+        
         users.Update(user);
         await uow.SaveChangesAsync(ct);
 

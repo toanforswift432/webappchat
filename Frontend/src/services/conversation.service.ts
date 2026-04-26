@@ -14,9 +14,11 @@ export const conversationService = {
   uploadGroupAvatar: (conversationId: string, file: File) => {
     const form = new FormData();
     form.append("file", file);
-    return api.post<{ avatarUrl: string }>(`/conversations/${conversationId}/avatar`, form, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }).then((r) => r.data.avatarUrl);
+    return api
+      .post<{ avatarUrl: string }>(`/conversations/${conversationId}/avatar`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data.avatarUrl);
   },
 
   getMessages: (conversationId: string, page = 1, pageSize = 50) =>
@@ -54,6 +56,20 @@ export const conversationService = {
   recallMessage: (conversationId: string, messageId: string) =>
     api.delete(`/conversations/${conversationId}/messages/${messageId}`),
 
+  deleteMessage: (conversationId: string, messageId: string) =>
+    api.delete(`/conversations/${conversationId}/messages/${messageId}/permanent`),
+
+  deleteForMeMessage: (conversationId: string, messageId: string) =>
+    api.delete(`/conversations/${conversationId}/messages/${messageId}/for-me`),
+
+  forwardMessage: (conversationId: string, messageId: string, targetConversationId: string) =>
+    api.post(`/conversations/${conversationId}/messages/${messageId}/forward`, { targetConversationId }),
+
+  pinMessage: (conversationId: string, messageId: string) =>
+    api
+      .put<{ isPinned: boolean }>(`/conversations/${conversationId}/messages/${messageId}/pin`)
+      .then((r) => r.data),
+
   toggleReaction: (conversationId: string, messageId: string, emoji: string) =>
     api
       .post<{ added: boolean }>(`/conversations/${conversationId}/messages/${messageId}/react`, { emoji })
@@ -62,11 +78,9 @@ export const conversationService = {
   muteConversation: (conversationId: string, mute: boolean) =>
     api.put(`/conversations/${conversationId}/mute`, { mute }).then((r) => r.data),
 
-  renameGroup: (conversationId: string, name: string) =>
-    api.patch(`/conversations/${conversationId}/name`, { name }),
+  renameGroup: (conversationId: string, name: string) => api.patch(`/conversations/${conversationId}/name`, { name }),
 
-  leaveGroup: (conversationId: string) =>
-    api.post(`/conversations/${conversationId}/leave`),
+  leaveGroup: (conversationId: string) => api.post(`/conversations/${conversationId}/leave`),
 
   kickMember: (conversationId: string, userId: string) =>
     api.delete(`/conversations/${conversationId}/members/${userId}`),

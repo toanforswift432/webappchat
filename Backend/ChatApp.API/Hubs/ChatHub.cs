@@ -26,13 +26,22 @@ public class ChatHub(
         {
             await redis.SetUserOnlineAsync(userId);
 
-            // Update status in DB so REST queries reflect online state
+            // Do NOT force status to Online - keep user's chosen status (Away/InMeeting/WFH)
+            // Only update LastSeenAt to track activity
             var user = await users.GetByIdAsync(userId);
             if (user is not null)
             {
-                user.SetStatus(OnlineStatus.Online);
-                users.Update(user);
-                await uow.SaveChangesAsync();
+                // Only set to Online if user was previously Offline
+                if (user.Status == OnlineStatus.Offline)
+                {
+                    user.SetStatus(OnlineStatus.Online);
+                    users.Update(user);
+                    await uow.SaveChangesAsync();
+                }
+                // Otherwise keep their chosen status (Away/InMeeting/WFH)
+
+                // Broadcast current status to all clients (including reconnected user)
+                await Clients.All.SendAsync("UserStatusChanged", userId.ToString(), (int)user.Status);
             }
 
             // Join personal group for targeted notifications (friend requests, etc.)
@@ -43,6 +52,7 @@ public class ChatHub(
             foreach (var conv in convs)
                 await Groups.AddToGroupAsync(Context.ConnectionId, conv.Id.ToString());
 
+            // Send legacy UserOnline event for backward compatibility (deprecated)
             await Clients.Others.SendAsync("UserOnline", userId);
         }
         await base.OnConnectedAsync();

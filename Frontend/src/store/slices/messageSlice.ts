@@ -97,6 +97,50 @@ export const recallMessage = createAsyncThunk(
   },
 );
 
+export const deleteMessage = createAsyncThunk(
+  "messages/delete",
+  async ({ conversationId, messageId }: { conversationId: string; messageId: string }, { rejectWithValue }) => {
+    try {
+      await conversationService.deleteMessage(conversationId, messageId);
+      return { conversationId, messageId };
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed to delete message");
+    }
+  },
+);
+
+export const deleteForMe = createAsyncThunk(
+  "messages/deleteForMe",
+  async ({ conversationId, messageId }: { conversationId: string; messageId: string }, { dispatch, rejectWithValue }) => {
+    try {
+      await conversationService.deleteForMeMessage(conversationId, messageId);
+      dispatch(hideMessage(messageId));
+      return { conversationId, messageId };
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed to delete message");
+    }
+  },
+);
+
+export const forwardMessage = createAsyncThunk(
+  "messages/forward",
+  async (
+    {
+      conversationId,
+      messageId,
+      targetConversationId,
+    }: { conversationId: string; messageId: string; targetConversationId: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await conversationService.forwardMessage(conversationId, messageId, targetConversationId);
+      return response.data;
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed to forward message");
+    }
+  },
+);
+
 const messageSlice = createSlice({
   name: "messages",
   initialState: initial,
@@ -130,6 +174,19 @@ const messageSlice = createSlice({
         const msg = list.find((m) => m.id === action.payload.messageId);
         if (msg) msg.isRecalled = true;
       }
+    },
+    markDeleted(state, action: PayloadAction<{ messageId: string; conversationId: string }>) {
+      const list = state.byConvId[action.payload.conversationId];
+      if (list) {
+        const idx = list.findIndex((m) => m.id === action.payload.messageId);
+        if (idx >= 0) list.splice(idx, 1);
+      }
+    },
+    setPinned(state, action: PayloadAction<{ messageId: string; conversationId: string; isPinned: boolean }>) {
+      const list = state.byConvId[action.payload.conversationId];
+      if (!list) return;
+      const msg = list.find((m) => m.id === action.payload.messageId);
+      if (msg) msg.isPinned = action.payload.isPinned;
     },
     toggleMessageReaction(
       state,
@@ -180,6 +237,18 @@ const messageSlice = createSlice({
         }
       }
     },
+    markMessagesSeen(state, action: PayloadAction<{ conversationId: string; readByUserId: string; currentUserId: string }>) {
+      const list = state.byConvId[action.payload.conversationId];
+      if (!list) return;
+
+      // Mark messages sent by CURRENT user as seen (because someone else read them)
+      // Don't mark messages sent by the reader
+      list.forEach((msg) => {
+        if (msg.senderId === action.payload.currentUserId && msg.senderId !== action.payload.readByUserId) {
+          msg.status = "seen";
+        }
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -223,6 +292,17 @@ const messageSlice = createSlice({
           const msg = list.find((m) => m.id === action.payload.messageId);
           if (msg) msg.isRecalled = true;
         }
+      })
+      .addCase(deleteMessage.fulfilled, (state, action) => {
+        const list = state.byConvId[action.payload.conversationId];
+        if (list) {
+          const idx = list.findIndex((m) => m.id === action.payload.messageId);
+          if (idx >= 0) list.splice(idx, 1);
+        }
+      })
+      .addCase(forwardMessage.fulfilled, (state, action) => {
+        // Forward action doesn't modify current conversation messages
+        // The new forwarded message will arrive via SignalR to target conversation
       });
   },
 });
@@ -234,5 +314,8 @@ export const {
   toggleMessageReaction,
   hideMessage,
   markRecalled,
+  markDeleted,
+  setPinned,
+  markMessagesSeen,
 } = messageSlice.actions;
 export default messageSlice.reducer;

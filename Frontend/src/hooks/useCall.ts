@@ -74,8 +74,11 @@ export function useCall(options?: UseCallOptions) {
 
     const handleCallEnded = () => {
       console.log('Call ended event received, cleaning up');
-      dispatch(clearCall());
-      resetWebRTCService();
+      // Delay slightly so all state updates settle before cleanup
+      setTimeout(() => {
+        dispatch(clearCall());
+        resetWebRTCService();
+      }, 100);
     };
 
     window.addEventListener('call-initiated', handleCallInitiated);
@@ -101,6 +104,8 @@ export function useCall(options?: UseCallOptions) {
           return;
         }
 
+        // Always reset before starting a new call to ensure clean state
+        resetWebRTCService();
         const service = getWebRTCService();
 
         // Get local stream
@@ -148,6 +153,8 @@ export function useCall(options?: UseCallOptions) {
         return;
       }
 
+      // Always reset before answering to ensure clean WebRTC state
+      resetWebRTCService();
       const service = getWebRTCService();
 
       // Get local stream

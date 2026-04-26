@@ -177,18 +177,42 @@ export class WebRTCService {
   }
 
   toggleVideo(enabled: boolean): void {
+    console.log(`[WebRTC] toggleVideo(${enabled})`);
     if (this.localStream) {
       this.localStream.getVideoTracks().forEach((track) => {
         track.enabled = enabled;
+        console.log(`[WebRTC] localStream video track.enabled = ${track.enabled}`);
       });
+    }
+    if (this.peerConnection) {
+      this.peerConnection.getSenders()
+        .filter((s) => s.track?.kind === 'video')
+        .forEach((s) => {
+          if (s.track) {
+            s.track.enabled = enabled;
+            console.log(`[WebRTC] sender video track.enabled = ${s.track.enabled}`);
+          }
+        });
     }
   }
 
   toggleAudio(enabled: boolean): void {
+    console.log(`[WebRTC] toggleAudio(${enabled}), localStream=${!!this.localStream}, pc=${!!this.peerConnection}`);
     if (this.localStream) {
       this.localStream.getAudioTracks().forEach((track) => {
         track.enabled = enabled;
+        console.log(`[WebRTC] localStream audio track.enabled = ${track.enabled}, readyState=${track.readyState}`);
       });
+    }
+    if (this.peerConnection) {
+      this.peerConnection.getSenders()
+        .filter((s) => s.track?.kind === 'audio')
+        .forEach((s) => {
+          if (s.track) {
+            s.track.enabled = enabled;
+            console.log(`[WebRTC] sender audio track.enabled = ${s.track.enabled}`);
+          }
+        });
     }
   }
 

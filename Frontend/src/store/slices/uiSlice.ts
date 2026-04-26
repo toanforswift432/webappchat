@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { AppTab } from '../../types';
+import type { AppTab, AppNotification } from '../../types';
 import type { Message } from '../../types';
 
 interface UIState {
@@ -9,6 +9,7 @@ interface UIState {
   isSearchOpen: boolean;
   messageToForward: Message | null;
   typingConvIds: string[];
+  notifications: AppNotification[];
 }
 
 const initial: UIState = {
@@ -18,6 +19,7 @@ const initial: UIState = {
   isSearchOpen: false,
   messageToForward: null,
   typingConvIds: [],
+  notifications: [],
 };
 
 const uiSlice = createSlice({
@@ -53,6 +55,21 @@ const uiSlice = createSlice({
         state.typingConvIds = state.typingConvIds.filter((id) => id !== action.payload.convId);
       }
     },
+    addNotification(state, action: PayloadAction<AppNotification>) {
+      // Add to beginning (most recent first)
+      state.notifications.unshift(action.payload);
+      // Keep only last 50 notifications
+      if (state.notifications.length > 50) {
+        state.notifications = state.notifications.slice(0, 50);
+      }
+    },
+    markNotificationRead(state, action: PayloadAction<string>) {
+      const notif = state.notifications.find((n) => n.id === action.payload);
+      if (notif) notif.isRead = true;
+    },
+    markAllNotificationsRead(state) {
+      state.notifications.forEach((n) => (n.isRead = true));
+    },
   },
 });
 
@@ -64,6 +81,9 @@ export const {
   setSearchOpen,
   setMessageToForward,
   setTyping,
+  addNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

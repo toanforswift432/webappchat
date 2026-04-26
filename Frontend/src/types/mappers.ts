@@ -43,6 +43,7 @@ export function mapUser(dto: UserDto): User {
     name: dto.displayName,
     avatar: avatarUrl(dto),
     isOnline: dto.status === OnlineStatus.Online,
+    status: dto.status,
     statusMessage: statusLabel(dto.status),
   };
 }
@@ -71,8 +72,10 @@ function formatFileSize(bytes: number): string {
 }
 
 export function mapMessage(dto: MessageDto): Message {
-  const resolvedFileUrl = dto.fileUrl ? resolveUrl(dto.fileUrl) : null;
-  const content = dto.content ?? resolvedFileUrl ?? "";
+  // DO NOT resolve fileUrl - keep it as relative path for download API
+  // Only resolve for display purposes (images)
+  const fileUrl = dto.fileUrl || null;
+  const content = dto.content ?? fileUrl ?? "";
   return {
     id: dto.id,
     conversationId: dto.conversationId,
@@ -85,7 +88,18 @@ export function mapMessage(dto: MessageDto): Message {
     status: "sent",
     isPinned: dto.isPinned,
     isRecalled: dto.isRecalled,
-    reactions: dto.reactions.length > 0 ? dto.reactions : undefined,
+    reactions: (dto.reactions?.length ?? 0) > 0 ? dto.reactions : undefined,
+    isForwarded: dto.isForwarded || undefined,
+    forwardedFromMessageId: dto.forwardedFromMessageId?.toString() || undefined,
+    originalSenderName: dto.originalSenderName || undefined,
+    replyTo: dto.replyToMessageId
+      ? {
+          id: dto.replyToMessageId,
+          senderName: dto.replyToSenderName ?? "",
+          content: dto.replyToContent ?? null,
+          type: dto.replyToType != null ? mapMessageType(dto.replyToType) : "text",
+        }
+      : undefined,
   };
 }
 
@@ -98,14 +112,16 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
         name: otherMember.displayName,
         avatar: avatarUrl(otherMember),
         isOnline: otherMember.status === OnlineStatus.Online,
+        status: otherMember.status,
       }
-    : { id: "", name: "Unknown", avatar: "", isOnline: false };
+    : { id: "", name: "Unknown", avatar: "", isOnline: false, status: 0 };
 
   const members: User[] = dto.members.map((m) => ({
     id: m.userId,
     name: m.displayName,
     avatar: avatarUrl(m),
     isOnline: m.status === OnlineStatus.Online,
+    status: m.status,
   }));
 
   const adminMember = dto.members.find((m) => m.role === 1);
@@ -118,6 +134,7 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
           name: dto.name ?? "Group",
           avatar: avatarUrl({ displayName: dto.name ?? "G", avatarUrl: dto.avatarUrl }),
           isOnline: false,
+          status: 0,
         }
       : otherUser,
     lastMessage: dto.lastMessage ? mapMessage(dto.lastMessage) : undefined,

@@ -93,6 +93,45 @@ public class ConversationController(
         return Ok();
     }
 
+    [HttpDelete("{conversationId}/messages/{messageId}/permanent")]
+    public async Task<IActionResult> DeleteMessage(Guid conversationId, Guid messageId, CancellationToken ct)
+    {
+        var result = await mediator.Send(new DeleteMessageCommand(messageId, CurrentUserId), ct);
+        if (!result.IsSuccess) return BadRequest(new { error = result.Error });
+
+        await hub.Clients.Group(conversationId.ToString()).SendAsync("MessageDeleted", messageId, conversationId, ct);
+        return Ok();
+    }
+
+    [HttpDelete("{conversationId}/messages/{messageId}/for-me")]
+    public async Task<IActionResult> DeleteForMe(Guid conversationId, Guid messageId, CancellationToken ct)
+    {
+        var result = await mediator.Send(new DeleteForMeCommand(messageId, conversationId, CurrentUserId), ct);
+        return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
+    }
+
+    [HttpPost("{conversationId}/messages/{messageId}/forward")]
+    public async Task<IActionResult> ForwardMessage(Guid conversationId, Guid messageId, [FromBody] ForwardMessageRequest req, CancellationToken ct)
+    {
+        var result = await mediator.Send(new ForwardMessageCommand(messageId, req.TargetConversationId, CurrentUserId), ct);
+        if (!result.IsSuccess) return BadRequest(new { error = result.Error });
+
+        await hub.Clients.Group(req.TargetConversationId.ToString()).SendAsync("ReceiveMessage", result.Value, ct);
+        return Ok(result.Value);
+    }
+
+    [HttpPut("{conversationId}/messages/{messageId}/pin")]
+    public async Task<IActionResult> TogglePinMessage(Guid conversationId, Guid messageId, CancellationToken ct)
+    {
+        var result = await mediator.Send(new PinMessageCommand(messageId, conversationId, CurrentUserId), ct);
+        if (!result.IsSuccess) return BadRequest(new { error = result.Error });
+
+        var isPinned = result.Value;
+        var eventName = isPinned ? "MessagePinned" : "MessageUnpinned";
+        await hub.Clients.Group(conversationId.ToString()).SendAsync(eventName, messageId, conversationId, ct);
+        return Ok(new { isPinned });
+    }
+
     [HttpPost("{conversationId}/messages/{messageId}/react")]
     public async Task<IActionResult> ToggleReaction(Guid conversationId, Guid messageId, [FromBody] ToggleReactionRequest req, CancellationToken ct)
     {
@@ -256,3 +295,4 @@ public record ToggleReactionRequest(string Emoji);
 public record MuteConversationRequest(bool Mute);
 public record RenameGroupRequest(string Name);
 public record AddMemberRequest(Guid UserId);
+public record ForwardMessageRequest(Guid TargetConversationId);

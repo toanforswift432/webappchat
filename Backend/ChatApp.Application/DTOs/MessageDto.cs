@@ -18,6 +18,14 @@ public record MessageDto(
     bool IsPinned,
     List<ReactionDto> Reactions,
     DateTime CreatedAt
-);
+)
+{
+    public bool IsForwarded { get; init; }
+    public Guid? ForwardedFromMessageId { get; init; }
+    public string? OriginalSenderName { get; init; }
+    public string? ReplyToSenderName { get; init; }
+    public string? ReplyToContent { get; init; }
+    public MessageType? ReplyToType { get; init; }
+}
 
 public record ReactionDto(string Emoji, List<Guid> UserIds);

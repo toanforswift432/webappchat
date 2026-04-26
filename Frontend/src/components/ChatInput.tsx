@@ -25,6 +25,7 @@ interface ChatInputProps {
   onCreatePoll?: () => void;
   members?: User[];
   onTyping?: (isTyping: boolean) => void;
+  disabled?: boolean;
 }
 const STICKER_PACKS = [
   {
@@ -129,6 +130,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onCreatePoll,
   members = [],
   onTyping,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -294,14 +296,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <div className="flex gap-1 pb-2">
             <button
               onClick={() => imageInputRef.current?.click()}
-              className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
+              disabled={disabled}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-500 dark:disabled:hover:text-gray-400 disabled:hover:bg-transparent"
               title={t("chat.attachImage")}
             >
               <ImageIcon className="w-5 h-5" />
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
+              disabled={disabled}
+              className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-500 dark:disabled:hover:text-gray-400 disabled:hover:bg-transparent"
               title={t("chat.attachFile")}
             >
               <Paperclip className="w-5 h-5" />
@@ -309,7 +313,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {isGroup && (
               <button
                 onClick={onCreatePoll}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors hidden sm:block"
+                disabled={disabled}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors hidden sm:block disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:text-gray-500 dark:disabled:hover:text-gray-400 disabled:hover:bg-transparent"
                 title={t("chat.createPoll")}
               >
                 <BarChart2 className="w-5 h-5" />
@@ -445,7 +450,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onChange={handleTextChange}
               onKeyDown={handleKeyDown}
               placeholder={t("chat.typeMessage")}
-              className="w-full bg-transparent py-3 px-2 max-h-[120px] resize-none focus:outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 custom-scrollbar"
+              disabled={disabled}
+              className="w-full bg-transparent py-3 px-2 max-h-[120px] resize-none focus:outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 custom-scrollbar disabled:opacity-50 disabled:cursor-not-allowed"
               rows={1}
             />
           </div>
@@ -453,8 +459,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {/* Send Button */}
           <button
             onClick={handleSendText}
-            disabled={!text.trim()}
-            className={`p-3 rounded-full flex-shrink-0 transition-colors ${text.trim() ? "bg-primary text-white hover:bg-primary-hover shadow-sm" : "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"}`}
+            disabled={!text.trim() || disabled}
+            className={`p-3 rounded-full flex-shrink-0 transition-colors ${text.trim() && !disabled ? "bg-primary text-white hover:bg-primary-hover shadow-sm" : "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed"}`}
           >
             <Send className="w-5 h-5 ml-0.5" />
           </button>

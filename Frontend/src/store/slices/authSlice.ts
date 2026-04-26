@@ -170,6 +170,12 @@ const authSlice = createSlice({
         localStorage.setItem("authUser", JSON.stringify(state.user));
       }
     },
+    updateLocalUserStatus(state, action: PayloadAction<number>) {
+      if (state.user) {
+        state.user.status = action.payload;
+        localStorage.setItem("authUser", JSON.stringify(state.user));
+      }
+    },
   },
   extraReducers: (builder) => {
     const handleAuthPending = (state: AuthState) => {
@@ -242,10 +248,21 @@ const authSlice = createSlice({
         localStorage.setItem("authUser", JSON.stringify(action.payload));
       })
       .addCase(updateStatus.fulfilled, (state, action) => {
-        if (state.user) state.user.status = action.payload;
+        if (state.user) {
+          state.user.status = action.payload;
+          // Persist updated user to localStorage
+          localStorage.setItem("authUser", JSON.stringify(state.user));
+        }
       });
   },
 });
 
-export const { logout, setTokens, clearError, updateNotificationSettings, clearRegistrationState } = authSlice.actions;
+export const {
+  logout,
+  setTokens,
+  clearError,
+  updateNotificationSettings,
+  clearRegistrationState,
+  updateLocalUserStatus,
+} = authSlice.actions;
 export default authSlice.reducer;

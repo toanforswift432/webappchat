@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { ChatArea } from "./components/ChatArea";
 import { EmptyState } from "./components/EmptyState";
@@ -23,19 +23,30 @@ import {
   getOrCreateDirect,
   createGroup,
 } from "./store/slices/conversationSlice";
-import { fetchMessages, sendMessage, recallMessage, toggleMessageReaction } from "./store/slices/messageSlice";
+import {
+  fetchMessages,
+  sendMessage,
+  recallMessage,
+  deleteMessage,
+  forwardMessage,
+  toggleMessageReaction,
+  setPinned,
+} from "./store/slices/messageSlice";
 import {
   setActiveTab,
   toggleDarkMode,
   setNotificationsOpen,
   setSearchOpen,
   setMessageToForward,
+  markNotificationRead,
+  markAllNotificationsRead,
 } from "./store/slices/uiSlice";
 import { useSignalR, getSignalRConnection } from "./hooks/useSignalR";
 import { fetchFriendRequests } from "./store/slices/friendSlice";
 import type { Message } from "./types";
 import { MessageType, AccountType } from "./types/api";
 import { Account } from "./types";
+import { ToastContainer, ToastData, ToastType } from "./components/Toast";
 
 type AuthView = "login" | "register";
 
@@ -51,13 +62,21 @@ export function App() {
   const { isAuthenticated, user, status: authStatus } = useAppSelector((s) => s.auth);
   const { items: conversations, activeId: activeConvId } = useAppSelector((s) => s.conversations);
   const { byConvId, loadingConvIds } = useAppSelector((s) => s.messages);
-  const { activeTab, isDarkMode, isNotificationsOpen, isSearchOpen, messageToForward, typingConvIds } = useAppSelector(
+  const { activeTab, isDarkMode, isNotificationsOpen, isSearchOpen, messageToForward, typingConvIds, notifications } = useAppSelector(
     (s) => s.ui,
   );
   const pendingRequestCount = useAppSelector((s) => s.friends.requestDetails.length);
 
   const inviteCode = React.useMemo(() => getInviteCodeFromUrl(), []);
   const [authView, setAuthView] = React.useState<AuthView>(() => (inviteCode ? "register" : "login"));
+  const [toasts, setToasts] = useState<ToastData[]>([]);
+  const showToast = useCallback((message: string, type: ToastType = "warning") => {
+    const id = Date.now().toString();
+    setToasts((prev) => [...prev, { id, message, type }]);
+  }, []);
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   useSignalR();
 
@@ -145,8 +164,19 @@ export function App() {
     // TODO: backend endpoint for leaving/removing group
   };
 
-  const handlePinToggle = async (_msgId: string) => {
-    // TODO: backend endpoint for pin
+  const handlePinToggle = async (msgId: string) => {
+    if (!activeConvId) return;
+    try {
+      const { isPinned } = await conversationService.pinMessage(activeConvId, msgId);
+      dispatch(setPinned({ messageId: msgId, conversationId: activeConvId, isPinned }));
+    } catch (err: any) {
+      const msg: string = err.response?.data?.error ?? "";
+      if (err.response?.status === 400 && (msg.includes("3") || msg.toLowerCase().includes("pin"))) {
+        showToast("Chỉ có thể ghim tối đa 3 tin nhắn", "warning");
+      } else {
+        showToast(msg || "Không thể ghim tin nhắn", "error");
+      }
+    }
   };
 
   const handleReact = async (msgId: string, emoji: string) => {
@@ -168,14 +198,22 @@ export function App() {
     }
   };
 
-  const handleForward = async (_msgId: string, _targetConvId: string) => {
-    // TODO: backend endpoint for forward
+  const handleForward = async (msgId: string, targetConvId: string) => {
+    if (!activeConvId) return;
+    await dispatch(
+      forwardMessage({ conversationId: activeConvId, messageId: msgId, targetConversationId: targetConvId }),
+    );
     dispatch(setMessageToForward(null));
   };
 
   const handleRecall = async (msgId: string) => {
     if (!activeConvId) return;
     dispatch(recallMessage({ conversationId: activeConvId, messageId: msgId }));
+  };
+
+  const handleDelete = async (msgId: string) => {
+    if (!activeConvId) return;
+    dispatch(deleteMessage({ conversationId: activeConvId, messageId: msgId }));
   };
 
   const handleVote = async (_msgId: string, _optionId: string) => {
@@ -200,6 +238,7 @@ export function App() {
   const isTyping = activeConvId ? typingConvIds.includes(activeConvId) : false;
   const totalUnreadCount = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
   const unreadConvsCount = conversations.filter((c) => (c.unreadCount || 0) > 0).length;
+  const unreadNotificationCount = notifications.filter((n) => !n.isRead).length;
   const isMobileChatActive = activeTab === "chat" && activeConvId !== null;
   const showBottomNav = !isMobileChatActive;
 
@@ -220,7 +259,7 @@ export function App() {
               isMobileHidden={activeConvId !== null}
               onOpenSearch={() => dispatch(setSearchOpen(true))}
               onOpenNotifications={() => dispatch(setNotificationsOpen(!isNotificationsOpen))}
-              unreadNotificationCount={unreadConvsCount}
+              unreadNotificationCount={unreadNotificationCount}
               activeTab={activeTab}
               onTabChange={(tab) => dispatch(setActiveTab(tab))}
               unreadCount={totalUnreadCount}
@@ -231,10 +270,16 @@ export function App() {
             <NotificationPanel
               isOpen={isNotificationsOpen}
               onClose={() => dispatch(setNotificationsOpen(false))}
-              notifications={[]}
-              onMarkRead={async () => {}}
-              onMarkAllRead={async () => {}}
-              onNotificationClick={async () => {}}
+              notifications={notifications}
+              onMarkRead={(id) => dispatch(markNotificationRead(id))}
+              onMarkAllRead={() => dispatch(markAllNotificationsRead())}
+              onNotificationClick={(notif) => {
+                // Handle notification click - navigate to related content
+                if (notif.type === "friend_request") {
+                  dispatch(setActiveTab("contacts"));
+                  dispatch(setNotificationsOpen(false));
+                }
+              }}
             />
 
             <div
@@ -254,6 +299,7 @@ export function App() {
                   onReact={handleReact}
                   onForward={(msg) => dispatch(setMessageToForward(msg))}
                   onRecall={handleRecall}
+                  onDelete={handleDelete}
                   onVote={handleVote}
                 />
               ) : (
@@ -315,6 +361,8 @@ export function App() {
       {/* Video/Audio Call Modals */}
       <VideoCallModal />
       <IncomingCallModal />
+
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }

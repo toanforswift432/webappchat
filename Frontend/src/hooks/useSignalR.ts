@@ -1,18 +1,32 @@
 import { useEffect, useRef } from "react";
 import * as signalR from "@microsoft/signalr";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { addRealTimeMessage, toggleMessageReaction, markRecalled } from "../store/slices/messageSlice";
-import { bumpUnread, updateLastMessage, setUserStatus as setConvUserStatus, upsertConversation, updateConvAvatar, renameConversation, removeMemberFromConv, removeConversation } from "../store/slices/conversationSlice";
+import { addRealTimeMessage, toggleMessageReaction, markRecalled, markDeleted, setPinned, markMessagesSeen } from "../store/slices/messageSlice";
+import {
+  bumpUnread,
+  updateLastMessage,
+  markLastMessageRecalled,
+  markLastMessageDeleted,
+  setUserStatus as setConvUserStatus,
+  upsertConversation,
+  updateConvAvatar,
+  renameConversation,
+  removeMemberFromConv,
+  removeConversation,
+} from "../store/slices/conversationSlice";
 import { mapMessage, mapConversation } from "../types/mappers";
 import { fetchFriends, fetchFriendRequests, setUserStatus as setFriendUserStatus } from "../store/slices/friendSlice";
 import type { ConversationDto, MessageDto } from "../types/api";
-import { setTyping } from "../store/slices/uiSlice";
+import { setTyping, addNotification } from "../store/slices/uiSlice";
 import { setIncomingCall, setActiveCall, updateCallStatus, clearCall, CallType } from "../store/slices/callSlice";
+import { updateLocalUserStatus, updateStatus as updateStatusAsync } from "../store/slices/authSlice";
 import { playMessageSound, playFriendRequestSound, NotificationSoundType } from "../utils/sounds";
 import { HUB_URL, BASE_URL } from "../config";
 
 // Singleton connection
 let sharedConnection: signalR.HubConnection | null = null;
+// Track which conversation groups the current connection has joined
+let joinedGroupIds = new Set<string>();
 
 export function useSignalR() {
   const dispatch = useAppDispatch();
@@ -63,11 +77,19 @@ export function useSignalR() {
 
       dispatch(addRealTimeMessage({ dto, currentUserId }));
 
-      // Play sound only when the conversation is NOT currently open AND not sent by current user
+      // Play sound only when the conversation is NOT currently open AND not sent by current user AND conversation is not muted
       if (dto.conversationId !== activeIdRef.current && dto.senderId !== currentUserId) {
-        console.log("🔊 Conditions met, calling playMessageSound...");
-        const soundType = (notificationSettingsRef.current?.messageSoundType || "ding") as NotificationSoundType;
-        playMessageSound(notificationSettingsRef.current, soundType);
+        // Check if conversation is muted
+        const conversation = conversationsRef.current.find((c) => c.id === dto.conversationId);
+        const isMuted = conversation?.isMuted ?? false;
+
+        if (!isMuted) {
+          console.log("🔊 Conditions met, calling playMessageSound...");
+          const soundType = (notificationSettingsRef.current?.messageSoundType || "ding") as NotificationSoundType;
+          playMessageSound(notificationSettingsRef.current, soundType);
+        } else {
+          console.log("🔇 Conversation is muted, skipping sound");
+        }
         dispatch(bumpUnread(dto.conversationId));
       } else {
         console.log("🚫 Not playing sound:", {
@@ -85,6 +107,20 @@ export function useSignalR() {
 
     connection.on("MessageRecalled", (messageId: string, conversationId: string) => {
       dispatch(markRecalled({ messageId, conversationId }));
+      dispatch(markLastMessageRecalled({ messageId, conversationId }));
+    });
+
+    connection.on("MessageDeleted", (messageId: string, conversationId: string) => {
+      dispatch(markDeleted({ messageId, conversationId }));
+      dispatch(markLastMessageDeleted({ messageId, conversationId }));
+    });
+
+    connection.on("MessagePinned", (messageId: string, conversationId: string) => {
+      dispatch(setPinned({ messageId, conversationId, isPinned: true }));
+    });
+
+    connection.on("MessageUnpinned", (messageId: string, conversationId: string) => {
+      dispatch(setPinned({ messageId, conversationId, isPinned: false }));
     });
 
     connection.on(
@@ -103,13 +139,26 @@ export function useSignalR() {
     );
 
     connection.on("UserOnline", (userId: string) => {
-      dispatch(setFriendUserStatus({ userId, isOnline: true }));
-      dispatch(setConvUserStatus({ userId, isOnline: true }));
+      dispatch(setFriendUserStatus({ userId, isOnline: true, status: 1 })); // 1 = Online
+      dispatch(setConvUserStatus({ userId, isOnline: true, status: 1 }));
     });
 
     connection.on("UserOffline", (userId: string) => {
-      dispatch(setFriendUserStatus({ userId, isOnline: false }));
-      dispatch(setConvUserStatus({ userId, isOnline: false }));
+      dispatch(setFriendUserStatus({ userId, isOnline: false, status: 0 })); // 0 = Offline
+      dispatch(setConvUserStatus({ userId, isOnline: false, status: 0 }));
+    });
+
+    connection.on("UserStatusChanged", (userId: string, status: number) => {
+      console.log("📡 UserStatusChanged:", userId, status);
+      // Update status in both friends and conversations
+      dispatch(setFriendUserStatus({ userId, isOnline: status !== 0, status }));
+      dispatch(setConvUserStatus({ userId, isOnline: status !== 0, status }));
+
+      // Also update authSlice if this is the current user
+      if (userId === currentUserId && status !== undefined) {
+        console.log("✅ Updating own status in authSlice:", status);
+        dispatch(updateLocalUserStatus(status));
+      }
     });
 
     connection.on("UserTyping", (convId: string, _userId: string, isTyping: boolean) => {
@@ -119,15 +168,36 @@ export function useSignalR() {
       }
     });
 
-    connection.on("MessagesRead", () => {
-      // Unread count is managed locally via bumpUnread / setActiveConversation
+    connection.on("MessagesRead", (data: { conversationId: string; userId: string }) => {
+      console.log("👁️ MessagesRead:", data);
+      // Mark messages as seen - update status of messages sent by current user
+      dispatch(markMessagesSeen({
+        conversationId: data.conversationId,
+        readByUserId: data.userId,
+        currentUserId: currentUserId,
+      }));
     });
 
     // ── Friend events ──────────────────────────────────────────────
-    connection.on("FriendRequestReceived", (_senderId: string, _senderName: string, _senderAvatar: string) => {
+    connection.on("FriendRequestReceived", (senderId: string, senderName: string, senderAvatar: string) => {
       const soundType = (notificationSettingsRef.current?.callSoundType || "chime") as NotificationSoundType;
       playFriendRequestSound(notificationSettingsRef.current, soundType);
       dispatch(fetchFriendRequests());
+
+      // Add notification
+      import("../store/slices/uiSlice").then((uiModule) => {
+        const notificationId = `friend_req_${senderId}_${Date.now()}`;
+        dispatch(uiModule.addNotification({
+          id: notificationId,
+          type: "friend_request",
+          title: "Lời mời kết bạn",
+          body: `${senderName} vừa gửi lời mời kết bạn tới bạn`,
+          timestamp: new Date().toISOString(),
+          isRead: false,
+          relatedId: senderId,
+          fromUserId: senderId,
+        }));
+      });
     });
 
     connection.on("FriendRequestAccepted", (_accepterId: string, _accepterName: string) => {
@@ -170,6 +240,19 @@ export function useSignalR() {
       if (userId !== currentUserId) {
         dispatch(removeMemberFromConv({ conversationId, userId: "__noop__" }));
       }
+    });
+
+    // ── Block events ────────────────────────────────────────────────
+    connection.on("UserBlocked", (blockerUserId: string) => {
+      console.log("🚫 UserBlocked:", blockerUserId);
+      // Trigger a custom event that ChatArea can listen to
+      window.dispatchEvent(new CustomEvent("user-blocked", { detail: { userId: blockerUserId } }));
+    });
+
+    connection.on("UserUnblocked", (unblockerUserId: string) => {
+      console.log("✅ UserUnblocked:", unblockerUserId);
+      // Trigger a custom event that ChatArea can listen to
+      window.dispatchEvent(new CustomEvent("user-unblocked", { detail: { userId: unblockerUserId } }));
     });
 
     // ── Call events ────────────────────────────────────────────────
@@ -246,16 +329,58 @@ export function useSignalR() {
 
     connection
       .start()
-      .then(() => console.log("SignalR connected"))
+      .then(async () => {
+        console.log("SignalR connected");
+
+        // Restore user status from localStorage after reconnecting
+        try {
+          const storedUser = localStorage.getItem("authUser");
+          if (storedUser) {
+            const user = JSON.parse(storedUser);
+            // Restore status (default to Online if not set)
+            const statusToRestore = user.status ?? 1; // Default to Online (1)
+            console.log("📡 Restoring user status from localStorage:", statusToRestore);
+            const { userService } = await import("../services/user.service");
+            await userService.updateStatus(statusToRestore);
+            console.log("✅ Status restored successfully");
+
+            // Also update authSlice immediately
+            dispatch(updateStatusAsync(statusToRestore));
+          }
+        } catch (err) {
+          console.error("Failed to restore user status:", err);
+        }
+
+        // Join all current conversation groups immediately after connecting
+        joinedGroupIds.clear();
+        conversationsRef.current.forEach((conv) => {
+          joinedGroupIds.add(conv.id);
+          connection.invoke("JoinConversation", conv.id).catch(() => {});
+        });
+      })
       .catch((err) => console.error("SignalR connection error:", err));
 
     return () => {
       if (sharedConnection) {
         sharedConnection.stop();
         sharedConnection = null;
+        joinedGroupIds.clear();
       }
     };
   }, [isAuthenticated, accessToken, currentUserId, dispatch]);
+
+  // Join SignalR groups for any conversation not yet joined.
+  // Handles new direct chats and groups added after the connection was established.
+  useEffect(() => {
+    if (!sharedConnection || sharedConnection.state !== signalR.HubConnectionState.Connected) return;
+    const conn = sharedConnection;
+    conversations.forEach((conv) => {
+      if (!joinedGroupIds.has(conv.id)) {
+        joinedGroupIds.add(conv.id);
+        conn.invoke("JoinConversation", conv.id).catch(() => {});
+      }
+    });
+  }, [conversations]);
 }
 
 // Export connection getter for useCall hook

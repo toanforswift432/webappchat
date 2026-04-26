@@ -6,8 +6,10 @@ import {
   ArrowLeft,
   Users,
   Pin,
-  ChevronDown,
+  PinOff,
   ChevronUp,
+  ChevronDown,
+  List,
   Search,
   Paperclip,
   Image as ImageIcon,
@@ -26,6 +28,7 @@ import { GroupManageModal } from "./GroupManageModal";
 import { SharedFilesPanel } from "./SharedFilesPanel";
 import { MessageSearchPanel } from "./MessageSearchPanel";
 import { CreatePollModal } from "./CreatePollModal";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { useAppSelector, useAppDispatch } from "../store/hooks";
 import { useTranslation } from "../i18n/LanguageContext";
 import { useCall } from "../hooks/useCall";
@@ -33,7 +36,13 @@ import { getSignalRConnection } from "../hooks/useSignalR";
 import { conversationService } from "../services/conversation.service";
 import { userService } from "../services/user.service";
 import { MessageType } from "../types/api";
-import { addRealTimeMessage, hideMessage as hideMessageAction, fetchMoreMessages } from "../store/slices/messageSlice";
+import {
+  addRealTimeMessage,
+  hideMessage as hideMessageAction,
+  fetchMoreMessages,
+  deleteForMe,
+} from "../store/slices/messageSlice";
+import { updateConversationMute } from "../store/slices/conversationSlice";
 interface ChatAreaProps {
   conversation: Conversation;
   messages: Message[];
@@ -63,6 +72,7 @@ interface ChatAreaProps {
   onReact: (msgId: string, emoji: string) => void;
   onForward: (msg: Message) => void;
   onRecall: (msgId: string) => void;
+  onDelete: (msgId: string) => void;
   onVote: (msgId: string, optionId: string) => void;
 }
 export const ChatArea: React.FC<ChatAreaProps> = ({
@@ -78,6 +88,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   onReact,
   onForward,
   onRecall,
+  onDelete,
   onVote,
 }) => {
   const { t } = useTranslation();
@@ -102,20 +113,44 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [pinnedIndex, setPinnedIndex] = useState(0);
   const [showAllPinned, setShowAllPinned] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSharedFilesOpen, setIsSharedFilesOpen] = useState(false);
   const [isCreatePollOpen, setIsCreatePollOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(conversation.isMuted || false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [isBlockedByOther, setIsBlockedByOther] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const optionsMenuRef = useRef<HTMLDivElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const hiddenIds = useAppSelector((s) => s.messages.hiddenIds);
   const visibleMessages = messages.filter((m) => !hiddenIds.includes(m.id));
   const pinnedMessages = visibleMessages.filter((m) => m.isPinned);
-  const handleDeleteForMe = (msgId: string) => dispatch(hideMessageAction(msgId));
+  const safePinIdx = pinnedMessages.length > 0 ? pinnedIndex % pinnedMessages.length : 0;
+  const currentPinned = pinnedMessages[safePinIdx];
+
+  // Reset index when pinned list shrinks (e.g. after unpin)
+  useEffect(() => {
+    if (pinnedIndex >= pinnedMessages.length && pinnedMessages.length > 0) {
+      setPinnedIndex(pinnedMessages.length - 1);
+    }
+  }, [pinnedMessages.length]);
+
+  const scrollToMessage = (msgId: string) => {
+    const el = scrollContainerRef.current?.querySelector(`[data-msg-id="${msgId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightedMsgId(msgId);
+      setTimeout(() => setHighlightedMsgId(null), 1500);
+    }
+  };
+
+  const handleDeleteForMe = (msgId: string) =>
+    dispatch(deleteForMe({ conversationId: conversation.id, messageId: msgId }));
 
   // Call functionality
   const { initiateCall } = useCall();
@@ -203,10 +238,64 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     setIsMuted(conversation.isMuted || false);
   }, [conversation.isMuted]);
 
+  // Check if user is blocked when conversation changes
+  useEffect(() => {
+    if (conversation.isGroup) {
+      setIsBlocked(false);
+      setIsBlockedByOther(false);
+      return;
+    }
+
+    const checkBlocked = async () => {
+      try {
+        const blockedUsers = await userService.getBlockedUsers();
+        const isUserBlocked = blockedUsers.some((u) => u.id === conversation.user.id);
+        setIsBlocked(isUserBlocked);
+      } catch (error) {
+        console.error("Failed to check blocked status:", error);
+      }
+    };
+
+    checkBlocked();
+  }, [conversation.id, conversation.isGroup, conversation.user.id]);
+
+  // Listen for block events
+  useEffect(() => {
+    if (conversation.isGroup) return;
+
+    const handleUserBlocked = (event: CustomEvent) => {
+      console.log("🔴 ChatArea received user-blocked event:", event.detail);
+      console.log("🔴 Current conversation.user.id:", conversation.user.id);
+      if (event.detail.userId === conversation.user.id) {
+        console.log("✅ Setting isBlockedByOther to TRUE");
+        setIsBlockedByOther(true);
+      }
+    };
+
+    const handleUserUnblocked = (event: CustomEvent) => {
+      console.log("🟢 ChatArea received user-unblocked event:", event.detail);
+      if (event.detail.userId === conversation.user.id) {
+        console.log("✅ Setting isBlockedByOther to FALSE");
+        setIsBlockedByOther(false);
+      }
+    };
+
+    window.addEventListener("user-blocked", handleUserBlocked as EventListener);
+    window.addEventListener("user-unblocked", handleUserUnblocked as EventListener);
+
+    return () => {
+      window.removeEventListener("user-blocked", handleUserBlocked as EventListener);
+      window.removeEventListener("user-unblocked", handleUserUnblocked as EventListener);
+    };
+  }, [conversation.id, conversation.isGroup, conversation.user.id]);
+
   const handleToggleMute = async () => {
     try {
-      await conversationService.muteConversation(conversation.id, !isMuted);
-      setIsMuted(!isMuted);
+      const newMutedState = !isMuted;
+      await conversationService.muteConversation(conversation.id, newMutedState);
+      setIsMuted(newMutedState);
+      // Update Redux store so icon shows in sidebar
+      dispatch(updateConversationMute({ conversationId: conversation.id, isMuted: newMutedState }));
       setShowOptionsMenu(false);
     } catch (error) {
       console.error("Failed to toggle mute:", error);
@@ -216,23 +305,34 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 
   const handleToggleBlock = async () => {
     if (conversation.isGroup) return; // Can't block in groups
-    try {
-      if (isBlocked) {
+
+    if (isBlocked) {
+      // Unblock directly
+      try {
         await userService.unblockUser(conversation.user.id);
-      } else {
-        if (!window.confirm("Are you sure you want to block this user?")) {
-          return;
-        }
-        await userService.blockUser(conversation.user.id);
+        setIsBlocked(false);
+        setShowOptionsMenu(false);
+      } catch (error) {
+        console.error("Failed to unblock:", error);
+        alert("Failed to unblock. Please try again.");
       }
-      setIsBlocked(!isBlocked);
+    } else {
+      // Show confirm dialog for block
+      setShowBlockConfirm(true);
       setShowOptionsMenu(false);
-    } catch (error) {
-      console.error("Failed to toggle block:", error);
-      alert("Failed to toggle block. Please try again.");
     }
   };
 
+  const confirmBlock = async () => {
+    try {
+      await userService.blockUser(conversation.user.id);
+      setIsBlocked(true);
+      setShowBlockConfirm(false);
+    } catch (error) {
+      console.error("Failed to block:", error);
+      alert("Failed to block. Please try again.");
+    }
+  };
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -315,9 +415,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   const displayAvatar = conversation.isGroup ? conversation.groupAvatar : conversation.user.avatar;
   const displayStatus = conversation.isGroup
     ? `${conversation.members?.length || 0} members`
-    : conversation.user.isOnline
+    : conversation.user.status === 1
       ? "Active now"
-      : "Offline";
+      : conversation.user.status === 2
+        ? "Away"
+        : conversation.user.status === 3
+          ? "In a meeting"
+          : conversation.user.status === 4
+            ? "Working from home"
+            : "Offline";
   return (
     <div
       className="flex-1 flex flex-col h-full bg-[#e5e7eb] dark:bg-gray-800 relative w-full transition-colors duration-200"
@@ -327,8 +433,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       onDrop={handleDrop}
     >
       {/* Header */}
-      <div className="h-16 px-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm z-10 transition-colors duration-200"
-        style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', columnGap: '4px' }}>
+      <div
+        className="h-16 px-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm relative z-20 transition-colors duration-200"
+        style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", alignItems: "center", columnGap: "4px" }}
+      >
         {/* Left: info */}
         <div className="flex items-center min-w-0">
           <button
@@ -344,13 +452,37 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               alt={displayName}
               className="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-gray-700"
             />
-            {!conversation.isGroup && conversation.user.isOnline && (
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" />
+            {!conversation.isGroup && conversation.user.status !== 0 && (
+              <div
+                className={`absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-white dark:border-gray-900 rounded-full ${
+                  conversation.user.status === 1
+                    ? "bg-green-500" // Online
+                    : conversation.user.status === 2
+                      ? "bg-yellow-500" // Away
+                      : conversation.user.status === 3
+                        ? "bg-purple-500" // InMeeting
+                        : conversation.user.status === 4
+                          ? "bg-blue-500"
+                          : "bg-gray-400" // WorkFromHome : Offline
+                }`}
+              />
             )}
           </div>
 
           <div className="ml-2 min-w-0">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{displayName}</h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{displayName}</h2>
+              {isMuted && (
+                <span title="Muted">
+                  <BellOff className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                </span>
+              )}
+              {isBlocked && (
+                <span title="Blocked">
+                  <Ban className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+                </span>
+              )}
+            </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{displayStatus}</p>
           </div>
         </div>
@@ -404,14 +536,20 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             {showOptionsMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
                 <button
-                  onClick={() => { setIsSearchOpen(true); setShowOptionsMenu(false); }}
+                  onClick={() => {
+                    setIsSearchOpen(true);
+                    setShowOptionsMenu(false);
+                  }}
                   className="sm:hidden w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
                 >
                   <Search className="w-4 h-4" />
                   <span>{t("common.search")}</span>
                 </button>
                 <button
-                  onClick={() => { setIsSharedFilesOpen(true); setShowOptionsMenu(false); }}
+                  onClick={() => {
+                    setIsSharedFilesOpen(true);
+                    setShowOptionsMenu(false);
+                  }}
                   className="md:hidden w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
                 >
                   <Paperclip className="w-4 h-4" />
@@ -463,50 +601,122 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         conversationId={conversation.id}
       />
 
-      {/* Pinned Messages Bar */}
-      {pinnedMessages.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm z-10 transition-colors duration-200">
-          <div
-            className="px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-            onClick={() => setShowAllPinned(!showAllPinned)}
-          >
-            <div className="flex items-center gap-2 overflow-hidden">
-              <Pin className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {pinnedMessages.length}{" "}
-                {pinnedMessages.length === 1 ? t("chat.pinnedMessage") : t("chat.pinnedMessages_plural")}
+      {/* Pinned Messages Bar — Zalo style */}
+      {pinnedMessages.length > 0 && currentPinned && (
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-10 transition-colors duration-200">
+          {/* Main row */}
+          <div className="flex items-stretch">
+            {/* Accent bar */}
+            <div className="w-1 bg-primary flex-shrink-0 rounded-sm my-1 ml-1" />
+
+            {/* Content — click to scroll to message */}
+            <button
+              className="flex-1 min-w-0 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              onClick={() => scrollToMessage(currentPinned.id)}
+            >
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Pin className="w-3 h-3 text-primary flex-shrink-0" />
+                <span className="text-[11px] font-semibold text-primary">Tin nhắn đã ghim</span>
+                {pinnedMessages.length > 1 && (
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                    {safePinIdx + 1}/{pinnedMessages.length}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300 truncate leading-snug">
+                <span className="font-medium text-gray-500 dark:text-gray-400 mr-1">
+                  {users[currentPinned.senderId]?.name}:
+                </span>
+                {currentPinned.type === "image"
+                  ? "[Hình ảnh]"
+                  : currentPinned.type === "file"
+                    ? `[${currentPinned.fileName ?? "File"}]`
+                    : currentPinned.content}
+              </p>
+            </button>
+
+            {/* Navigation arrows (only when > 1 pin) */}
+            {pinnedMessages.length > 1 && (
+              <div className="flex flex-col justify-center border-l border-gray-100 dark:border-gray-700">
+                <button
+                  onClick={() => setPinnedIndex((i) => (i - 1 + pinnedMessages.length) % pinnedMessages.length)}
+                  className="px-2 py-1 text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  title="Tin ghim trước"
+                >
+                  <ChevronUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setPinnedIndex((i) => (i + 1) % pinnedMessages.length)}
+                  className="px-2 py-1 text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  title="Tin ghim tiếp"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Show all pinned */}
+            <div className="relative group/list border-l border-gray-100 dark:border-gray-700">
+              <button
+                onClick={() => setShowAllPinned((v) => !v)}
+                className={`h-full px-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${showAllPinned ? "text-primary" : "text-gray-400"}`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <span className="pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover/list:opacity-100 dark:bg-gray-900 z-50">
+                {showAllPinned ? "Thu gọn" : "Xem tất cả"}
               </span>
             </div>
-            <button
-              onClick={() => setShowAllPinned(!showAllPinned)}
-              className="text-xs text-primary hover:underline flex items-center"
-            >
-              {showAllPinned ? t("chat.showLess") : t("chat.showAll")}
-              {showAllPinned ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
-            </button>
+
+            {/* Unpin current */}
+            <div className="relative group/unpin border-l border-gray-100 dark:border-gray-700">
+              <button
+                onClick={() => onPinToggle(currentPinned.id)}
+                className="h-full px-2.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                <PinOff className="w-4 h-4" />
+              </button>
+              <span className="pointer-events-none absolute top-full right-0 mt-1.5 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover/unpin:opacity-100 dark:bg-gray-900 z-50">
+                Bỏ ghim
+              </span>
+            </div>
           </div>
 
+          {/* Show all dropdown */}
           {showAllPinned && (
-            <div className="max-h-40 overflow-y-auto custom-scrollbar bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
-              {pinnedMessages.map((msg) => (
+            <div className="border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 max-h-48 overflow-y-auto custom-scrollbar">
+              {pinnedMessages.map((msg, idx) => (
                 <div
                   key={msg.id}
-                  className="px-4 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800 flex justify-between items-start group transition-colors"
+                  className={`flex items-start gap-2 px-4 py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group/row ${idx === safePinIdx ? "bg-primary/5 dark:bg-primary/10" : ""}`}
+                  onClick={() => {
+                    setPinnedIndex(idx);
+                    scrollToMessage(msg.id);
+                    setShowAllPinned(false);
+                  }}
                 >
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      {users[msg.senderId]?.name || "Unknown"}
+                  <Pin className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 mr-1">
+                      {users[msg.senderId]?.name}:
                     </span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400 truncate">{msg.content}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {msg.type === "image"
+                        ? "[Hình ảnh]"
+                        : msg.type === "file"
+                          ? `[${msg.fileName ?? "File"}]`
+                          : msg.content}
+                    </span>
                   </div>
                   <button
+                    title="Bỏ ghim"
                     onClick={(e) => {
                       e.stopPropagation();
                       onPinToggle(msg.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-all"
+                    className="opacity-0 group-hover/row:opacity-100 p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all rounded flex-shrink-0"
                   >
-                    Unpin
+                    <PinOff className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
@@ -537,26 +747,56 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             <p className="text-center text-xs text-gray-400 dark:text-gray-500 py-2">Beginning of conversation</p>
           )}
           {visibleMessages.map((msg) => (
-            <MessageBubble
-              key={msg.id}
-              message={msg}
-              isOwn={msg.senderId === currentUserId}
-              users={users}
-              onReply={setReplyingTo}
-              onPinToggle={onPinToggle}
-              onReact={onReact}
-              onForward={onForward}
-              onRecall={onRecall}
-              onVote={onVote}
-              onDelete={handleDeleteForMe}
-              onImagePreview={(url) => setLightboxUrl(url)}
-              currentUserId={currentUserId}
-            />
+            <div key={msg.id} data-msg-id={msg.id}>
+              <MessageBubble
+                message={msg}
+                isOwn={msg.senderId === currentUserId}
+                users={users}
+                onReply={setReplyingTo}
+                onPinToggle={onPinToggle}
+                onReact={onReact}
+                onForward={onForward}
+                onRecall={onRecall}
+                onDeleteForMe={handleDeleteForMe}
+                onVote={onVote}
+                onDelete={onDelete}
+                onImagePreview={(url) => setLightboxUrl(url)}
+                onScrollToMessage={scrollToMessage}
+                isHighlighted={msg.id === highlightedMsgId}
+                currentUserId={currentUserId}
+              />
+            </div>
           ))}
           {isTyping && <TypingIndicator />}
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* Blocked Banner */}
+      {isBlocked && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
+            <Ban className="w-4 h-4" />
+            <span>Bạn đã chặn người này</span>
+          </div>
+          <button
+            onClick={handleToggleBlock}
+            className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium"
+          >
+            Bỏ chặn
+          </button>
+        </div>
+      )}
+
+      {/* Blocked by Other Banner */}
+      {isBlockedByOther && !isBlocked && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-red-700 dark:text-red-300">
+            <Ban className="w-4 h-4" />
+            <span>Bạn đã bị chặn bởi người dùng này</span>
+          </div>
+        </div>
+      )}
 
       <ChatInput
         conversation={conversation}
@@ -572,6 +812,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         onTyping={(isTyping) => {
           getSignalRConnection()?.invoke("Typing", conversation.id, isTyping);
         }}
+        disabled={isBlocked}
       />
 
       {/* Image Preview Modal */}
@@ -634,6 +875,18 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         isOpen={isCreatePollOpen}
         onClose={() => setIsCreatePollOpen(false)}
         onCreate={handleCreatePoll}
+      />
+
+      {/* Block Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showBlockConfirm}
+        title="Chặn người dùng"
+        message={`Bạn có chắc muốn chặn ${conversation.user.name}? Bạn sẽ không thể gửi hoặc nhận tin nhắn từ người này.`}
+        confirmLabel="Chặn"
+        cancelLabel="Hủy"
+        variant="danger"
+        onConfirm={confirmBlock}
+        onCancel={() => setShowBlockConfirm(false)}
       />
 
       {/* Drag & Drop Overlay */}

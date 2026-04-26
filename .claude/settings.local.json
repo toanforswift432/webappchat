@@ -16,7 +16,8 @@
       "Bash(npm run *)",
       "Bash(dotnet restore *)",
       "Bash(git -C /Users/nguyenkhactoan/Documents/company/AmiChat/Backend/ChatApp.API show HEAD:appsettings.json)",
-      "Bash(git -C /Users/nguyenkhactoan/Documents/company/AmiChat show HEAD:Backend/ChatApp.API/appsettings.json)"
+      "Bash(git -C /Users/nguyenkhactoan/Documents/company/AmiChat show HEAD:Backend/ChatApp.API/appsettings.json)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\('PinOff' in l\\)\")"
     ]
   }
 }

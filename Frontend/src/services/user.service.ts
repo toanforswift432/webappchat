@@ -26,4 +26,6 @@ export const userService = {
   blockUser: (userId: string) => api.post(`/users/${userId}/block`).then((r) => r.data),
 
   unblockUser: (userId: string) => api.delete(`/users/${userId}/block`).then((r) => r.data),
+
+  getBlockedUsers: () => api.get<UserDto[]>("/users/blocked").then((r) => r.data),
 };

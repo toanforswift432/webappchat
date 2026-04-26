@@ -2,17 +2,17 @@
 
 ## Stack kỹ thuật
 
-| Thành phần | Công nghệ |
-|-----------|-----------|
-| Framework | React 18 + TypeScript |
-| Build tool | Vite |
-| State management | Redux Toolkit |
-| Real-time | SignalR (`@microsoft/signalr`) |
-| Video/Audio call | WebRTC (browser native API) |
-| Styling | Tailwind CSS + Dark mode |
-| Animation | Framer Motion |
-| HTTP client | Axios (với auto refresh token) |
-| Đa ngôn ngữ | Custom i18n (vi / en) |
+| Thành phần       | Công nghệ                      |
+| ---------------- | ------------------------------ |
+| Framework        | React 18 + TypeScript          |
+| Build tool       | Vite                           |
+| State management | Redux Toolkit                  |
+| Real-time        | SignalR (`@microsoft/signalr`) |
+| Video/Audio call | WebRTC (browser native API)    |
+| Styling          | Tailwind CSS + Dark mode       |
+| Animation        | Framer Motion                  |
+| HTTP client      | Axios (với auto refresh token) |
+| Đa ngôn ngữ      | Custom i18n (vi / en)          |
 
 ---
 
@@ -44,14 +44,15 @@ src/
 
 Ứng dụng là **SPA không dùng React Router**, điều hướng qua `activeTab` trong Redux uiSlice:
 
-| Tab | Component | Điều kiện hiển thị |
-|-----|-----------|-------|
-| `chat` | `Sidebar` + `ChatArea` | Tất cả user đã đăng nhập |
-| `contacts` | `ContactsPage` | Tất cả user đã đăng nhập |
-| `profile` | `ProfilePage` | Tất cả user đã đăng nhập |
-| `admin` | `AdminPage` | Chỉ user có `AccountType = Admin` |
+| Tab        | Component              | Điều kiện hiển thị                |
+| ---------- | ---------------------- | --------------------------------- |
+| `chat`     | `Sidebar` + `ChatArea` | Tất cả user đã đăng nhập          |
+| `contacts` | `ContactsPage`         | Tất cả user đã đăng nhập          |
+| `profile`  | `ProfilePage`          | Tất cả user đã đăng nhập          |
+| `admin`    | `AdminPage`            | Chỉ user có `AccountType = Admin` |
 
 Khi chưa đăng nhập:
+
 - URL `/webchatapp/{inviteCode}` → `RegisterPage` (chế độ đăng ký nhân viên, invite code tự động điền)
 - Mọi URL khác → `LoginPage` (có thể chuyển sang `RegisterPage` khách hàng)
 
@@ -64,29 +65,34 @@ Khi chưa đăng nhập:
 **Files:** [LoginPage.tsx](../src/pages/LoginPage.tsx), [RegisterPage.tsx](../src/pages/RegisterPage.tsx), [authSlice.ts](../src/store/slices/authSlice.ts), [auth.service.ts](../src/services/auth.service.ts)
 
 #### Đăng nhập
+
 - Email + mật khẩu
 - JWT Access Token + Refresh Token — lưu vào `localStorage`
 - Auto refresh khi nhận 401 (Axios interceptor)
 - Persist session khi reload trang
 
 #### Đăng ký Khách hàng (`POST /api/auth/register/customer`)
+
 - Form: họ tên, số điện thoại, email, mật khẩu
 - Backend gửi OTP 6 số về email (10 phút)
 - Bước 2: nhập OTP → xác thực → nhận JWT → đăng nhập ngay
 
 #### Đăng ký Nhân viên (`POST /api/auth/register/employee/{inviteCode}`)
+
 - URL: `/webchatapp/{inviteCode}` — invite code lấy từ URL path
 - Form: tương tự khách hàng, invite code hiển thị readonly
 - Sau OTP → trạng thái "chờ Admin duyệt" (`requiresApproval = true`)
 - Tài khoản chỉ dùng được sau khi Admin phê duyệt
 
 #### Admin duyệt tài khoản
+
 - Tab `admin` trong BottomNav (chỉ hiện với Admin)
 - `AdminPage`: danh sách nhân viên chờ duyệt, nút Duyệt / Từ chối
 - API: `GET /api/admin/pending-accounts`, `POST /api/admin/accounts/{id}/approve`
 - Backend gửi email thông báo kết quả cho nhân viên
 
 #### Đăng xuất
+
 - Xóa token khỏi localStorage, reset toàn bộ Redux state
 
 ---
@@ -98,8 +104,10 @@ Khi chưa đăng nhập:
 - Hiển thị danh sách tất cả hội thoại (Direct + Group)
 - Sắp xếp theo tin nhắn mới nhất (auto-sort khi nhận tin nhắn mới)
 - Hiển thị avatar, tên, tin nhắn cuối cùng, thời gian, số tin chưa đọc
+- Preview tin nhắn cuối: nếu bị thu hồi hiện `"🚫 Tin nhắn đã được thu hồi"`, nếu bị xóa thì ẩn
+- Preview cập nhật real-time qua SignalR khi đối phương thu hồi/xóa tin nhắn
 - Chỉ báo online (chấm xanh) cho hội thoại 1-1
-- Badge số chưa đọc trên từng conversation
+- Badge số chưa đọc + bold text khi có tin nhắn chưa đọc
 - Indicator `[Muted]` cho conversation đã tắt thông báo
 - Click vào conversation → load messages + đánh dấu đọc tự động
 
@@ -110,6 +118,7 @@ Khi chưa đăng nhập:
 **Files:** [ChatArea.tsx](../src/components/ChatArea.tsx), [ChatInput.tsx](../src/components/ChatInput.tsx), [MessageBubble.tsx](../src/components/MessageBubble.tsx), [messageSlice.ts](../src/store/slices/messageSlice.ts)
 
 #### Gửi tin nhắn
+
 - Gửi tin nhắn **text** (Enter hoặc nút gửi)
 - Upload và gửi **file** (bất kỳ loại)
 - Upload và gửi **ảnh** (preview trước khi gửi)
@@ -117,28 +126,78 @@ Khi chưa đăng nhập:
 - Indicator đang gõ (typing indicator) — tự tắt sau 3 giây
 
 #### Nhận tin nhắn (Real-time qua SignalR)
+
 - Nhận tin nhắn ngay lập tức qua SignalR `ReceiveMessage`
 - Auto mark read khi conversation đang mở
 - Phát âm thanh thông báo khi nhận tin nhắn từ conversation khác
 
 #### Phân trang tin nhắn
+
 - Load 10 tin nhắn/trang khi mở conversation
 - Scroll up để load thêm tin nhắn cũ (infinite scroll)
 
 #### Tương tác tin nhắn
+
 - **React emoji** — thêm/bỏ reaction (hiển thị danh sách emoji picker)
-- **Thu hồi tin nhắn** — chỉ thu hồi được tin nhắn của chính mình; hiển thị "Tin nhắn đã được thu hồi"
-- **Forward tin nhắn** — chuyển tiếp sang conversation khác (`ForwardModal`)
-- **Ghim tin nhắn** — (UI có, backend endpoint chưa hoàn thiện)
+- **Reply (Trả lời)** — trả lời một tin nhắn cụ thể:
+  - Khung trích dẫn Zalo-style bên trong bong bóng tin nhắn: tên người gửi gốc + nội dung rút gọn
+  - Hỗ trợ tất cả loại: text, ảnh (`🖼️ Hình ảnh`), file (`📎 File`), tin nhắn đã thu hồi (`🚫 Tin nhắn đã thu hồi`)
+  - Click vào khung reply → scroll smooth đến tin nhắn gốc + **highlight** (flash `bg-primary/10`) trong 1.5 giây
+  - Dữ liệu reply tải đầy đủ từ server qua REST và SignalR (không bị "Unknown")
+- **Copy text** — sao chép nội dung tin nhắn text (Clipboard API)
+- **@Mention** — tag thành viên trong group chat:
+  - Gõ `@` trong input box → dropdown suggestion hiện danh sách members
+  - Filter theo tên khi gõ tiếp (vd: `@joh` → chỉ hiện "John")
+  - Click member → auto-insert `@Name` vào text
+  - Mention được highlight trong tin nhắn đã gửi
+- **Forward tin nhắn** — chuyển tiếp sang conversation khác (`ForwardModal`):
+  - Hỗ trợ forward text, image, file
+  - Hiển thị label `📤 Forwarded from [Tên người gửi gốc]`
+  - Giữ nguyên nội dung + loại tin nhắn
+  - Forward được cả tin nhắn có reply
+- **Thu hồi tin nhắn** — thu hồi 2 phía (time limit: **30 phút**):
+  - Chỉ thu hồi được tin nhắn của chính mình
+  - Hiển thị "Tin nhắn đã được thu hồi" (italic, mờ) cho cả 2 phía
+  - Sidebar preview cập nhật real-time ngay khi thu hồi (không cần reload)
+  - Không thể thu hồi sau 30 phút
+  - Hiện **confirm dialog** trước khi thực hiện
+- **Xóa vĩnh viễn** — xóa tin nhắn hoàn toàn (time limit: **3 phút**):
+  - Chỉ xóa được trong vòng 3 phút sau khi gửi
+  - Tin nhắn biến mất hoàn toàn khỏi cả 2 phía + xóa khỏi DB
+  - Sau 3 phút mất quyền xóa vĩnh viễn
+  - Hiện **confirm dialog** trước khi thực hiện
+- **Xóa phía tôi** — ẩn tin nhắn chỉ với bản thân (khả dụng sau 30 phút):
+  - API: `DELETE /conversations/{id}/messages/{id}/for-me`
+  - Lưu vào bảng `MessageDeletions` (server-side, persist qua reload + thiết bị khác)
+  - Khi reload / đăng nhập thiết bị khác, tin nhắn đã xóa phía tôi không hiện
+  - Người khác vẫn thấy bình thường
+  - Hiện **confirm dialog** trước khi thực hiện
+- **Ghim tin nhắn** — tối đa **3 tin nhắn** mỗi conversation:
+  - `PUT /conversations/{id}/messages/{id}/pin` — toggle pin/unpin
+  - Backend kiểm tra giới hạn 3 pin, trả về `{ isPinned: bool }`
+  - Vượt quá 3 pin → hiện **toast warning** "Chỉ có thể ghim tối đa 3 tin nhắn" (không báo lỗi 400)
+  - SignalR broadcast `MessagePinned` / `MessageUnpinned` → pinned bar cập nhật real-time
+  - Pinned bar Zalo-style dưới header: accent bar xanh, preview nội dung tin ghim hiện tại
+  - Khi có nhiều pin (≤3): chỉ số `1/3`, mũi tên ▲▼ để cycle qua các pin
+  - Click vào bar → scroll smooth đến tin nhắn đó trong list
+  - Icon `PinOff` → unpin tin ghim đang hiển thị (tooltip right-aligned, không bị tràn viền)
+  - Icon `List` → xổ dropdown xem tất cả tin ghim, click để navigate
+- **Confirm dialog** — tất cả action phá hủy (thu hồi, xóa vĩnh viễn, xóa phía tôi) đều hiện popup confirm trước khi thực hiện (`ConfirmDialog` — `variant: danger | warning`, AnimatePresence)
+- **Toast notification** — thông báo non-blocking, tự dismiss sau 3.5s; dùng cho max-pin warning và các lỗi nhẹ (`Toast` + `ToastContainer`, 4 variant: info / warning / success / error)
 - **Tin nhắn hệ thống** — hiển thị kiểu khác (tham gia nhóm, đổi tên, v.v.)
 
 #### Hiển thị nội dung
-- Text thuần
+
+- Text thuần (hỗ trợ @mention highlight)
 - **Ảnh** — click để xem fullscreen (`ImageLightbox`)
 - **File** — hiển thị icon + tên + kích thước + link download
-- **Reply preview** — hiển thị khung trích dẫn phía trên
+- **Forward label** — tin nhắn được chuyển tiếp hiển thị `📤 Forwarded from [Tên]`
+- **Reply block** — khung trích dẫn Zalo-style bên trên nội dung: tên người gửi gốc + rút gọn nội dung (ảnh/file/text/đã thu hồi), click scroll + highlight tới tin gốc
 - **Reaction bar** — hiển thị emoji + số lượng bên dưới tin nhắn
 - **Typing indicator** — animation "..." khi người kia đang gõ
+- **Pinned badge** — icon ghim màu vàng cho tin nhắn đã ghim
+- **Recalled message** — hiển thị italic mờ "Tin nhắn đã được thu hồi"
+- **Highlight animation** — khi scroll đến tin nhắn được reply, tin đó flash `bg-primary/10` trong 1.5 giây
 
 ---
 
@@ -161,12 +220,14 @@ Khi chưa đăng nhập:
 **Files:** [GlobalSearchPanel.tsx](../src/components/GlobalSearchPanel.tsx), [MessageSearchPanel.tsx](../src/components/MessageSearchPanel.tsx)
 
 #### Global Search (nhấn icon tìm kiếm ở Sidebar)
+
 - Tìm kiếm người dùng theo tên
 - Tìm kiếm hội thoại theo tên
 - Tìm kiếm tin nhắn theo nội dung
 - Click kết quả → mở chat tương ứng
 
 #### Message Search (trong ChatArea)
+
 - Tìm kiếm tin nhắn trong conversation đang mở
 
 ---
@@ -177,10 +238,10 @@ Khi chưa đăng nhập:
 
 ContactsPage có 3 sub-tab:
 
-| Tab | Tính năng |
-|-----|-----------|
-| **Bạn bè** | Danh sách bạn bè, tìm kiếm, nhắn tin trực tiếp, xóa bạn |
-| **Lời mời** | Xem lời mời kết bạn nhận được, chấp nhận / từ chối |
+| Tab           | Tính năng                                                          |
+| ------------- | ------------------------------------------------------------------ |
+| **Bạn bè**    | Danh sách bạn bè, tìm kiếm, nhắn tin trực tiếp, xóa bạn            |
+| **Lời mời**   | Xem lời mời kết bạn nhận được, chấp nhận / từ chối                 |
 | **Tìm người** | Tìm kiếm người dùng theo tên (debounce 300ms), gửi lời mời kết bạn |
 
 - Badge đỏ trên tab Lời mời khi có lời mời pending
@@ -195,12 +256,14 @@ ContactsPage có 3 sub-tab:
 **Files:** [VideoCallModal.tsx](../src/components/VideoCallModal.tsx), [IncomingCallModal.tsx](../src/components/IncomingCallModal.tsx), [useCall.ts](../src/hooks/useCall.ts), [webrtc.service.ts](../src/services/webrtc.service.ts), [callSlice.ts](../src/store/slices/callSlice.ts)
 
 #### Luồng gọi
+
 1. **Người gọi**: Click nút call → `initiateCall()` → lấy camera/mic → tạo WebRTC offer → gửi `InitiateCall` qua SignalR
 2. **Người nhận**: Nhận `IncomingCall` → hiện `IncomingCallModal` → chấp nhận → tạo answer → gửi `AnswerCall`
 3. **Kết nối**: ICE candidate exchange qua `SendIceCandidate` / `IceCandidate` events
 4. **Kết thúc**: Gửi `EndCall` → backend lưu system message với thời lượng cuộc gọi
 
 #### Tính năng trong cuộc gọi
+
 - Gọi Audio hoặc Video
 - Tắt/bật camera trong khi đang gọi (`ToggleMedia`)
 - Tắt/bật micro trong khi đang gọi
@@ -211,6 +274,7 @@ ContactsPage có 3 sub-tab:
 - Sau khi kết thúc: hiển thị system message "📹 Video call · 1:23" trong chat
 
 #### WebRTC Service (singleton)
+
 - `WebRTCService` là singleton — dùng chung giữa `useCall` và `VideoCallModal`
 - Xử lý edge case: ICE candidates đến trước remote description → buffer rồi flush
 - Chống duplicate `setRemoteDescription` (flag `remoteAnswerSet`)
@@ -227,15 +291,16 @@ ContactsPage có 3 sub-tab:
 - Hiển thị trạng thái online
 
 #### Cài đặt trong Profile
-| Cài đặt | Chi tiết |
-|---------|---------|
-| Dark Mode | Toggle bật/tắt, persist localStorage |
-| Thông báo | Bật/tắt: tin nhắn, âm thanh, preview, nhóm, mention |
-| Âm thanh tin nhắn | Chọn loại: ding, chime, pop, whoosh, v.v. + preview nghe thử |
-| Âm thanh cuộc gọi | Chọn loại riêng cho cuộc gọi |
-| Ngôn ngữ | Tiếng Anh / Tiếng Việt |
-| Quyền riêng tư | Show online status, read receipts, allow friend requests (lưu localStorage, chưa sync BE) |
-| Đăng xuất | Xóa token, reset state |
+
+| Cài đặt           | Chi tiết                                                                                  |
+| ----------------- | ----------------------------------------------------------------------------------------- |
+| Dark Mode         | Toggle bật/tắt, persist localStorage                                                      |
+| Thông báo         | Bật/tắt: tin nhắn, âm thanh, preview, nhóm, mention                                       |
+| Âm thanh tin nhắn | Chọn loại: ding, chime, pop, whoosh, v.v. + preview nghe thử                              |
+| Âm thanh cuộc gọi | Chọn loại riêng cho cuộc gọi                                                              |
+| Ngôn ngữ          | Tiếng Anh / Tiếng Việt                                                                    |
+| Quyền riêng tư    | Show online status, read receipts, allow friend requests (lưu localStorage, chưa sync BE) |
+| Đăng xuất         | Xóa token, reset state                                                                    |
 
 ---
 
@@ -276,6 +341,7 @@ ContactsPage có 3 sub-tab:
 **Files:** [StatusSelector.tsx](../src/components/StatusSelector.tsx)
 
 Người dùng có thể đặt trạng thái:
+
 - Online (Trực tuyến)
 - Away (Vắng mặt)
 - In a Meeting (Đang họp)
@@ -298,63 +364,65 @@ Trạng thái được sync lên server và broadcast real-time tới tất cả
 
 ## Redux Store
 
-| Slice | State chính | Mô tả |
-|-------|-------------|-------|
-| `auth` | user, accessToken, refreshToken, isAuthenticated | Auth state, persist localStorage |
-| `conversations` | items[], activeId, status | Danh sách conversation + conversation đang chọn |
-| `messages` | byConvId{}, loadingConvIds, hasMoreByConvId, pageByConvId | Messages theo từng conversation, phân trang |
-| `friends` | friends[], requestDetails[], status | Danh sách bạn + lời mời kết bạn |
-| `call` | activeCall, incomingCall, isVideoEnabled, isAudioEnabled | WebRTC call state |
-| `ui` | activeTab, isDarkMode, isNotificationsOpen, isSearchOpen, typingConvIds, messageToForward | UI state |
+| Slice           | State chính                                                                               | Mô tả                                           |
+| --------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `auth`          | user, accessToken, refreshToken, isAuthenticated                                          | Auth state, persist localStorage                |
+| `conversations` | items[], activeId, status                                                                 | Danh sách conversation + conversation đang chọn |
+| `messages`      | byConvId{}, loadingConvIds, hasMoreByConvId, pageByConvId                                 | Messages theo từng conversation, phân trang     |
+| `friends`       | friends[], requestDetails[], status                                                       | Danh sách bạn + lời mời kết bạn                 |
+| `call`          | activeCall, incomingCall, isVideoEnabled, isAudioEnabled                                  | WebRTC call state                               |
+| `ui`            | activeTab, isDarkMode, isNotificationsOpen, isSearchOpen, typingConvIds, messageToForward | UI state                                        |
 
 ---
 
 ## Services (HTTP)
 
-| Service | Endpoints |
-|---------|-----------|
-| `auth.service.ts` | POST /auth/login, /auth/register, /auth/refresh |
-| `conversation.service.ts` | GET/POST conversations, messages, upload, recall, react, mute, group management |
-| `user.service.ts` | GET/PUT /users/me, upload avatar, update status, update notifications, search |
-| `friend.service.ts` | GET/POST /friends, friend requests, unfriend |
-| `webrtc.service.ts` | GET /turn/credentials (không phải HTTP service thuần — quản lý WebRTC peer connection) |
+| Service                   | Endpoints                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| `auth.service.ts`         | POST /auth/login, /auth/register, /auth/refresh                                        |
+| `conversation.service.ts` | GET/POST conversations, messages, upload, recall, react, mute, group management        |
+| `user.service.ts`         | GET/PUT /users/me, upload avatar, update status, update notifications, search          |
+| `friend.service.ts`       | GET/POST /friends, friend requests, unfriend                                           |
+| `webrtc.service.ts`       | GET /turn/credentials (không phải HTTP service thuần — quản lý WebRTC peer connection) |
 
 ---
 
 ## Real-time Events (SignalR)
 
 ### Nhận từ server
-| Event | Xử lý |
-|-------|-------|
-| `ReceiveMessage` | Thêm vào messageSlice, update lastMessage, phát âm thanh |
-| `MessageRecalled` | Đánh dấu isRecalled trong messageSlice |
-| `ReactionToggled` | Cập nhật reactions trong messageSlice |
-| `UserOnline` / `UserOffline` | Cập nhật trạng thái trong friendSlice + conversationSlice |
-| `UserTyping` | Cập nhật typingConvIds trong uiSlice (auto clear 3s) |
-| `FriendRequestReceived` | Re-fetch friend requests, phát âm thanh |
-| `FriendRequestAccepted` | Re-fetch friends + requests |
-| `GroupCreated` | Thêm conversation mới vào store |
-| `GroupAvatarUpdated` | Cập nhật avatar trong conversationSlice |
-| `GroupRenamed` | Đổi tên trong conversationSlice |
-| `MemberKicked` / `MemberLeft` | Xóa member hoặc xóa conversation khỏi store |
-| `IncomingCall` | Set incomingCall trong callSlice, hiện IncomingCallModal |
-| `CallAnswered` | Set activeCall status = active, set remote SDP |
-| `CallRejected` / `CallEnded` | Clear call state, cleanup WebRTC |
-| `IceCandidate` | Thêm ICE candidate vào peer connection |
-| `MediaToggled` | Broadcast cho UI biết remote user đổi camera/mic |
+
+| Event                         | Xử lý                                                     |
+| ----------------------------- | --------------------------------------------------------- |
+| `ReceiveMessage`              | Thêm vào messageSlice, update lastMessage, phát âm thanh  |
+| `MessageRecalled`             | Đánh dấu isRecalled trong messageSlice                    |
+| `ReactionToggled`             | Cập nhật reactions trong messageSlice                     |
+| `UserOnline` / `UserOffline`  | Cập nhật trạng thái trong friendSlice + conversationSlice |
+| `UserTyping`                  | Cập nhật typingConvIds trong uiSlice (auto clear 3s)      |
+| `FriendRequestReceived`       | Re-fetch friend requests, phát âm thanh                   |
+| `FriendRequestAccepted`       | Re-fetch friends + requests                               |
+| `GroupCreated`                | Thêm conversation mới vào store                           |
+| `GroupAvatarUpdated`          | Cập nhật avatar trong conversationSlice                   |
+| `GroupRenamed`                | Đổi tên trong conversationSlice                           |
+| `MemberKicked` / `MemberLeft` | Xóa member hoặc xóa conversation khỏi store               |
+| `IncomingCall`                | Set incomingCall trong callSlice, hiện IncomingCallModal  |
+| `CallAnswered`                | Set activeCall status = active, set remote SDP            |
+| `CallRejected` / `CallEnded`  | Clear call state, cleanup WebRTC                          |
+| `IceCandidate`                | Thêm ICE candidate vào peer connection                    |
+| `MediaToggled`                | Broadcast cho UI biết remote user đổi camera/mic          |
 
 ### Gửi lên server
-| Method | Khi nào |
-|--------|---------|
-| `SendMessage` | Gửi tin nhắn text qua SignalR (thay thế bằng REST cũng được) |
-| `MarkRead` | Khi mở conversation hoặc nhận tin nhắn khi conversation đang mở |
-| `Typing` | Khi người dùng đang gõ |
-| `InitiateCall` | Bắt đầu gọi |
-| `AnswerCall` | Chấp nhận cuộc gọi |
-| `RejectCall` | Từ chối cuộc gọi |
-| `EndCall` | Kết thúc cuộc gọi |
-| `SendIceCandidate` | Trao đổi ICE candidate trong WebRTC |
-| `ToggleMedia` | Bật/tắt camera hoặc micro |
+
+| Method             | Khi nào                                                         |
+| ------------------ | --------------------------------------------------------------- |
+| `SendMessage`      | Gửi tin nhắn text qua SignalR (thay thế bằng REST cũng được)    |
+| `MarkRead`         | Khi mở conversation hoặc nhận tin nhắn khi conversation đang mở |
+| `Typing`           | Khi người dùng đang gõ                                          |
+| `InitiateCall`     | Bắt đầu gọi                                                     |
+| `AnswerCall`       | Chấp nhận cuộc gọi                                              |
+| `RejectCall`       | Từ chối cuộc gọi                                                |
+| `EndCall`          | Kết thúc cuộc gọi                                               |
+| `SendIceCandidate` | Trao đổi ICE candidate trong WebRTC                             |
+| `ToggleMedia`      | Bật/tắt camera hoặc micro                                       |
 
 ---
 
@@ -369,12 +437,33 @@ Trạng thái được sync lên server và broadcast real-time tới tất cả
 
 ## Các tính năng TODO / chưa hoàn thiện
 
-| Tính năng | Trạng thái |
-|-----------|-----------|
-| Ghim tin nhắn | UI có, backend chưa có endpoint |
-| Forward tin nhắn | UI có, backend chưa có endpoint |
-| Poll / Bình chọn | UI có (`CreatePollModal`), backend chưa xử lý |
-| Quyền riêng tư (Privacy settings) | Lưu localStorage, chưa sync lên server |
-| Notification Panel | Component có, chưa kết nối data thực |
-| Sticker | Enum có, UI chưa implement đầy đủ |
-| Block user | Backend có (`BlockedUsers`), FE chưa có UI |
+| Tính năng                         | Trạng thái                                                        |
+| --------------------------------- | ----------------------------------------------------------------- |
+| Ghim tin nhắn                     | ✅ Hoàn thiện (04/2026) — xem mục 3. Tin nhắn                     |
+| Poll / Bình chọn                  | UI có (`CreatePollModal`), backend chưa xử lý                     |
+| Quyền riêng tư (Privacy settings) | Lưu localStorage, chưa sync lên server                            |
+| Notification Panel                | Component có, chưa kết nối data thực                              |
+| Sticker                           | Enum có, UI chưa implement đầy đủ                                 |
+| Block user                        | Backend có (`BlockedUsers`), FE chưa có UI                        |
+| @Mention notification             | Mention UI hoàn chỉnh, backend chưa gửi notification khi được tag |
+
+---
+
+## Changelog gần đây
+
+### Phase 1 (Tháng 4/2026)
+
+✅ **Message Interaction Features**
+
+- Forward message với label hiển thị người gửi gốc
+- Copy text (Clipboard API)
+- Delete message vĩnh viễn (≤ 3 phút)
+- Recall message với time limit 30 phút
+- @Mention suggestion UI trong group chat
+- Time-based button visibility (Delete vs Recall)
+
+✅ **Authentication Enhancements**
+
+- Resend OTP cho unverified accounts (5 lần/24h limit)
+- Admin approval page (desktop + mobile)
+- Verify OTP bằng email hoặc phone number

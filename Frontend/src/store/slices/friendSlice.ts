@@ -87,9 +87,14 @@ const friendSlice = createSlice({
   name: "friends",
   initialState: initial,
   reducers: {
-    setUserStatus(state, action: PayloadAction<{ userId: string; isOnline: boolean }>) {
+    setUserStatus(state, action: PayloadAction<{ userId: string; isOnline: boolean; status?: number }>) {
       const friend = state.friends.find((f) => f.id === action.payload.userId);
-      if (friend) friend.isOnline = action.payload.isOnline;
+      if (friend) {
+        friend.isOnline = action.payload.isOnline;
+        if (action.payload.status !== undefined) {
+          friend.status = action.payload.status;
+        }
+      }
     },
   },
   extraReducers: (builder) => {

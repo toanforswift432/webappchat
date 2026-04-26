@@ -4,11 +4,13 @@ using ChatApp.Application.Features.Users;
 using ChatApp.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using ChatApp.API.Hubs;
 
 namespace ChatApp.API.Controllers;
 
 [Route("api/users")]
-public class UserController(IUserRepository users, IUnitOfWork uow, IRedisService redis, IMediator mediator, IStorageService storage) : BaseController
+public class UserController(IUserRepository users, IUnitOfWork uow, IRedisService redis, IMediator mediator, IStorageService storage, IHubContext<ChatHub> hubContext) : BaseController
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetMe(CancellationToken ct)
@@ -71,6 +73,9 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
         else
             await redis.SetUserOnlineAsync(CurrentUserId);
 
+        // Broadcast status update to all connected clients (including sender, frontend will handle)
+        await hubContext.Clients.All.SendAsync("UserStatusChanged", CurrentUserId.ToString(), (int)req.Status, ct);
+
         return Ok();
     }
 
@@ -86,6 +91,11 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
     public async Task<IActionResult> BlockUser(Guid userId, CancellationToken ct)
     {
         var result = await mediator.Send(new BlockUserCommand(CurrentUserId, userId), ct);
+        if (result.IsSuccess)
+        {
+            // Broadcast to the blocked user
+            await hubContext.Clients.User(userId.ToString()).SendAsync("UserBlocked", CurrentUserId.ToString(), ct);
+        }
         return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
     }
 
@@ -93,7 +103,19 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
     public async Task<IActionResult> UnblockUser(Guid userId, CancellationToken ct)
     {
         var result = await mediator.Send(new UnblockUserCommand(CurrentUserId, userId), ct);
+        if (result.IsSuccess)
+        {
+            // Broadcast to the unblocked user
+            await hubContext.Clients.User(userId.ToString()).SendAsync("UserUnblocked", CurrentUserId.ToString(), ct);
+        }
         return result.IsSuccess ? Ok() : BadRequest(new { error = result.Error });
+    }
+
+    [HttpGet("blocked")]
+    public async Task<IActionResult> GetBlockedUsers(CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetBlockedUsersQuery(CurrentUserId), ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
     }
 }
 

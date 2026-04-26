@@ -47,6 +47,7 @@ export interface User {
   name: string;
   avatar: string;
   isOnline: boolean;
+  status: number; // OnlineStatus enum: 0=Offline, 1=Online, 2=Away, 3=InMeeting, 4=WorkFromHome
   statusMessage?: string; // e.g., 'Busy', 'Away', 'In a meeting'
 }
 
@@ -62,10 +63,12 @@ export interface Message {
   status: MessageStatus;
   isPinned?: boolean;
   isForwarded?: boolean;
+  forwardedFromMessageId?: string;
+  originalSenderName?: string;
   isRecalled?: boolean;
   replyTo?: {
     id: string;
-    content: string;
+    content: string | null;
     senderName: string;
     type: MessageType;
   };

@@ -16,6 +16,10 @@ public class RecallMessageCommandHandler(IMessageRepository messages, IUnitOfWor
         if (message.SenderId != req.RequesterId) return Result.Failure("Cannot recall another user's message.");
         if (message.IsRecalled) return Result.Failure("Message already recalled.");
 
+        var recallTimeLimit = TimeSpan.FromMinutes(30);
+        if (!message.CanRecall(recallTimeLimit))
+            return Result.Failure("Cannot recall message after 30 minutes.");
+
         message.Recall();
         messages.Update(message);
         await uow.SaveChangesAsync(ct);

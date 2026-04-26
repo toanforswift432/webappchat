@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
@@ -39,7 +39,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
   const [localError, setLocalError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);
-  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // State cho tính năng resend OTP cho tài khoản chưa verify
   const [showResendForm, setShowResendForm] = useState(false);
@@ -58,17 +57,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
-    cooldownRef.current = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(cooldownRef.current!);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(cooldownRef.current!);
-  }, [resendCooldown > 0 && resendCooldown === RESEND_COOLDOWN ? resendCooldown : null]);
+    const timer = setTimeout(() => setResendCooldown((prev) => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   const handleResendOtp = async () => {
     setLocalError("");
@@ -239,7 +230,23 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
                 </button>
               </form>
 
-              <div className="mt-4 text-center">
+              {/* Resend OTP */}
+              <div className="mt-4 text-center space-y-2">
+                {resendSuccess && (
+                  <p className="text-xs text-green-600 dark:text-green-400">Mã OTP mới đã được gửi!</p>
+                )}
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={isLoading || resendCooldown > 0}
+                  className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline disabled:text-gray-400 dark:disabled:text-gray-500 disabled:no-underline disabled:cursor-default transition-colors"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                  {resendCooldown > 0 ? `Gửi lại sau ${resendCooldown}s` : "Gửi lại OTP"}
+                </button>
+              </div>
+
+              <div className="mt-3 text-center">
                 <button
                   onClick={handleBackToRegister}
                   className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
@@ -264,7 +271,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
         >
           <div className="flex justify-center">
             <img
-              src="/ami-logo.svg"
+              src={`${import.meta.env.BASE_URL}ami-logo.svg`}
               alt="Ami Chat Logo"
               className="w-16 h-16"
               onError={(e) => {

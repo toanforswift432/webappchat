@@ -1,22 +1,12 @@
-import React, { useState, lazy } from "react";
+import React, { useState } from "react";
 import { LazyImage } from "./LazyImage";
 import { Message, User } from "../types";
 import { format } from "date-fns";
-import {
-  Check,
-  CheckCheck,
-  FileText,
-  Download,
-  Reply,
-  Pin,
-  Smile,
-  Forward,
-  Undo2,
-  Trash2,
-  Copy,
-} from "lucide-react";
+import { Check, CheckCheck, FileText, Download, Reply, Pin, Smile, Forward, RotateCcw, Trash2, Copy, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "../i18n/LanguageContext";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { BASE_URL } from "../config";
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
@@ -26,11 +16,30 @@ interface MessageBubbleProps {
   onReact?: (msgId: string, emoji: string) => void;
   onForward?: (msg: Message) => void;
   onRecall?: (msgId: string) => void;
+  onDeleteForMe?: (msgId: string) => void;
   onVote?: (msgId: string, optionId: string) => void;
   onDelete?: (msgId: string) => void;
   onImagePreview?: (url: string) => void;
+  onScrollToMessage?: (msgId: string) => void;
+  isHighlighted?: boolean;
   currentUserId: string;
 }
+const ActionBtn: React.FC<{
+  onClick: () => void;
+  label: string;
+  btnClass: string;
+  children: React.ReactNode;
+}> = ({ onClick, label, btnClass, children }) => (
+  <div className="relative group/btn">
+    <button onClick={onClick} className={btnClass}>
+      {children}
+    </button>
+    <span className="pointer-events-none absolute bottom-full left-1/2 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] font-medium text-white opacity-0 transition-opacity duration-150 group-hover/btn:opacity-100 dark:bg-gray-900 z-50">
+      {label}
+    </span>
+  </div>
+);
+
 const EMOJI_OPTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
   message,
@@ -41,15 +50,33 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   onReact,
   onForward,
   onRecall,
+  onDeleteForMe,
   onVote,
   onDelete,
   onImagePreview,
+  onScrollToMessage,
+  isHighlighted,
   currentUserId,
 }) => {
+  type PendingAction = "delete" | "recall" | "deleteForMe";
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const timeString = format(new Date(message.timestamp), "HH:mm");
   const sender = users[message.senderId];
+
+  // Calculate message age in minutes
+  const messageAgeMinutes = (Date.now() - new Date(message.timestamp).getTime()) / 60000;
+  const canDelete = messageAgeMinutes <= 3;
+  const canRecall = messageAgeMinutes <= 30;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   const renderStatus = () => {
     if (!isOwn) return null;
     switch (message.status) {
@@ -70,17 +97,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     if (!message.replyTo) return null;
     return (
       <div
-        className={`mb-2 p-2 rounded border-l-4 text-xs cursor-pointer opacity-90 transition-colors
+        onClick={() => onScrollToMessage?.(message.replyTo!.id)}
+        className={`mb-2 p-2 rounded border-l-4 text-xs cursor-pointer opacity-90 hover:opacity-100 transition-opacity
           ${isOwn ? "bg-white/20 border-white text-white" : "bg-gray-100 dark:bg-gray-600 border-primary text-gray-700 dark:text-gray-200"}
         `}
       >
         <div className="font-semibold mb-0.5">{message.replyTo.senderName}</div>
         <div className="truncate opacity-80">
-          {message.replyTo.type === "image"
-            ? t("chat.image")
-            : message.replyTo.type === "file"
-              ? t("chat.file")
-              : message.replyTo.content}
+          {message.replyTo.content === null
+            ? "🚫 Tin nhắn đã thu hồi"
+            : message.replyTo.type === "image"
+              ? `🖼️ ${t("chat.image")}`
+              : message.replyTo.type === "file"
+                ? `📎 ${t("chat.file")}`
+                : message.replyTo.content}
         </div>
       </div>
     );
@@ -142,13 +172,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         return <p className="whitespace-pre-wrap break-words">{renderTextWithMentions(message.content)}</p>;
 
       case "image":
+        // For display, resolve to full URL
+        const imageUrl = message.content.startsWith('/') ? `${BASE_URL}${message.content}` : message.content;
         return (
           <div
             className="relative group/img cursor-pointer rounded-2xl overflow-hidden"
-            onClick={() => onImagePreview?.(message.content)}
+            onClick={() => onImagePreview?.(imageUrl)}
           >
             <LazyImage
-              src={message.content}
+              src={imageUrl}
               alt="Attached"
               className="w-full max-w-[220px] sm:max-w-xs h-auto object-cover"
             />
@@ -156,6 +188,31 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         );
 
       case "file":
+        const handleDownload = async (e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          try {
+            const downloadUrl = `${BASE_URL}/api/files/download?path=${encodeURIComponent(message.content)}`;
+            const response = await fetch(downloadUrl, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+              },
+            });
+            if (!response.ok) throw new Error('Download failed');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = message.fileName || 'download';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error('Download error:', error);
+            alert('Failed to download file. Please try again.');
+          }
+        };
         return (
           <div
             className={`flex items-center p-2 rounded-md mt-1 mb-1 transition-colors ${isOwn ? "bg-primary-hover" : "bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500"}`}
@@ -169,7 +226,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 {message.fileSize || "Unknown size"}
               </p>
             </div>
-            <button className={`ml-2 p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors`}>
+            <button
+              onClick={handleDownload}
+              className={`ml-2 p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors`}
+            >
               <Download className={`w-4 h-4 ${isOwn ? "text-white" : "text-gray-600 dark:text-gray-300"}`} />
             </button>
           </div>
@@ -178,11 +238,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       case "sticker":
         return (
           <div className="mt-1 mb-1">
-            <LazyImage
-              src={message.content}
-              alt="Sticker"
-              className="w-32 h-32 object-contain drop-shadow-md"
-            />
+            <LazyImage src={message.content} alt="Sticker" className="w-32 h-32 object-contain drop-shadow-md" />
           </div>
         );
 
@@ -273,9 +329,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   const isSticker = message.type === "sticker";
   const isImage = message.type === "image";
-  const bubbleClasses = (isSticker || isImage)
-    ? "relative" // No padding/background for stickers and images
-    : `relative px-4 py-2 transition-colors ${isOwn ? "bg-primary text-white rounded-2xl rounded-tr-sm" : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm shadow-sm dark:shadow-none border border-gray-100 dark:border-gray-600"}`;
+  const bubbleClasses =
+    isSticker || isImage
+      ? "relative" // No padding/background for stickers and images
+      : `relative px-4 py-2 transition-colors ${isOwn ? "bg-primary text-white rounded-2xl rounded-tr-sm" : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm shadow-sm dark:shadow-none border border-gray-100 dark:border-gray-600"}`;
   return (
     <motion.div
       initial={{
@@ -286,7 +343,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         opacity: 1,
         y: 0,
       }}
-      className={`flex w-full mb-4 ${isOwn ? "justify-end" : "justify-start"} relative group`}
+      className={`flex w-full mb-4 ${isOwn ? "justify-end" : "justify-start"} relative group transition-all duration-300 ${isHighlighted ? "bg-primary/10 dark:bg-primary/20 rounded-xl -mx-2 px-2" : ""}`}
     >
       {!isOwn && sender && (
         <img
@@ -302,54 +359,71 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         <div className="relative flex items-center">
           {/* Actions for Own Messages (Left side) — CSS group-hover, no JS gap issue */}
           {isOwn && !message.isRecalled && (
-            <div className="absolute right-full mr-2 flex items-center gap-1 bg-white dark:bg-gray-700 shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-600 rounded-lg p-1 transition-all duration-150 invisible opacity-0 group-hover:visible group-hover:opacity-100 z-10">
-              <button
+            <div className="absolute right-full mr-2 flex items-center gap-0.5 bg-white dark:bg-gray-700 shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-600 rounded-lg p-1 transition-all duration-150 invisible opacity-0 group-hover:visible group-hover:opacity-100 z-30">
+              <ActionBtn
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
+                label="Cảm xúc"
+                btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
               >
                 <Smile className="w-4 h-4" />
-              </button>
-              <button
+              </ActionBtn>
+              <ActionBtn
                 onClick={() => onReply?.(message)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
+                label="Phản hồi"
+                btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
               >
                 <Reply className="w-4 h-4" />
-              </button>
-              <button
+              </ActionBtn>
+              <ActionBtn
                 onClick={() => onForward?.(message)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
+                label="Chuyển tiếp"
+                btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
               >
                 <Forward className="w-4 h-4" />
-              </button>
-              <button
+              </ActionBtn>
+              <ActionBtn
                 onClick={() => onPinToggle?.(message.id)}
-                className={`p-1.5 rounded transition-colors ${message.isPinned ? "text-primary dark:text-blue-400 bg-primary-light dark:bg-gray-600" : "text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600"}`}
+                label={message.isPinned ? "Bỏ ghim" : "Ghim"}
+                btnClass={`p-1.5 rounded transition-colors ${message.isPinned ? "text-primary dark:text-blue-400 bg-primary-light dark:bg-gray-600" : "text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600"}`}
               >
                 <Pin className="w-4 h-4" />
-              </button>
+              </ActionBtn>
               {message.type === "text" && (
-                <button
-                  onClick={() => { navigator.clipboard.writeText(message.content); }}
-                  className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
-                  title="Sao chép"
+                <ActionBtn
+                  onClick={handleCopy}
+                  label={copied ? "Đã sao chép!" : "Sao chép"}
+                  btnClass={`p-1.5 rounded transition-colors ${copied ? "text-green-500 dark:text-green-400 bg-green-50 dark:bg-green-900/20" : "text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600"}`}
                 >
-                  <Copy className="w-4 h-4" />
-                </button>
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </ActionBtn>
               )}
-              <button
-                onClick={() => onRecall?.(message.id)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 rounded transition-colors"
-                title="Thu hồi"
-              >
-                <Undo2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => onDelete?.(message.id)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 rounded transition-colors"
-                title="Xóa phía mình"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {canDelete && (
+                <ActionBtn
+                  onClick={() => setPendingAction("delete")}
+                  label={`Xóa (còn ${Math.ceil(3 - messageAgeMinutes)}p)`}
+                  btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 rounded transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </ActionBtn>
+              )}
+              {canRecall && (
+                <ActionBtn
+                  onClick={() => setPendingAction("recall")}
+                  label={`Thu hồi (còn ${Math.ceil(30 - messageAgeMinutes)}p)`}
+                  btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 rounded transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </ActionBtn>
+              )}
+              {!canRecall && (
+                <ActionBtn
+                  onClick={() => setPendingAction("deleteForMe")}
+                  label="Xóa phía tôi"
+                  btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 rounded transition-colors"
+                >
+                  <EyeOff className="w-4 h-4" />
+                </ActionBtn>
+              )}
             </div>
           )}
 
@@ -364,9 +438,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
             {message.isForwarded && !message.isRecalled && (
               <div
-                className={`flex items-center gap-1 mb-1 text-[11px] italic opacity-80 ${isOwn ? "text-blue-100" : "text-gray-500 dark:text-gray-400"}`}
+                className={`flex items-center gap-1 mb-1 text-[11px] italic ${
+                  isImage
+                    ? "bg-black/60 text-white px-2 py-0.5 rounded-full w-fit"
+                    : `opacity-80 ${isOwn ? "text-blue-100" : "text-gray-500 dark:text-gray-400"}`
+                }`}
               >
-                <Forward className="w-3 h-3" /> Forwarded
+                <Forward className="w-3 h-3" />
+                {message.originalSenderName ? `Forwarded from ${message.originalSenderName}` : "Forwarded"}
               </div>
             )}
 
@@ -375,8 +454,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
             {isImage ? (
               /* Timestamp overlaid at bottom-right of image */
-              <div className="flex items-center justify-end gap-0.5 absolute bottom-1.5 right-2 bg-black/40 rounded-full px-1.5 py-0.5 pointer-events-none z-10">
+              <div className="flex items-center justify-end gap-1 absolute bottom-1.5 right-2 bg-black/40 rounded-full px-1.5 py-0.5 pointer-events-none z-10">
                 <span className="text-[10px] leading-none text-white">{timeString}</span>
+                {isOwn && message.status === "seen" && (
+                  <span className="text-[9px] leading-none text-blue-200">
+                    Đã xem
+                  </span>
+                )}
                 {isOwn && renderStatus()}
               </div>
             ) : (
@@ -384,6 +468,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 className={`flex items-center justify-end mt-1 space-x-1 ${isOwn ? (isSticker ? "text-gray-400 dark:text-gray-500" : "text-blue-100") : "text-gray-400 dark:text-gray-400"}`}
               >
                 <span className="text-[10px] leading-none">{timeString}</span>
+                {isOwn && message.status === "seen" && (
+                  <span className="text-[9px] leading-none text-blue-200 dark:text-blue-300">
+                    Đã xem
+                  </span>
+                )}
                 {renderStatus()}
               </div>
             )}
@@ -391,47 +480,44 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
           {/* Actions for Received Messages (Right side) — CSS group-hover, no JS gap issue */}
           {!isOwn && !message.isRecalled && (
-            <div className="absolute left-full ml-2 flex items-center gap-1 bg-white dark:bg-gray-700 shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-600 rounded-lg p-1 transition-all duration-150 invisible opacity-0 group-hover:visible group-hover:opacity-100 z-10">
-              <button
+            <div className="absolute left-full ml-2 flex items-center gap-0.5 bg-white dark:bg-gray-700 shadow-sm dark:shadow-none border border-gray-200 dark:border-gray-600 rounded-lg p-1 transition-all duration-150 invisible opacity-0 group-hover:visible group-hover:opacity-100 z-30">
+              <ActionBtn
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
+                label="Cảm xúc"
+                btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
               >
                 <Smile className="w-4 h-4" />
-              </button>
-              <button
+              </ActionBtn>
+              <ActionBtn
                 onClick={() => onReply?.(message)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
+                label="Phản hồi"
+                btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
               >
                 <Reply className="w-4 h-4" />
-              </button>
-              <button
+              </ActionBtn>
+              <ActionBtn
                 onClick={() => onForward?.(message)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
+                label="Chuyển tiếp"
+                btnClass="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
               >
                 <Forward className="w-4 h-4" />
-              </button>
-              <button
+              </ActionBtn>
+              <ActionBtn
                 onClick={() => onPinToggle?.(message.id)}
-                className={`p-1.5 rounded transition-colors ${message.isPinned ? "text-primary dark:text-blue-400 bg-primary-light dark:bg-gray-600" : "text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600"}`}
+                label={message.isPinned ? "Bỏ ghim" : "Ghim"}
+                btnClass={`p-1.5 rounded transition-colors ${message.isPinned ? "text-primary dark:text-blue-400 bg-primary-light dark:bg-gray-600" : "text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600"}`}
               >
                 <Pin className="w-4 h-4" />
-              </button>
+              </ActionBtn>
               {message.type === "text" && (
-                <button
-                  onClick={() => { navigator.clipboard.writeText(message.content); }}
-                  className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600 rounded transition-colors"
-                  title="Sao chép"
+                <ActionBtn
+                  onClick={handleCopy}
+                  label={copied ? "Đã sao chép!" : "Sao chép"}
+                  btnClass={`p-1.5 rounded transition-colors ${copied ? "text-green-500 dark:text-green-400 bg-green-50 dark:bg-green-900/20" : "text-gray-500 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-primary-light dark:hover:bg-gray-600"}`}
                 >
-                  <Copy className="w-4 h-4" />
-                </button>
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </ActionBtn>
               )}
-              <button
-                onClick={() => onDelete?.(message.id)}
-                className="p-1.5 text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-600 rounded transition-colors"
-                title="Xóa phía mình"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </div>
           )}
 
@@ -479,6 +565,32 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
         {renderReactions()}
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingAction === "delete"}
+        title="Xóa tin nhắn vĩnh viễn?"
+        message="Tin nhắn sẽ bị xóa hoàn toàn với tất cả mọi người. Hành động này không thể hoàn tác."
+        confirmLabel="Xóa"
+        onConfirm={() => { setPendingAction(null); onDelete?.(message.id); }}
+        onCancel={() => setPendingAction(null)}
+      />
+      <ConfirmDialog
+        isOpen={pendingAction === "recall"}
+        title="Thu hồi tin nhắn?"
+        message="Tin nhắn sẽ được thu hồi với tất cả mọi người trong cuộc trò chuyện."
+        confirmLabel="Thu hồi"
+        variant="warning"
+        onConfirm={() => { setPendingAction(null); onRecall?.(message.id); }}
+        onCancel={() => setPendingAction(null)}
+      />
+      <ConfirmDialog
+        isOpen={pendingAction === "deleteForMe"}
+        title="Xóa phía tôi?"
+        message="Tin nhắn sẽ bị ẩn chỉ với bạn. Người khác vẫn thấy bình thường."
+        confirmLabel="Xóa"
+        onConfirm={() => { setPendingAction(null); onDeleteForMe?.(message.id); }}
+        onCancel={() => setPendingAction(null)}
+      />
     </motion.div>
   );
 };

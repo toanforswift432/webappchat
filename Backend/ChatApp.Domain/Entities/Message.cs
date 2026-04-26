@@ -15,10 +15,15 @@ public class Message : BaseEntity
     public Guid? ReplyToMessageId { get; private set; }
     public bool IsRecalled { get; private set; }
     public bool IsPinned { get; private set; }
+    public bool IsForwarded { get; private set; }
+    public Guid? ForwardedFromMessageId { get; private set; }
+    public Guid? OriginalSenderId { get; private set; }
 
     public Conversation Conversation { get; private set; } = default!;
     public User? Sender { get; private set; }
     public Message? ReplyToMessage { get; private set; }
+    public Message? ForwardedFromMessage { get; private set; }
+    public User? OriginalSender { get; private set; }
     public ICollection<MessageReaction> Reactions { get; private set; } = [];
 
     private Message() { }
@@ -53,11 +58,47 @@ public class Message : BaseEntity
             Content = systemMessage
         };
 
+    public static Message CreateForwarded(
+        Guid targetConversationId,
+        Guid forwardedBySenderId,
+        Message originalMessage,
+        Guid? replyToId = null)
+    {
+        var forwarded = new Message
+        {
+            ConversationId = targetConversationId,
+            SenderId = forwardedBySenderId,
+            Type = originalMessage.Type,
+            Content = originalMessage.Content,
+            FileUrl = originalMessage.FileUrl,
+            FileName = originalMessage.FileName,
+            FileSize = originalMessage.FileSize,
+            ReplyToMessageId = replyToId,
+            IsForwarded = true,
+            ForwardedFromMessageId = originalMessage.Id,
+            OriginalSenderId = originalMessage.SenderId
+        };
+        return forwarded;
+    }
+
+    public bool CanRecall(TimeSpan timeLimit)
+    {
+        if (IsRecalled) return false;
+        var elapsed = DateTime.UtcNow - CreatedAt;
+        return elapsed <= timeLimit;
+    }
+
     public void Recall()
     {
         IsRecalled = true;
         Content = null;
         SetUpdatedAt();
+    }
+
+    public bool CanDelete(TimeSpan timeLimit)
+    {
+        var elapsed = DateTime.UtcNow - CreatedAt;
+        return elapsed <= timeLimit;
     }
 
     public void TogglePin()

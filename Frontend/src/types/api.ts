@@ -111,8 +111,14 @@ export interface MessageDto {
   fileName: string | null;
   fileSize: number | null;
   replyToMessageId: string | null;
+  replyToSenderName: string | null;
+  replyToContent: string | null;
+  replyToType: MessageType | null;
   isRecalled: boolean;
   isPinned: boolean;
+  isForwarded: boolean;
+  forwardedFromMessageId: string | null;
+  originalSenderName: string | null;
   reactions: ReactionDto[];
   createdAt: string;
 }
