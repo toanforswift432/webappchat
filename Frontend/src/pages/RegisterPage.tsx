@@ -11,6 +11,7 @@ import {
 } from "../store/slices/authSlice";
 import { useTranslation } from "../i18n/LanguageContext";
 import { Clock, Mail, RefreshCw, AlertCircle } from "lucide-react";
+import { LazyContractCodeSelect } from "../components/LazyContractCodeSelect";
 
 const RESEND_COOLDOWN = 60;
 
@@ -39,6 +40,11 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
   const [localError, setLocalError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [customerRegistered, setCustomerRegistered] = useState(false);
+
+  // Contract code state (for customers)
+  const [selectedContractCodeId, setSelectedContractCodeId] = useState("");
+  const [registrationNote, setRegistrationNote] = useState("");
 
   // State cho tính năng resend OTP cho tài khoản chưa verify
   const [showResendForm, setShowResendForm] = useState(false);
@@ -66,15 +72,16 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
     setResendSuccess(false);
     dispatch(clearError());
 
-    const action = isEmployee
-      ? registerEmployee({ inviteCode: inviteCode!, email, password, displayName, phoneNumber })
-      : registerCustomer({ email, password, displayName, phoneNumber });
-
-    const result = await dispatch(action);
-    if (registerCustomer.fulfilled.match(result) || registerEmployee.fulfilled.match(result)) {
-      setResendSuccess(true);
-      setOtpCode("");
-      setResendCooldown(RESEND_COOLDOWN);
+    // Chỉ Employee mới có OTP resend trong registration flow
+    // Customer không dùng OTP trong flow mới
+    if (isEmployee) {
+      const action = registerEmployee({ inviteCode: inviteCode!, email, password, displayName, phoneNumber });
+      const result = await dispatch(action);
+      if (registerEmployee.fulfilled.match(result)) {
+        setResendSuccess(true);
+        setOtpCode("");
+        setResendCooldown(RESEND_COOLDOWN);
+      }
     }
   };
 
@@ -83,15 +90,32 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
     setLocalError("");
     dispatch(clearError());
 
-    if (password !== confirmPassword) {
-      setLocalError("Mật khẩu xác nhận không khớp");
-      return;
-    }
-
+    // Employee cần validate password
     if (isEmployee) {
+      if (password !== confirmPassword) {
+        setLocalError("Mật khẩu xác nhận không khớp");
+        return;
+      }
       dispatch(registerEmployee({ inviteCode: inviteCode!, email, password, displayName, phoneNumber }));
     } else {
-      dispatch(registerCustomer({ email, password, displayName, phoneNumber }));
+      // Customer validation
+      if (!selectedContractCodeId) {
+        setLocalError("Vui lòng chọn mã hợp đồng");
+        return;
+      }
+
+      const result = await dispatch(
+        registerCustomer({
+          email,
+          displayName,
+          phoneNumber,
+          contractCodeId: selectedContractCodeId,
+          registrationNote: registrationNote || undefined,
+        }),
+      );
+      if (registerCustomer.fulfilled.match(result)) {
+        setCustomerRegistered(true);
+      }
     }
   };
 
@@ -138,6 +162,37 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
       setResendError((result.payload as string) || "Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
+
+  // Customer registration success - waiting for admin approval
+  if (customerRegistered && !isEmployee) {
+    return (
+      <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="sm:mx-auto sm:w-full sm:max-w-md mx-4"
+        >
+          <div className="bg-white dark:bg-gray-800 py-10 px-6 shadow sm:rounded-xl border border-gray-100 dark:border-gray-700 text-center">
+            <Mail className="mx-auto w-16 h-16 text-blue-500 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Đăng ký thành công!</h2>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+              Tài khoản của bạn đang chờ quản trị viên phê duyệt. Bạn sẽ nhận được email với hướng dẫn kích hoạt tài
+              khoản sau khi được duyệt.
+            </p>
+            <button
+              onClick={() => {
+                setCustomerRegistered(false);
+                onSwitchToLogin();
+              }}
+              className="w-full py-3 px-4 border border-transparent rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary-hover transition-colors"
+            >
+              Về trang đăng nhập
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (requiresApproval) {
     return (
@@ -232,16 +287,14 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
 
               {/* Resend OTP */}
               <div className="mt-4 text-center space-y-2">
-                {resendSuccess && (
-                  <p className="text-xs text-green-600 dark:text-green-400">Mã OTP mới đã được gửi!</p>
-                )}
+                {resendSuccess && <p className="text-xs text-green-600 dark:text-green-400">Mã OTP mới đã được gửi!</p>}
                 <button
                   type="button"
                   onClick={handleResendOtp}
                   disabled={isLoading || resendCooldown > 0}
                   className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline disabled:text-gray-400 dark:disabled:text-gray-500 disabled:no-underline disabled:cursor-default transition-colors"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
                   {resendCooldown > 0 ? `Gửi lại sau ${resendCooldown}s` : "Gửi lại OTP"}
                 </button>
               </div>
@@ -271,9 +324,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
         >
           <div className="flex justify-center">
             <img
-              src={`${import.meta.env.BASE_URL}ami-logo.svg`}
+              src={`${import.meta.env.BASE_URL}LOGO.jpg`}
               alt="Ami Chat Logo"
-              className="w-16 h-16"
+              className="w-16 h-16 object-contain"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
@@ -345,37 +398,76 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t("auth.password")}
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={inputClass}
-                    placeholder={t("auth.createPasswordPlaceholder")}
-                  />
-                </div>
-              </div>
+              {/* Contract Code - chỉ hiện với Customer */}
+              {!isEmployee && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Mã hợp đồng <span className="text-red-500">*</span>
+                    </label>
+                    <LazyContractCodeSelect
+                      value={selectedContractCodeId}
+                      onChange={setSelectedContractCodeId}
+                      error={localError && !selectedContractCodeId ? "Vui lòng chọn mã hợp đồng" : undefined}
+                      disabled={isLoading}
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t("auth.confirmPassword")}
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={inputClass}
-                    placeholder={t("auth.confirmPasswordPlaceholder")}
-                  />
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Ghi chú (tùy chọn)
+                    </label>
+                    <div className="mt-1">
+                      <textarea
+                        value={registrationNote}
+                        onChange={(e) => setRegistrationNote(e.target.value)}
+                        className={inputClass}
+                        placeholder="Nhập ghi chú của bạn cho quản trị viên..."
+                        rows={3}
+                        maxLength={500}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{registrationNote.length}/500 ký tự</p>
+                  </div>
+                </>
+              )}
+
+              {/* Password fields - chỉ hiện với Employee */}
+              {isEmployee && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t("auth.password")}
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className={inputClass}
+                        placeholder={t("auth.createPasswordPlaceholder")}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t("auth.confirmPassword")}
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={inputClass}
+                        placeholder={t("auth.confirmPasswordPlaceholder")}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <button
                 type="submit"

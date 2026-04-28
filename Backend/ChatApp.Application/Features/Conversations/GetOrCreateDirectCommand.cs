@@ -12,6 +12,7 @@ public record GetOrCreateDirectCommand(Guid UserId, Guid OtherUserId) : IRequest
 public class GetOrCreateDirectCommandHandler(
     IConversationRepository conversations,
     IUserRepository users,
+    IContractCodeRepository contractCodes,
     IUnitOfWork uow)
     : IRequestHandler<GetOrCreateDirectCommand, Result<ConversationDto>>
 {
@@ -19,7 +20,7 @@ public class GetOrCreateDirectCommandHandler(
     {
         var existing = await conversations.GetDirectAsync(req.UserId, req.OtherUserId, ct);
         if (existing is not null)
-            return Result<ConversationDto>.Success(await MapAsync(existing, req.UserId, users, ct));
+            return Result<ConversationDto>.Success(await MapAsync(existing, req.UserId, users, contractCodes, ct));
 
         var conv = Conversation.CreateDirect();
         await conversations.AddAsync(conv, ct);
@@ -27,10 +28,10 @@ public class GetOrCreateDirectCommandHandler(
         await conversations.AddMemberAsync(ConversationMember.Create(conv.Id, req.OtherUserId), ct);
         await uow.SaveChangesAsync(ct);
 
-        return Result<ConversationDto>.Success(await MapAsync(conv, req.UserId, users, ct));
+        return Result<ConversationDto>.Success(await MapAsync(conv, req.UserId, users, contractCodes, ct));
     }
 
-    private static async Task<ConversationDto> MapAsync(Conversation conv, Guid currentUserId, IUserRepository users, CancellationToken ct)
+    private static async Task<ConversationDto> MapAsync(Conversation conv, Guid currentUserId, IUserRepository users, IContractCodeRepository contractCodes, CancellationToken ct)
     {
         var memberIds = conv.Members.Select(m => m.UserId).ToList();
         if (!memberIds.Any())
@@ -43,6 +44,26 @@ public class GetOrCreateDirectCommandHandler(
         var currentMember = conv.Members.FirstOrDefault(m => m.UserId == currentUserId);
         var isMuted = currentMember?.IsMuted ?? false;
 
-        return new ConversationDto(conv.Id, conv.Name, conv.AvatarUrl, conv.Type, memberDtos, null, 0, conv.CreatedAt, isMuted);
+        // Check if this is a colleague conversation
+        var currentUser = await users.GetByIdAsync(currentUserId, ct);
+        var isColleague = false;
+        string? companyName = null;
+
+        if (conv.Type == ConversationType.Direct && currentUser?.ContractCodeId is not null)
+        {
+            var otherUserId = memberIds.FirstOrDefault(id => id != currentUserId);
+            if (otherUserId != Guid.Empty)
+            {
+                var otherUser = memberUsers.FirstOrDefault(u => u.Id == otherUserId);
+                if (otherUser?.ContractCodeId == currentUser.ContractCodeId)
+                {
+                    isColleague = true;
+                    var contractCode = await contractCodes.GetByIdAsync(currentUser.ContractCodeId.Value, ct);
+                    companyName = contractCode?.CompanyName;
+                }
+            }
+        }
+
+        return new ConversationDto(conv.Id, conv.Name, conv.AvatarUrl, conv.Type, memberDtos, null, 0, conv.CreatedAt, isMuted, isColleague, companyName);
     }
 }

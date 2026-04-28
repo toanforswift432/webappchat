@@ -8,6 +8,7 @@ interface FriendState {
   friends: User[];
   requests: FriendRequest[];
   requestDetails: FriendRequestDto[];
+  sentRequests: string[]; // User IDs of people we've sent friend requests to
   status: "idle" | "loading" | "failed";
 }
 
@@ -15,6 +16,7 @@ const initial: FriendState = {
   friends: [],
   requests: [],
   requestDetails: [],
+  sentRequests: [],
   status: "idle",
 };
 
@@ -40,6 +42,19 @@ export const sendFriendRequest = createAsyncThunk(
   async (toUserId: string, { rejectWithValue }) => {
     try {
       await friendService.sendRequest(toUserId);
+      return toUserId;
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Failed");
+    }
+  },
+);
+
+export const cancelFriendRequest = createAsyncThunk(
+  "friends/cancelRequest",
+  async (toUserId: string, { rejectWithValue }) => {
+    try {
+      await friendService.cancelRequest(toUserId);
+      return toUserId;
     } catch (e: any) {
       return rejectWithValue(e.response?.data?.error ?? "Failed");
     }
@@ -105,6 +120,20 @@ const friendSlice = createSlice({
       .addCase(fetchFriends.fulfilled, (state, action) => {
         state.status = "idle";
         state.friends = action.payload;
+      })
+      .addCase(sendFriendRequest.fulfilled, (state, action) => {
+        // Add to sent requests list
+        if (!state.sentRequests.includes(action.payload)) {
+          state.sentRequests.push(action.payload);
+        }
+      })
+      .addCase(cancelFriendRequest.fulfilled, (state, action) => {
+        // Remove from sent requests list
+        state.sentRequests = state.sentRequests.filter((id) => id !== action.payload);
+      })
+      .addCase(acceptFriendRequest.fulfilled, (state) => {
+        // When accepting a friend request, clear sent requests (friend list will be refreshed)
+        state.sentRequests = [];
       })
       .addCase(fetchFriends.rejected, (state) => {
         state.status = "failed";

@@ -8,7 +8,11 @@ namespace ChatApp.Application.Features.Conversations;
 
 public record GetConversationsQuery(Guid UserId) : IRequest<Result<List<ConversationDto>>>;
 
-public class GetConversationsQueryHandler(IConversationRepository conversations, IRedisService redis)
+public class GetConversationsQueryHandler(
+    IConversationRepository conversations,
+    IRedisService redis,
+    IUserRepository users,
+    IContractCodeRepository contractCodes)
     : IRequestHandler<GetConversationsQuery, Result<List<ConversationDto>>>
 {
     private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
@@ -21,8 +25,10 @@ public class GetConversationsQueryHandler(IConversationRepository conversations,
             return Result<List<ConversationDto>>.Success(cached);
 
         var convs = await conversations.GetByUserIdAsync(req.UserId, ct);
+        var currentUser = await users.GetByIdAsync(req.UserId, ct);
 
-        var dtos = convs.Select(c =>
+        var dtos = new List<ConversationDto>();
+        foreach (var c in convs)
         {
             var members = c.Members.Select(m => new ConversationMemberDto(
                 m.UserId, m.User.DisplayName, m.User.AvatarUrl, m.Role, m.User.Status)).ToList();
@@ -44,8 +50,24 @@ public class GetConversationsQueryHandler(IConversationRepository conversations,
 
             var isMuted = unread?.IsMuted ?? false;
 
-            return new ConversationDto(c.Id, c.Name, c.AvatarUrl, c.Type, members, lastMsgDto, unreadCount, c.CreatedAt, isMuted);
-        }).ToList();
+            // Check if this is a colleague conversation (direct chat with same ContractCodeId)
+            var isColleague = false;
+            string? companyName = null;
+
+            if (c.Type == ConversationType.Direct && currentUser?.ContractCodeId is not null)
+            {
+                var otherMember = c.Members.FirstOrDefault(m => m.UserId != req.UserId);
+                if (otherMember?.User?.ContractCodeId == currentUser.ContractCodeId)
+                {
+                    isColleague = true;
+                    var contractCode = await contractCodes.GetByIdAsync(currentUser.ContractCodeId.Value, ct);
+                    companyName = contractCode?.CompanyName;
+                }
+            }
+
+            dtos.Add(new ConversationDto(c.Id, c.Name, c.AvatarUrl, c.Type, members, lastMsgDto,
+                unreadCount, c.CreatedAt, isMuted, isColleague, companyName));
+        }
 
         await redis.SetJsonAsync(cacheKey, dtos, CacheTtl);
         return Result<List<ConversationDto>>.Success(dtos);

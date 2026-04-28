@@ -8,6 +8,8 @@ export const friendService = {
 
   sendRequest: (toUserId: string) => api.post("/friends/request", { toUserId }),
 
+  cancelRequest: (toUserId: string) => api.delete(`/friends/request/${toUserId}`),
+
   acceptRequest: (requestId: string) => api.post(`/friends/request/${requestId}/accept`),
 
   rejectRequest: (requestId: string) => api.post(`/friends/request/${requestId}/reject`),

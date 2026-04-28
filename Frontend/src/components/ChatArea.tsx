@@ -17,6 +17,7 @@ import {
   BellOff,
   Ban,
   CircleSlash,
+  Building2,
 } from "lucide-react";
 import { Conversation, Message, User } from "../types";
 import { MessageBubble } from "./MessageBubble";
@@ -472,6 +473,17 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           <div className="ml-2 min-w-0">
             <div className="flex items-center gap-1.5">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{displayName}</h2>
+              {conversation.isColleague && conversation.companyName && (
+                <div className="group relative flex-shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full">
+                    <Building2 className="w-3 h-3" />
+                    {t("contacts.colleague")}
+                  </span>
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    {conversation.companyName}
+                  </div>
+                </div>
+              )}
               {isMuted && (
                 <span title="Muted">
                   <BellOff className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" />

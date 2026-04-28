@@ -61,6 +61,32 @@ export interface UserDto {
   notificationSettings: NotificationSettingsDto;
 }
 
+export interface UserSearchResultDto {
+  id: string;
+  email: string;
+  displayName: string;
+  phoneNumber: string | null;
+  avatarUrl: string | null;
+  status: OnlineStatus;
+  lastSeenAt: string | null;
+  accountType: AccountType;
+  approvalStatus: ApprovalStatus;
+  isVerified: boolean;
+  friendshipStatus: number; // FriendshipStatus enum: 0=None, 1=Friend, 2=RequestSent, 3=RequestReceived
+}
+
+export interface ColleagueDto {
+  id: string;
+  email: string;
+  displayName: string;
+  phoneNumber: string | null;
+  avatarUrl: string | null;
+  status: OnlineStatus;
+  lastSeenAt: string | null;
+  contractCodeId: string | null;
+  companyName: string | null;
+}
+
 export interface RegisterResponseDto {
   message: string;
   otpCode: string | null; // chỉ có khi dev/test
@@ -86,6 +112,24 @@ export interface PendingEmployeeDto {
   displayName: string;
   phoneNumber: string | null;
   createdAt: string;
+}
+
+export interface PendingAccountDto {
+  id: string;
+  email: string;
+  displayName: string;
+  phoneNumber: string | null;
+  accountType: AccountType;
+  createdAt: string;
+}
+
+export interface VerifyAccountResponseDto {
+  message: string;
+  userId: string;
+}
+
+export interface SetPasswordResponseDto {
+  message: string;
 }
 
 export interface AuthResponseDto {
@@ -141,6 +185,8 @@ export interface ConversationDto {
   unreadCount: number;
   createdAt: string;
   isMuted: boolean;
+  isColleague: boolean;
+  companyName: string | null;
 }
 
 export interface FriendRequestDto {

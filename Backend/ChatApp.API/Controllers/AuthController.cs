@@ -22,10 +22,28 @@ public class AuthController(IMediator mediator, IConfiguration config) : Control
         return result.IsSuccess ? Ok(result.Value) : Unauthorized(new { error = result.Error });
     }
 
-    // Đăng ký khách hàng — không cần invite code
+    // Đăng ký khách hàng — không nhập password, chờ admin duyệt
     [AllowAnonymous]
     [HttpPost("register/customer")]
     public async Task<IActionResult> RegisterCustomer([FromBody] RegisterCustomerCommand command, CancellationToken ct)
+    {
+        var result = await mediator.Send(command, ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+    }
+
+    // Verify account với token + OTP (sau khi admin approve Customer)
+    [AllowAnonymous]
+    [HttpPost("verify-account")]
+    public async Task<IActionResult> VerifyAccount([FromBody] VerifyAccountCommand command, CancellationToken ct)
+    {
+        var result = await mediator.Send(command, ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+    }
+
+    // Set password sau khi verify account
+    [AllowAnonymous]
+    [HttpPost("set-password")]
+    public async Task<IActionResult> SetPassword([FromBody] SetPasswordCommand command, CancellationToken ct)
     {
         var result = await mediator.Send(command, ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
@@ -74,34 +92,16 @@ public class AuthController(IMediator mediator, IConfiguration config) : Control
 
 public record RegisterEmployeeRequest(string Email, string Password, string DisplayName, string PhoneNumber);
 
-// ── Admin controller ──────────────────────────────────────────────────────────
+// ── Public Contract Code Endpoint (for customer registration) ────────────────
 [ApiController]
-[Route("api/admin")]
-[Authorize]
-public class AdminController(IMediator mediator, IUserRepository users) : BaseController
+[Route("api/contract-codes")]
+public class ContractCodeController(IMediator mediator) : BaseController
 {
-    private void EnsureAdmin()
+    [AllowAnonymous]
+    [HttpGet("active")]
+    public async Task<IActionResult> GetActiveContractCodes([FromQuery] int skip = 0, [FromQuery] int take = 10, CancellationToken ct = default)
     {
-        // Middleware sẽ enforce, đây chỉ là guard thêm
-    }
-
-    // Danh sách nhân viên chờ duyệt
-    [HttpGet("pending-accounts")]
-    public async Task<IActionResult> GetPending(CancellationToken ct)
-    {
-        var pending = await users.GetPendingEmployeesAsync(ct);
-        var dtos = pending.Select(u => new PendingEmployeeDto(
-            u.Id, u.Email, u.DisplayName, u.PhoneNumber, u.CreatedAt));
-        return Ok(dtos);
-    }
-
-    // Duyệt hoặc từ chối tài khoản nhân viên
-    [HttpPost("accounts/{userId}/approve")]
-    public async Task<IActionResult> ApproveAccount(Guid userId, [FromBody] ApproveRequest req, CancellationToken ct)
-    {
-        var result = await mediator.Send(new ApproveAccountCommand(userId, req.Approve), ct);
-        return result.IsSuccess ? Ok(new { approved = result.Value }) : BadRequest(new { error = result.Error });
+        var result = await mediator.Send(new ChatApp.Application.Features.ContractCodes.GetActiveContractCodesQuery(skip, take), ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
     }
 }
-
-public record ApproveRequest(bool Approve);

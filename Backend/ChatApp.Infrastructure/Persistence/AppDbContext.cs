@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CallParticipant> CallParticipants => Set<CallParticipant>();
     public DbSet<BlockedUser> BlockedUsers => Set<BlockedUser>();
     public DbSet<MessageDeletion> MessageDeletions => Set<MessageDeletion>();
+    public DbSet<ContractCode> ContractCodes => Set<ContractCode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

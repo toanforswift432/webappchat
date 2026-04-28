@@ -57,14 +57,21 @@ export const registerCustomer = createAsyncThunk(
   async (
     {
       email,
-      password,
       displayName,
       phoneNumber,
-    }: { email: string; password: string; displayName: string; phoneNumber: string },
+      contractCodeId,
+      registrationNote,
+    }: {
+      email: string;
+      displayName: string;
+      phoneNumber: string;
+      contractCodeId: string;
+      registrationNote?: string;
+    },
     { rejectWithValue },
   ) => {
     try {
-      return await authService.registerCustomer(email, password, displayName, phoneNumber);
+      return await authService.registerCustomer(email, displayName, phoneNumber, contractCodeId, registrationNote);
     } catch (e: any) {
       return rejectWithValue(e.response?.data?.error ?? "Registration failed");
     }
@@ -109,6 +116,28 @@ export const resendOtpForUnverified = createAsyncThunk(
       return await authService.resendOtp(emailOrPhone);
     } catch (e: any) {
       return rejectWithValue(e.response?.data?.error ?? "Failed to resend OTP");
+    }
+  },
+);
+
+export const verifyAccount = createAsyncThunk(
+  "auth/verifyAccount",
+  async ({ token, otpCode }: { token: string; otpCode: string }, { rejectWithValue }) => {
+    try {
+      return await authService.verifyAccount(token, otpCode);
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Account verification failed");
+    }
+  },
+);
+
+export const setPassword = createAsyncThunk(
+  "auth/setPassword",
+  async ({ userId, password }: { userId: string; password: string }, { rejectWithValue }) => {
+    try {
+      return await authService.setPassword(userId, password);
+    } catch (e: any) {
+      return rejectWithValue(e.response?.data?.error ?? "Set password failed");
     }
   },
 );
@@ -207,7 +236,9 @@ const authSlice = createSlice({
       .addCase(registerCustomer.pending, handleAuthPending)
       .addCase(registerCustomer.fulfilled, (state, action) => {
         state.status = "idle";
-        state.pendingOtpEmail = action.meta.arg.email;
+        // Customer đăng ký thành công, chờ admin duyệt
+        // Không có OTP flow trong registration, chỉ thông báo
+        state.pendingOtpEmail = null;
       })
       .addCase(registerCustomer.rejected, handleAuthRejected)
       .addCase(registerEmployee.pending, handleAuthPending)
@@ -253,7 +284,20 @@ const authSlice = createSlice({
           // Persist updated user to localStorage
           localStorage.setItem("authUser", JSON.stringify(state.user));
         }
-      });
+      })
+      .addCase(verifyAccount.pending, handleAuthPending)
+      .addCase(verifyAccount.fulfilled, (state, action) => {
+        state.status = "idle";
+        // Sau khi verify thành công, luông chuyển sang set password
+        // Không cần lưu thêm state, FE sẽ redirect
+      })
+      .addCase(verifyAccount.rejected, handleAuthRejected)
+      .addCase(setPassword.pending, handleAuthPending)
+      .addCase(setPassword.fulfilled, (state, action) => {
+        state.status = "idle";
+        // Sau khi set password thành công, user có thể login
+      })
+      .addCase(setPassword.rejected, handleAuthRejected);
   },
 });
 

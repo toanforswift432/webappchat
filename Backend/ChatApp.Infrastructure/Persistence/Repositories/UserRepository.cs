@@ -32,6 +32,16 @@ public class UserRepository(AppDbContext db) : IUserRepository
              .OrderBy(u => u.CreatedAt)
              .ToListAsync(ct);
 
+    public Task<List<User>> GetPendingAccountsAsync(CancellationToken ct = default)
+        => db.Users
+             .Include(u => u.ContractCode)
+             .Where(u => u.ApprovalStatus == ApprovalStatus.Pending)
+             .OrderBy(u => u.CreatedAt)
+             .ToListAsync(ct);
+
+    public Task<List<User>> GetAllAsync(CancellationToken ct = default)
+        => db.Users.ToListAsync(ct);
+
     public async Task AddAsync(User user, CancellationToken ct = default)
         => await db.Users.AddAsync(user, ct);
 

@@ -98,6 +98,86 @@ await DeleteMessage(messageId);
 return NoContent();
 ```
 
+---
+
+## 🆕 Contract Code API Endpoints
+
+### Public Endpoint (for Customer Registration)
+
+**GET /api/contract-codes/active**
+
+- No authentication required
+- Returns list of active contract codes for customer dropdown
+
+```json
+[
+  {
+    "id": "uuid",
+    "code": "ABC-2024-001",
+    "companyName": "ABC Corporation",
+    "description": "Contract for ABC Corp customers"
+  }
+]
+```
+
+### Admin Endpoints
+
+**GET /api/admin/contract-codes** (Requires Admin)
+
+- Returns all contract codes with status
+
+```json
+[
+  {
+    "id": "uuid",
+    "code": "ABC-2024-001",
+    "companyName": "ABC Corporation",
+    "description": "Contract for ABC Corp",
+    "isActive": true,
+    "createdAt": "2026-04-27T10:00:00Z"
+  }
+]
+```
+
+**POST /api/admin/contract-codes** (Requires Admin)
+
+- Create new contract code
+
+**Request:**
+
+```json
+{
+  "code": "ABC-2024-001",
+  "companyName": "ABC Corporation",
+  "description": "Optional description"
+}
+```
+
+**Response:** `200 OK` with created code DTO
+
+**PUT /api/admin/contract-codes/{id}** (Requires Admin)
+
+- Update existing contract code
+
+**Request:**
+
+```json
+{
+  "code": "ABC-2024-001",
+  "companyName": "ABC Corporation Updated",
+  "description": "Updated description",
+  "isActive": false
+}
+```
+
+**Response:** `200 OK` with success message
+
+**DELETE /api/admin/contract-codes/{id}** (Requires Admin)
+
+- Delete contract code (only if not used by any customer)
+
+**Response:** `200 OK` with success message or `400 Bad Request` if code is in use
+
 ### **4xx - Client Errors**
 
 ```csharp

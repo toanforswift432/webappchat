@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Search, UserPlus, Check, X, UserMinus, MessageCircle, Users, ArrowLeft } from "lucide-react";
+import { Search, UserPlus, Check, X, UserMinus, MessageCircle, Users, ArrowLeft, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchFriends,
   fetchFriendRequests,
   sendFriendRequest,
+  cancelFriendRequest,
   acceptFriendRequest,
   rejectFriendRequest,
   unfriendUser,
@@ -13,6 +14,8 @@ import {
 import { userService } from "../services/user.service";
 import { mapUser } from "../types/mappers";
 import type { User } from "../types";
+import { FriendshipStatus } from "../types";
+import type { ColleagueDto } from "../types/api";
 import { useTranslation } from "../i18n/LanguageContext";
 
 interface ContactsPageProps {
@@ -20,23 +23,43 @@ interface ContactsPageProps {
   onBack?: () => void;
 }
 
-type SubTab = "friends" | "requests" | "find";
+type SubTab = "friends" | "colleagues" | "requests" | "find";
 
 export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat, onBack }) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { friends, requestDetails, status } = useAppSelector((s) => s.friends);
+  const { friends, requestDetails, sentRequests, status } = useAppSelector((s) => s.friends);
   const currentUserId = useAppSelector((s) => s.auth.user?.id ?? "");
 
   const [activeTab, setActiveTab] = useState<SubTab>("friends");
   const [searchQuery, setSearchQuery] = useState("");
   const [findQuery, setFindQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [colleagues, setColleagues] = useState<ColleagueDto[]>([]);
+  const [colleaguesLoading, setColleaguesLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchFriends());
     dispatch(fetchFriendRequests());
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "colleagues") {
+      loadColleagues();
+    }
+  }, [activeTab]);
+
+  const loadColleagues = async () => {
+    try {
+      setColleaguesLoading(true);
+      const data = await userService.getColleagues();
+      setColleagues(data);
+    } catch (error) {
+      console.error("Failed to load colleagues:", error);
+    } finally {
+      setColleaguesLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (findQuery.trim().length < 2) {
@@ -60,19 +83,24 @@ export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat, onBack }
 
   const isFriend = (userId: string) => friends.some((f) => f.id === userId);
 
+  const hasSentRequest = (userId: string) => sentRequests.includes(userId);
+
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 transition-colors duration-200">
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
         <div className="flex items-center gap-2 mb-3">
           {onBack && (
-            <button onClick={onBack} className="p-1.5 -ml-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+            <button
+              onClick={onBack}
+              className="p-1.5 -ml-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            >
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t("contacts.title")}</h1>
         </div>
         <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-          {(["friends", "requests", "find"] as SubTab[]).map((tab) => (
+          {(["friends", "colleagues", "requests", "find"] as SubTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -83,6 +111,7 @@ export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat, onBack }
               }`}
             >
               {tab === "friends" && t("contacts.friends")}
+              {tab === "colleagues" && t("contacts.colleagues")}
               {tab === "requests" && (
                 <>
                   {t("contacts.requests")}
@@ -194,6 +223,77 @@ export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat, onBack }
                 </div>
               )}
 
+              {activeTab === "colleagues" && (
+                <div className="space-y-4">
+                  {colleaguesLoading ? (
+                    <div className="flex justify-center items-center h-32">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : colleagues.length > 0 ? (
+                    <div className="space-y-2">
+                      {colleagues.map((colleague) => (
+                        <div
+                          key={colleague.id}
+                          className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          <div
+                            className="flex items-center gap-3 flex-1 cursor-pointer"
+                            onClick={() => onOpenChat(colleague.id)}
+                          >
+                            <div className="relative">
+                              <img
+                                src={
+                                  colleague.avatarUrl ??
+                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(colleague.displayName)}&background=6366f1&color=fff`
+                                }
+                                alt={colleague.displayName}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                              {colleague.status === 1 && (
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-gray-900 dark:text-white">{colleague.displayName}</h3>
+                                {colleague.companyName && (
+                                  <div className="group relative">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-md">
+                                      <Building2 className="w-3 h-3" />
+                                      Đồng nghiệp
+                                    </span>
+                                    <div className="absolute left-0 top-full mt-1 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                      {colleague.companyName}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{colleague.email}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => onOpenChat(colleague.id)}
+                            className="p-2 text-primary hover:bg-primary-light dark:hover:bg-primary-dark-light rounded-full transition-colors"
+                          >
+                            <MessageCircle className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10">
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Building2 className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400">{t("contacts.noColleagues")}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                        {t("contacts.colleaguesDescription")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {activeTab === "requests" && (
                 <div className="space-y-6">
                   <div>
@@ -278,9 +378,26 @@ export const ContactsPage: React.FC<ContactsPageProps> = ({ onOpenChat, onBack }
                               <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
                               <h3 className="font-semibold text-gray-900 dark:text-white text-sm">{user.name}</h3>
                             </div>
-                            {isFriend(user.id) ? (
+                            {user.friendshipStatus === FriendshipStatus.Friend ? (
                               <span className="text-xs font-medium text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md">
                                 {t("contacts.friend")}
+                              </span>
+                            ) : user.friendshipStatus === FriendshipStatus.RequestSent ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
+                                  {t("contacts.requestSent")}
+                                </span>
+                                <button
+                                  onClick={() => dispatch(cancelFriendRequest(user.id))}
+                                  className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                >
+                                  <X className="w-3 h-3" />
+                                  {t("contacts.cancel")}
+                                </button>
+                              </div>
+                            ) : user.friendshipStatus === FriendshipStatus.RequestReceived ? (
+                              <span className="text-xs font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md">
+                                {t("contacts.requestReceived")}
                               </span>
                             ) : (
                               <button

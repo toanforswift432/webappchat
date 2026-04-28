@@ -10,7 +10,7 @@ using ChatApp.API.Hubs;
 namespace ChatApp.API.Controllers;
 
 [Route("api/users")]
-public class UserController(IUserRepository users, IUnitOfWork uow, IRedisService redis, IMediator mediator, IStorageService storage, IHubContext<ChatHub> hubContext) : BaseController
+public class UserController(IUserRepository users, IFriendRepository friends, IUnitOfWork uow, IRedisService redis, IMediator mediator, IStorageService storage, IHubContext<ChatHub> hubContext) : BaseController
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetMe(CancellationToken ct)
@@ -84,7 +84,48 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
     {
         if (string.IsNullOrWhiteSpace(q)) return BadRequest("Query is required.");
         var results = await users.SearchAsync(q, ct);
-        return Ok(results.Select(u => u.ToDto()));
+
+        // Get friendship data for current user
+        var friendships = await friends.GetFriendsAsync(CurrentUserId, ct);
+        var friendIds = new HashSet<Guid>(friendships.Select(f => f.FriendId));
+
+        var sentRequests = await friends.GetSentRequestsAsync(CurrentUserId, ct);
+        var sentRequestIds = new HashSet<Guid>(sentRequests.Select(r => r.ToUserId));
+
+        var receivedRequests = await friends.GetReceivedRequestsAsync(CurrentUserId, ct);
+        var receivedRequestIds = new HashSet<Guid>(receivedRequests.Select(r => r.FromUserId));
+
+        // Map to UserSearchResultDto with friendship status
+        var searchResults = results.Select(u =>
+        {
+            FriendshipStatus status;
+            if (u.Id == CurrentUserId)
+                status = FriendshipStatus.None; // Don't show status for self
+            else if (friendIds.Contains(u.Id))
+                status = FriendshipStatus.Friend;
+            else if (sentRequestIds.Contains(u.Id))
+                status = FriendshipStatus.RequestSent;
+            else if (receivedRequestIds.Contains(u.Id))
+                status = FriendshipStatus.RequestReceived;
+            else
+                status = FriendshipStatus.None;
+
+            return new UserSearchResultDto(
+                u.Id,
+                u.Email,
+                u.DisplayName,
+                u.PhoneNumber,
+                u.AvatarUrl,
+                u.Status,
+                u.LastSeenAt,
+                u.AccountType,
+                u.ApprovalStatus,
+                u.IsVerified,
+                status
+            );
+        });
+
+        return Ok(searchResults);
     }
 
     [HttpPost("{userId}/block")]
@@ -115,6 +156,13 @@ public class UserController(IUserRepository users, IUnitOfWork uow, IRedisServic
     public async Task<IActionResult> GetBlockedUsers(CancellationToken ct)
     {
         var result = await mediator.Send(new GetBlockedUsersQuery(CurrentUserId), ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
+    }
+
+    [HttpGet("colleagues")]
+    public async Task<IActionResult> GetColleagues(CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetColleaguesQuery(CurrentUserId), ct);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(new { error = result.Error });
     }
 }

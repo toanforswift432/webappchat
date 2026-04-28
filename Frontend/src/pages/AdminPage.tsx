@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Check, X, RefreshCw, Users } from 'lucide-react';
 import { authService } from '../services/auth.service';
-import type { PendingEmployeeDto } from '../types/api';
+import type { PendingAccountDto } from '../types/api';
+import { AccountType } from '../types/api';
 import { format } from 'date-fns';
 
 interface AdminPageProps {
@@ -10,10 +11,36 @@ interface AdminPageProps {
 }
 
 export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
-  const [accounts, setAccounts] = useState<PendingEmployeeDto[]>([]);
+  const [accounts, setAccounts] = useState<PendingAccountDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const getAccountTypeLabel = (type: AccountType) => {
+    switch (type) {
+      case AccountType.Customer:
+        return 'Khách hàng';
+      case AccountType.Employee:
+        return 'Nhân viên';
+      case AccountType.Admin:
+        return 'Quản trị viên';
+      default:
+        return 'Không xác định';
+    }
+  };
+
+  const getAccountTypeBadgeColor = (type: AccountType) => {
+    switch (type) {
+      case AccountType.Customer:
+        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300';
+      case AccountType.Employee:
+        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
+      case AccountType.Admin:
+        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+      default:
+        return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -89,7 +116,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-white truncate">{account.displayName}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium text-gray-900 dark:text-white truncate">{account.displayName}</p>
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${getAccountTypeBadgeColor(account.accountType)}`}>
+                      {getAccountTypeLabel(account.accountType)}
+                    </span>
+                  </div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{account.email}</p>
                   {account.phoneNumber && (
                     <p className="text-sm text-gray-500 dark:text-gray-400">{account.phoneNumber}</p>

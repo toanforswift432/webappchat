@@ -24,6 +24,15 @@ public class User : BaseEntity
     public int OtpResendCount { get; private set; } = 0;
     public DateTime? OtpResendLastResetAt { get; private set; }
 
+    // Verification token for Customer account activation link
+    public string? VerificationToken { get; private set; }
+    public DateTime? VerificationTokenExpiresAt { get; private set; }
+
+    // Contract Code for Customer (required for registration)
+    public Guid? ContractCodeId { get; private set; }
+    public ContractCode? ContractCode { get; private set; }
+    public string? RegistrationNote { get; private set; }
+
     // Notification Settings
     public bool NotificationSound { get; private set; } = true;
     public bool NotificationMessages { get; private set; } = true;
@@ -49,9 +58,37 @@ public class User : BaseEntity
             DisplayName = displayName,
             PhoneNumber = phoneNumber,
             AccountType = accountType,
-            // Employee chờ duyệt, Customer & Admin tự approved
-            ApprovalStatus = accountType == AccountType.Employee ? ApprovalStatus.Pending : ApprovalStatus.Approved,
+            // Customer & Employee đều chờ duyệt, Admin tự approved
+            ApprovalStatus = accountType == AccountType.Admin ? ApprovalStatus.Approved : ApprovalStatus.Pending,
             IsVerified = accountType == AccountType.Admin, // Admin seed không cần verify
+        };
+
+    // Tạo Customer không có password (chờ admin approve để set password)
+    public static User CreateCustomerWithoutPassword(string email, string displayName, string? phoneNumber, Guid contractCodeId, string? registrationNote = null)
+        => new()
+        {
+            Email = email,
+            PasswordHash = string.Empty, // Temporary, sẽ set sau khi verify
+            DisplayName = displayName,
+            PhoneNumber = phoneNumber,
+            AccountType = AccountType.Customer,
+            ApprovalStatus = ApprovalStatus.Pending,
+            IsVerified = false,
+            ContractCodeId = contractCodeId,
+            RegistrationNote = registrationNote,
+        };
+
+    // Tạo Employee không có password (admin tạo trực tiếp, auto-approved)
+    public static User CreateEmployeeWithoutPassword(string email, string displayName, string? phoneNumber = null)
+        => new()
+        {
+            Email = email,
+            PasswordHash = string.Empty, // Temporary, sẽ set sau khi verify
+            DisplayName = displayName,
+            PhoneNumber = phoneNumber,
+            AccountType = AccountType.Employee,
+            ApprovalStatus = ApprovalStatus.Approved, // Admin tạo trực tiếp nên auto-approved
+            IsVerified = false, // Vẫn cần verify email
         };
 
     public static User CreateAdmin(string email, string passwordHash, string displayName)
@@ -145,6 +182,33 @@ public class User : BaseEntity
     {
         RefreshToken = null;
         RefreshTokenExpiresAt = null;
+        SetUpdatedAt();
+    }
+
+    public void SetVerificationToken(string token, DateTime expiresAt)
+    {
+        VerificationToken = token;
+        VerificationTokenExpiresAt = expiresAt;
+        SetUpdatedAt();
+    }
+
+    public bool VerifyToken(string token)
+    {
+        if (VerificationToken != token || VerificationTokenExpiresAt < DateTime.UtcNow)
+            return false;
+        return true;
+    }
+
+    public void ClearVerificationToken()
+    {
+        VerificationToken = null;
+        VerificationTokenExpiresAt = null;
+        SetUpdatedAt();
+    }
+
+    public void SetPassword(string passwordHash)
+    {
+        PasswordHash = passwordHash;
         SetUpdatedAt();
     }
 

@@ -11,7 +11,9 @@ public record ConversationDto(
     MessageDto? LastMessage,
     int UnreadCount,
     DateTime CreatedAt,
-    bool IsMuted
+    bool IsMuted,
+    bool IsColleague,
+    string? CompanyName
 );
 
 public record ConversationMemberDto(

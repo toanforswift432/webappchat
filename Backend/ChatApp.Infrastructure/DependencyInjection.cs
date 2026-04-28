@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IFriendRepository, FriendRepository>();
         services.AddScoped<ICallRepository, CallRepository>();
         services.AddScoped<IBlockedUserRepository, BlockedUserRepository>();
+        services.AddScoped<IContractCodeRepository, ContractCodeRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Services

@@ -1,5 +1,13 @@
 import { User, Message, Conversation, MessageType as UIMessageType } from "../types";
-import { UserDto, MessageDto, ConversationDto, OnlineStatus, MessageType, ConversationType } from "./api";
+import {
+  UserDto,
+  UserSearchResultDto,
+  MessageDto,
+  ConversationDto,
+  OnlineStatus,
+  MessageType,
+  ConversationType,
+} from "./api";
 import { BASE_URL } from "../config";
 
 // Resolve any file/avatar URL to an absolute URL that works on any environment.
@@ -37,7 +45,7 @@ function statusLabel(status: OnlineStatus): string | undefined {
   }
 }
 
-export function mapUser(dto: UserDto): User {
+export function mapUser(dto: UserDto | UserSearchResultDto): User {
   return {
     id: dto.id,
     name: dto.displayName,
@@ -45,6 +53,7 @@ export function mapUser(dto: UserDto): User {
     isOnline: dto.status === OnlineStatus.Online,
     status: dto.status,
     statusMessage: statusLabel(dto.status),
+    friendshipStatus: "friendshipStatus" in dto ? dto.friendshipStatus : undefined,
   };
 }
 
@@ -145,5 +154,7 @@ export function mapConversation(dto: ConversationDto, currentUserId: string): Co
     members: isGroup ? members : undefined,
     adminId: adminMember?.userId,
     isMuted: dto.isMuted,
+    isColleague: dto.isColleague,
+    companyName: dto.companyName ?? undefined,
   };
 }

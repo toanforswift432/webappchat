@@ -11,6 +11,8 @@ public interface IUserRepository
     Task<List<User>> SearchAsync(string query, CancellationToken ct = default);
     Task<User?> GetByPhoneAsync(string phone, CancellationToken ct = default);
     Task<List<User>> GetPendingEmployeesAsync(CancellationToken ct = default);
+    Task<List<User>> GetPendingAccountsAsync(CancellationToken ct = default);
+    Task<List<User>> GetAllAsync(CancellationToken ct = default);
     Task AddAsync(User user, CancellationToken ct = default);
     void Update(User user);
 }

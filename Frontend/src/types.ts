@@ -1,6 +1,13 @@
 export type MessageStatus = "sent" | "delivered" | "seen";
 export type MessageType = "text" | "image" | "file" | "sticker" | "poll" | "system";
 
+export enum FriendshipStatus {
+  None = 0,
+  Friend = 1,
+  RequestSent = 2,
+  RequestReceived = 3,
+}
+
 export interface Account {
   id: string;
   email: string;
@@ -49,6 +56,19 @@ export interface User {
   isOnline: boolean;
   status: number; // OnlineStatus enum: 0=Offline, 1=Online, 2=Away, 3=InMeeting, 4=WorkFromHome
   statusMessage?: string; // e.g., 'Busy', 'Away', 'In a meeting'
+  friendshipStatus?: FriendshipStatus;
+}
+
+export interface Colleague {
+  id: string;
+  email: string;
+  displayName: string;
+  phoneNumber: string | null;
+  avatarUrl: string | null;
+  status: number; // OnlineStatus enum
+  lastSeenAt: string | null;
+  contractCodeId: string | null;
+  companyName: string | null;
 }
 
 export interface Message {
@@ -90,4 +110,6 @@ export interface Conversation {
   members?: User[];
   adminId?: string;
   isMuted?: boolean;
+  isColleague?: boolean;
+  companyName?: string;
 }

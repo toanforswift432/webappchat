@@ -131,6 +131,37 @@ namespace ChatApp.Infrastructure.Migrations
                     b.ToTable("CallParticipants");
                 });
 
+            modelBuilder.Entity("ChatApp.Domain.Entities.ContractCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContractCodes");
+                });
+
             modelBuilder.Entity("ChatApp.Domain.Entities.Conversation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -409,6 +440,9 @@ namespace ChatApp.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasDefaultValue("chime");
 
+                    b.Property<Guid?>("ContractCodeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -486,13 +520,24 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("RegistrationNote")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("VerificationToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("VerificationTokenExpiresAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ContractCodeId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -670,6 +715,15 @@ namespace ChatApp.Infrastructure.Migrations
                     b.Navigation("Message");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ChatApp.Domain.Entities.User", b =>
+                {
+                    b.HasOne("ChatApp.Domain.Entities.ContractCode", "ContractCode")
+                        .WithMany()
+                        .HasForeignKey("ContractCodeId");
+
+                    b.Navigation("ContractCode");
                 });
 
             modelBuilder.Entity("ChatApp.Domain.Entities.Call", b =>

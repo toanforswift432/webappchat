@@ -49,6 +49,16 @@ public class FriendController(
         return Ok();
     }
 
+    [HttpDelete("request/{toUserId}")]
+    public async Task<IActionResult> CancelRequest(Guid toUserId, CancellationToken ct)
+    {
+        var result = await mediator.Send(new CancelFriendRequestCommand(CurrentUserId, toUserId), ct);
+        if (!result.IsSuccess)
+            return BadRequest(new { error = result.Error });
+
+        return Ok();
+    }
+
     [HttpPost("request/{requestId}/accept")]
     public async Task<IActionResult> AcceptRequest(Guid requestId, CancellationToken ct)
     {

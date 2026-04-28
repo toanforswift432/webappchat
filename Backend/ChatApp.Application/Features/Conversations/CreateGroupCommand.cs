@@ -37,7 +37,7 @@ public class CreateGroupCommandHandler(
             u.Status)).ToList();
 
         var dto = new ConversationDto(conversation.Id, conversation.Name, conversation.AvatarUrl,
-            conversation.Type, memberDtos, null, 0, conversation.CreatedAt, false);
+            conversation.Type, memberDtos, null, 0, conversation.CreatedAt, false, false, null);
         return Result<ConversationDto>.Success(dto);
     }
 }

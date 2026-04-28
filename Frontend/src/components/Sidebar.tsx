@@ -53,7 +53,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     [OnlineStatus.WorkFromHome]: { label: t("status.wfh"), color: "bg-blue-500" },
     [OnlineStatus.Offline]: { label: "Offline", color: "bg-gray-400" },
   };
-  const currentStatusInfo = STATUS_LABEL_MAP[authUser?.status ?? OnlineStatus.Online] ?? STATUS_LABEL_MAP[OnlineStatus.Online];
+  const currentStatusInfo =
+    STATUS_LABEL_MAP[authUser?.status ?? OnlineStatus.Online] ?? STATUS_LABEL_MAP[OnlineStatus.Online];
   const currentStatusColor = currentStatusInfo.color;
 
   const handleStatusSelect = async (status: string) => {
@@ -84,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 transition-colors duration-200">
           <div className="flex items-center gap-3">
-            <img src={`${import.meta.env.BASE_URL}ami-logo.svg`} alt="Ami Chat" className="w-8 h-8" />
+            <img src={`${import.meta.env.BASE_URL}LOGO.jpg`} alt="Ami Chat" className="w-8 h-8 object-contain" />
 
             <div
               className="flex flex-col relative cursor-pointer"

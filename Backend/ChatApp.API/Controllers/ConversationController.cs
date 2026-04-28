@@ -283,8 +283,9 @@ public class ConversationController(
         var conv = await convRepo.GetByIdAsync(conversationId, ct);
         var members = conv!.Members.Select(m => new ConversationMemberDto(
             m.UserId, m.User.DisplayName, m.User.AvatarUrl, m.Role, m.User.Status)).ToList();
+        // This is typically used for group operations, so IsColleague is false
         return new ConversationDto(conv.Id, conv.Name, conv.AvatarUrl,
-            conv.Type, members, null, 0, conv.CreatedAt, false);
+            conv.Type, members, null, 0, conv.CreatedAt, false, false, null);
     }
 }
 

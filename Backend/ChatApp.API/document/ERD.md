@@ -31,6 +31,8 @@ Tất cả bảng kế thừa 3 cột chung từ `BaseEntity`: `Id (UUID)`, `Cre
 | IsVerified            | bool      | Đã xác thực OTP email (thêm Phase 0)                     |
 | OtpCode               | string?   | Mã OTP tạm thời (thêm Phase 0)                           |
 | OtpExpiresAt          | datetime? | Hết hạn OTP (thêm Phase 0)                               |
+| ContractCodeId        | UUID?     | FK → ContractCodes (Customer registration)               |
+| RegistrationNote      | string?   | Ghi chú từ customer khi đăng ký                          |
 | Status                | int       | 0=Offline, 1=Online, 2=Away, 3=InMeeting, 4=WorkFromHome |
 | LastSeenAt            | datetime? | Lần cuối online                                          |
 | RefreshToken          | string?   | JWT refresh token                                        |
@@ -44,6 +46,27 @@ Tất cả bảng kế thừa 3 cột chung từ `BaseEntity`: `Id (UUID)`, `Cre
 | CallSoundType         | string    | Loại âm thanh cuộc gọi (default: "chime")                |
 | CreatedAt             | datetime  |                                                          |
 | UpdatedAt             | datetime? |                                                          |
+
+---
+
+### ContractCodes
+
+| Cột         | Kiểu      | Mô tả                                    |
+| ----------- | --------- | ---------------------------------------- |
+| Id          | UUID (PK) |                                          |
+| Code        | string    | Unique, mã hợp đồng (e.g., ABC-2024-001) |
+| CompanyName | string    | Tên công ty                              |
+| Description | string?   | Mô tả thêm về hợp đồng                   |
+| IsActive    | bool      | Hiển thị trong dropdown đăng ký customer |
+| CreatedAt   | datetime  |                                          |
+| UpdatedAt   | datetime? |                                          |
+
+**Business Rules:**
+
+- Admin tạo và quản lý contract codes
+- Customer phải chọn 1 contract code khi đăng ký
+- Chỉ contract codes có IsActive=true mới hiện trong dropdown
+- Không thể xóa contract code đang được sử dụng bởi user
 
 ---
 

@@ -73,9 +73,12 @@ Khi chưa đăng nhập:
 
 #### Đăng ký Khách hàng (`POST /api/auth/register/customer`)
 
-- Form: họ tên, số điện thoại, email, mật khẩu
-- Backend gửi OTP 6 số về email (10 phút)
-- Bước 2: nhập OTP → xác thực → nhận JWT → đăng nhập ngay
+- Form: họ tên, số điện thoại, email, **mã hợp đồng** (bắt buộc), ghi chú (tùy chọn)
+- Dropdown mã hợp đồng: tải từ `GET /api/contract-codes/active`
+- Hiển thị: `Code - Company Name` (e.g., "ABC-2024-001 - ABC Corporation")
+- Customer có thể thêm ghi chú cho admin (max 500 ký tự)
+- Account được tạo với trạng thái "Pending" → chờ admin duyệt
+- Admin xem mã hợp đồng và ghi chú trước khi duyệt
 
 #### Đăng ký Nhân viên (`POST /api/auth/register/employee/{inviteCode}`)
 
@@ -87,9 +90,28 @@ Khi chưa đăng nhập:
 #### Admin duyệt tài khoản
 
 - Tab `admin` trong BottomNav (chỉ hiện với Admin)
-- `AdminPage`: danh sách nhân viên chờ duyệt, nút Duyệt / Từ chối
+- `AdminDashboard` với nhiều tabs:
+  - **Create Employee**: Tạo tài khoản nhân viên
+  - **Pending Customers**: Duyệt/từ chối customer (hiển thị mã hợp đồng + ghi chú)
+  - **Employees**: Quản lý nhân viên (coming soon)
+  - **Contract Codes**: Quản lý mã hợp đồng
 - API: `GET /api/admin/pending-accounts`, `POST /api/admin/accounts/{id}/approve`
-- Backend gửi email thông báo kết quả cho nhân viên
+- Backend gửi email thông báo kết quả
+
+#### Admin quản lý mã hợp đồng
+
+- Tab **Contract Codes** trong AdminDashboard
+- Chức năng:
+  - Tạo mã hợp đồng mới (Code, Company Name, Description)
+  - Xem danh sách tất cả mã hợp đồng
+  - Chỉnh sửa thông tin mã hợp đồng
+  - Bật/tắt trạng thái Active/Inactive
+  - Xóa mã hợp đồng (nếu chưa có customer nào sử dụng)
+- API Endpoints:
+  - `GET /api/admin/contract-codes` (get all)
+  - `POST /api/admin/contract-codes` (create)
+  - `PUT /api/admin/contract-codes/{id}` (update)
+  - `DELETE /api/admin/contract-codes/{id}` (delete)
 
 #### Đăng xuất
 

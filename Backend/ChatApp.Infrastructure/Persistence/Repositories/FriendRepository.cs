@@ -20,8 +20,21 @@ public class FriendRepository(AppDbContext db) : IFriendRepository
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync(ct);
 
+    public Task<List<FriendRequest>> GetSentRequestsAsync(Guid userId, CancellationToken ct = default)
+        => db.FriendRequests
+            .Where(r => r.FromUserId == userId && r.Status == FriendRequestStatus.Pending)
+            .ToListAsync(ct);
+
+    public Task<List<FriendRequest>> GetReceivedRequestsAsync(Guid userId, CancellationToken ct = default)
+        => db.FriendRequests
+            .Where(r => r.ToUserId == userId && r.Status == FriendRequestStatus.Pending)
+            .ToListAsync(ct);
+
     public Task<List<Friendship>> GetFriendshipsAsync(Guid userId, CancellationToken ct = default)
         => db.Friendships.Include(f => f.Friend).Where(f => f.UserId == userId).ToListAsync(ct);
+
+    public Task<List<Friendship>> GetFriendsAsync(Guid userId, CancellationToken ct = default)
+        => db.Friendships.Where(f => f.UserId == userId).ToListAsync(ct);
 
     public Task<bool> AreFriendsAsync(Guid userAId, Guid userBId, CancellationToken ct = default)
         => db.Friendships.AnyAsync(f => f.UserId == userAId && f.FriendId == userBId, ct);
@@ -43,4 +56,6 @@ public class FriendRepository(AppDbContext db) : IFriendRepository
             (f.UserId == userBId && f.FriendId == userAId)).ToListAsync(ct);
 
     public void UpdateRequest(FriendRequest request) => db.FriendRequests.Update(request);
+
+    public void RemoveRequest(FriendRequest request) => db.FriendRequests.Remove(request);
 }

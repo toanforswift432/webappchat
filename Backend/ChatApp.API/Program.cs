@@ -95,6 +95,8 @@ builder.Services.AddCors(opts =>
 var app = builder.Build();
 
 // Auto-migrate + seed admin on startup
+// NOTE: Temporarily disabled - uncomment after system restart to clear connection pool
+/*
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -113,6 +115,7 @@ var app = builder.Build();
         Console.WriteLine($"[Seed] Admin account created: {adminEmail}");
     }
 }
+*/
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -174,6 +177,23 @@ app.MapHub<ChatHub>("/hubs/chat");
 
 // SPA fallback: serve wwwroot/webappchat/index.html for any /webappchat/* path
 app.MapFallback("/webappchat/{**path}", async (HttpContext ctx, IWebHostEnvironment env) =>
+{
+    var indexPath = Path.Combine(
+        env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"),
+        "webappchat", "index.html");
+    if (File.Exists(indexPath))
+    {
+        ctx.Response.ContentType = "text/html; charset=utf-8";
+        await ctx.Response.SendFileAsync(indexPath);
+    }
+    else
+    {
+        ctx.Response.StatusCode = 404;
+    }
+});
+
+// SPA fallback for admin portal: serve same index.html for /adminstractor/* paths
+app.MapFallback("/adminstractor/{**path}", async (HttpContext ctx, IWebHostEnvironment env) =>
 {
     var indexPath = Path.Combine(
         env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"),
