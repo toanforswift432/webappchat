@@ -35,7 +35,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchTo
         className="sm:mx-auto sm:w-full sm:max-w-md"
       >
         <div className="flex justify-center">
-          <img src={`${import.meta.env.BASE_URL}LOGO.jpg`} alt="Ami Chat Logo" className="w-16 h-16 object-contain" />
+          <img
+            src={`${import.meta.env.BASE_URL}logo-ami.png`}
+            alt="Ami Chat Logo"
+            className="w-16 h-16 object-contain"
+          />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">{t("auth.welcome")}</h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">{t("auth.signInSubtitle")}</p>

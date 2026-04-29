@@ -324,7 +324,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, o
         >
           <div className="flex justify-center">
             <img
-              src={`${import.meta.env.BASE_URL}LOGO.jpg`}
+              src={`${import.meta.env.BASE_URL}logo-ami.png`}
               alt="Ami Chat Logo"
               className="w-16 h-16 object-contain"
               onError={(e) => {
