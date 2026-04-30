@@ -30,6 +30,7 @@ Thumbs.db
 # Environment / secrets
 appsettings.*.json
 !appsettings.json
+Backend\ChatApp.API\appsettings.Development.json
 
 # Frontend
 Frontend/node_modules/
